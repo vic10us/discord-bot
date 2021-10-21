@@ -1,0 +1,19 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=be05c4c6_002Dd950_002D4195_002D8507_002Dadd6b537ace6/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Tests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::97E1DC49-C591-4605-96A3-3DD73C8BE74A::net5.0::tests.UnitTest1.Test1&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::97E1DC49-C591-4605-96A3-3DD73C8BE74A::net5.0::tests.UnitTest1.CanGetMondayQuote&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::97E1DC49-C591-4605-96A3-3DD73C8BE74A::net5.0::tests.UnitTest1.CanCreateSVG&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::97E1DC49-C591-4605-96A3-3DD73C8BE74A::net5.0::tests.UnitTest1.CanListMongoDBTables&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::97E1DC49-C591-4605-96A3-3DD73C8BE74A::net5.0::tests.UnitTest1.CanListMongoDatabases&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::97E1DC49-C591-4605-96A3-3DD73C8BE74A::net5.0::tests.UnitTest1.CanCallConvertImageApi&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::97E1DC49-C591-4605-96A3-3DD73C8BE74A::net5.0::tests.UnitTest1.CanComputeXPForLevel&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::97E1DC49-C591-4605-96A3-3DD73C8BE74A::net5.0::tests.UnitTest1.CanComputeXpForNextLevel&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::97E1DC49-C591-4605-96A3-3DD73C8BE74A::net5.0::tests.UnitTest1.CanComputeNext&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::97E1DC49-C591-4605-96A3-3DD73C8BE74A::net5.0::tests.UnitTest1.TestXp&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::97E1DC49-C591-4605-96A3-3DD73C8BE74A::net5.0::tests.UnitTest1.CanGetLevelFroTotalXp&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::97E1DC49-C591-4605-96A3-3DD73C8BE74A::net5.0::tests.UnitTest1.CanRemoveXp&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	
+	<s:Boolean x:Key="/Default/ResxEditorPersonal/Initialized/@EntryValue">True</s:Boolean></wpf:ResourceDictionary>

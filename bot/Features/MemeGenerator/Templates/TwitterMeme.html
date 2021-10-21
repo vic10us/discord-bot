@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Meme</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Bowlby+One+SC');
+
+        *,
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            font-family: 'Bowlby One SC', cursive;
+        }
+
+        .imageHolder {
+            background: url('{{ImageUrl}}') no-repeat;
+            background-size: cover;
+            width: 1024px;
+            height: 512px;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        p {
+            font-size: 28pt;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="imageHolder">
+        <p>
+            {{MemeText}}
+        </p>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,81 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <UserSecretsId>100ad8ba-7a2d-4fae-b60d-72f13a1e87e5</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AspNetCoreRateLimit" Version="4.0.1" />
+      <PackageReference Include="AspNetCoreRateLimit.Redis" Version="1.0.0" />
+      <PackageReference Include="CoreHtmlToImage" Version="1.0.6" />
+      <PackageReference Include="Discord.Net" Version="2.4.0" />
+      <PackageReference Include="GrapeCity.Documents.Html" Version="4.1.0.660" />
+      <PackageReference Include="GrapeCity.Documents.Html.Linux.X64" Version="4.1.0.660" />
+      <PackageReference Include="GrapeCity.Documents.Html.Windows.X64" Version="4.1.0.660" />
+      <PackageReference Include="GrapeCity.Documents.Imaging" Version="4.1.0.660" />
+      <PackageReference Include="Handlebars.Net" Version="2.0.9" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.7" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
+      <PackageReference Include="MimeTypes" Version="2.2.1">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="MongoDB.Bson" Version="2.13.1" />
+      <PackageReference Include="MongoDB.Driver" Version="2.13.1" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+      <PackageReference Include="Svg" Version="3.2.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="data\.keep">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Features\MemeGenerator\Templates\TwitterMeme.html" />
+      <EmbeddedResource Include="Features\MemeGenerator\Templates\TwitterMeme.html" />
+      <None Remove="Features\MondayQuotes\funny.txt" />
+      <EmbeddedResource Include="Features\MondayQuotes\Funny.txt" />
+      <None Remove="Features\MondayQuotes\inspirational.txt" />
+      <EmbeddedResource Include="Features\MondayQuotes\Inspirational.txt" />
+      <None Remove="Features\MondayQuotes\popular.txt" />
+      <EmbeddedResource Include="Features\MondayQuotes\Popular.txt" />
+      <None Remove="Features\RedneckJokes\redneckjokes.txt" />
+      <EmbeddedResource Include="Features\RedneckJokes\redneckjokes.txt" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="Images\*.*">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="media\*\*.*">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Features\Images\Templates\rank.hbs" />
+      <EmbeddedResource Include="Features\Images\Templates\rank.hbs">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Features\Economy\" />
+    </ItemGroup>
+
+</Project>
