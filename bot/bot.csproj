@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <UserSecretsId>100ad8ba-7a2d-4fae-b60d-72f13a1e87e5</UserSecretsId>
     </PropertyGroup>
@@ -11,29 +11,29 @@
       <PackageReference Include="AspNetCoreRateLimit" Version="4.0.1" />
       <PackageReference Include="AspNetCoreRateLimit.Redis" Version="1.0.0" />
       <PackageReference Include="CoreHtmlToImage" Version="1.0.6" />
-      <PackageReference Include="Discord.Net" Version="2.4.0" />
-      <PackageReference Include="GrapeCity.Documents.Html" Version="4.1.0.660" />
-      <PackageReference Include="GrapeCity.Documents.Html.Linux.X64" Version="4.1.0.660" />
-      <PackageReference Include="GrapeCity.Documents.Html.Windows.X64" Version="4.1.0.660" />
-      <PackageReference Include="GrapeCity.Documents.Imaging" Version="4.1.0.660" />
-      <PackageReference Include="Handlebars.Net" Version="2.0.9" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.7" />
-      <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
-      <PackageReference Include="MimeTypes" Version="2.2.1">
+      <PackageReference Include="Discord.Net" Version="3.3.0" />
+      <PackageReference Include="GrapeCity.Documents.Html" Version="5.0.0.770" />
+      <PackageReference Include="GrapeCity.Documents.Html.Linux.X64" Version="5.0.0.770" />
+      <PackageReference Include="GrapeCity.Documents.Html.Windows.X64" Version="5.0.0.770" />
+      <PackageReference Include="GrapeCity.Documents.Imaging" Version="5.0.0.770" />
+      <PackageReference Include="Handlebars.Net" Version="2.1.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.2" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+      <PackageReference Include="MimeTypes" Version="2.3.0">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="MongoDB.Bson" Version="2.13.1" />
-      <PackageReference Include="MongoDB.Driver" Version="2.13.1" />
+      <PackageReference Include="MongoDB.Bson" Version="2.14.1" />
+      <PackageReference Include="MongoDB.Driver" Version="2.14.1" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-      <PackageReference Include="Svg" Version="3.2.3" />
+      <PackageReference Include="Svg" Version="3.4.0" />
     </ItemGroup>
 
     <ItemGroup>

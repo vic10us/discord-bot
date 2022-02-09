@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -149,11 +150,18 @@ namespace bot
             return await reader.ReadToEndAsync();
         }
 
+        private static byte[] CopyToArray(Stream stream)
+        {
+            using var result = new MemoryStream();
+            stream.CopyTo(result);
+            return result.ToArray();
+        }
+
         private static async Task<byte[]> DownloadImage(string url)
         {
-            using var client = new WebClient();
-            var image = await client.DownloadDataTaskAsync(new Uri(url));
-            return image;
+            using var client = new HttpClient();
+            var image = await client.GetStreamAsync(new Uri(url));
+            return CopyToArray(image);
         }
 
         private static string GetStatusColor(UserStatus status)
