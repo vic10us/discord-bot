@@ -7,65 +7,65 @@ using bot.Features.Database;
 using bot.Features.MondayQuotes;
 using bot.Features.Pictures;
 using bot.Features.RedneckJokes;
-using bot.Services.vic10usAPI;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using bot.Features.Games;
+using bot;
+using Microsoft.AspNetCore.Builder;
+using bot.Services;
 
-namespace bot;
+var builder = WebApplication.CreateBuilder(args);
 
-public class Program
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Configuration.SetBasePath(Directory.GetCurrentDirectory());
+builder.Configuration.AddJsonFile("hostsettings.json", optional: true);
+builder.Configuration.AddEnvironmentVariables(prefix: "BOT_");
+builder.Configuration.AddCommandLine(args);
+
+builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("vic10usapi", c =>
 {
-    public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();
+    c.BaseAddress = new Uri(builder.Configuration["vic10usApi:BaseUrl"]);
+});
 
-    private static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureHostConfiguration(configHost =>
-            {
-                configHost
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("hostsettings.json", optional: true)
-                    .AddEnvironmentVariables(prefix: "BOT_")
-                    .AddUserSecrets<Program>(true, true)
-                    .AddCommandLine(args);
-            })
-            .ConfigureServices((hostContext, services) =>
-            {
-                var config = hostContext.Configuration;
-                services.AddHttpClient();
-                services.AddHttpClient("vic10usapi", c =>
-                {
-                    c.BaseAddress = new Uri(config["vic10usApi:BaseUrl"]);
-                });
-                services.AddDbContext<BotDbContext>
-                    (x => x.UseSqlite(hostContext.Configuration.GetConnectionString("BotDb")));
-                services.AddSingleton<DiceGame>();
-                services.AddSingleton<DiscordSocketClient>();
-                services.AddSingleton<CommandService>();
-                services.AddSingleton<CommandHandlingService>();
-                services.AddSingleton<PictureService>();
-                services.AddSingleton<DadJokeService>();
-                services.AddSingleton(new SomeServiceClass());
-                services.AddTransient<Program>();
-                services.AddSingleton<MondayQuotesService>();
-                services.AddSingleton<RedneckJokeService>();
-                services.AddSingleton<BotDataService>();
-                services.AddHttpClient<DadJokeService>("DadJokeService", (s, c) =>
-                {
-                        // var config = s.GetRequiredService<IConfiguration>();
-                        c.BaseAddress = new Uri(config["DadJokes:BaseUrl"]);
-                });
-                services.AddHostedService<LifetimeEventsHostedService>();
-                services.AddTransient<Vic10UsApiService>();
-                services.Configure<DiscordBotDatabaseSettings>(
-                    hostContext.Configuration.GetSection(nameof(DiscordBotDatabaseSettings)));
+builder.Services.AddDbContext<BotDbContext>
+    (x => x.UseSqlite(builder.Configuration.GetConnectionString("BotDb")), ServiceLifetime.Singleton);
+builder.Services.AddSingleton<DiceGame>();
+builder.Services.AddSingleton<DiscordSocketClient>();
+builder.Services.AddSingleton<CommandService>();
+builder.Services.AddSingleton<CommandHandlingService>();
+builder.Services.AddSingleton<PictureService>();
+builder.Services.AddSingleton<DadJokeService>();
+builder.Services.AddTransient<Program>();
+builder.Services.AddSingleton<MondayQuotesService>();
+builder.Services.AddSingleton<RedneckJokeService>();
+builder.Services.AddSingleton<BotDataService>();
+builder.Services.AddHttpClient<DadJokeService>("DadJokeService", (s, c) =>
+{
+    c.BaseAddress = new Uri(builder.Configuration["DadJokes:BaseUrl"]);
+});
+builder.Services.AddHostedService<LifetimeEventsHostedService>();
+builder.Services.AddTransient<ImageService>();
+builder.Services.Configure<DiscordBotDatabaseSettings>(
+    builder.Configuration.GetSection(nameof(DiscordBotDatabaseSettings)));
 
-                services.AddSingleton<IDatabaseSettings>(sp =>
-                    sp.GetRequiredService<IOptions<DiscordBotDatabaseSettings>>().Value);
-            })
-            .UseConsoleLifetime();
-}
+builder.Services.AddSingleton<IDatabaseSettings>(sp =>
+    sp.GetRequiredService<IOptions<DiscordBotDatabaseSettings>>().Value);
+
+var app = builder.Build();
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();

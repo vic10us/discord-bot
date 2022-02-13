@@ -13,7 +13,7 @@ using bot.Features.Games;
 using bot.Features.MondayQuotes;
 using bot.Features.Pictures;
 using bot.Features.RedneckJokes;
-using bot.Services.vic10usAPI;
+using bot.Services;
 using Discord;
 using Discord.Commands;
 using HandlebarsDotNet;
@@ -41,7 +41,7 @@ namespace bot
         public RedneckJokeService RedneckJokeService { get; set; }
         // ReSharper disable once MemberCanBePrivate.Global
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public Vic10UsApiService Vic10UsApiService { get; set; }
+        public ImageService ImageService { get; set; }
         public BotDataService BotDataService { get; set; }
         
         [Command("ping")]
@@ -268,8 +268,18 @@ namespace bot
             
             var svg = template(data);
 
-            var imageStream = await Vic10UsApiService.ConvertSvgImage(svg);
+            var imageStream = await ImageService.ConvertSvgImage(svg);
             await SendImageEmbed(imageStream, $"{user.Username}#{user.Discriminator} Rank Card", "rank.png", Color.Blue);
+        }
+
+        [Command("qrcode")]
+        [Alias("qr")]
+        public async Task GetQRCode(IUser user = null)
+        {
+            user ??= Context.User;
+            var imageStream = await ImageService.CreateQRCode();
+            // var image = System.Drawing.Image.FromStream(imageStream);
+            await SendImageEmbed(imageStream, $"{user.Username}#{user.Discriminator} QR Code", "qrcode.png", Color.Blue);
         }
         
         [Command("bunnycat")]

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace bot.Features.Database
         public static ulong XpNeededForLevel(ulong lvl) => (ulong)(5 * Math.Pow(lvl, 2) + 50 * lvl + 100);
         // public static ulong TotalXpForLevel(ulong level) => (ulong)(5.0f / 6.0f * level * (2 * (ulong)Math.Pow(level,2) + 27 * level + 91));
         public static ulong TotalXpForLevel(ulong x) => (ulong)(5.0f / 6.0f * x * (x + 7.0f) * (2.0f * x + 13.0f));
-        public static ulong LevelForTotalXp(ulong totalXp) 
+        public static ulong LevelForTotalXp(ulong totalXp)
         {
             var lvl = (ulong)0;
             var totalXpForCurrentLevel = TotalXpForLevel(lvl+1);
@@ -50,6 +51,8 @@ namespace bot.Features.Database
         // private readonly IMongoCollection<RankData> _profiles;
         private readonly IMongoCollection<LevelData> _levelData;
         private readonly IMongoCollection<MessageThrottle> _messageThottles;
+        private readonly IMongoCollection<UserVoiceStats> _userVoiceStats;
+        private readonly IMongoCollection<GuildData> _guildData;
 
         public BotDataService(
             // BotDbContext dbContext, 
@@ -66,6 +69,8 @@ namespace bot.Features.Database
             var indexModel = new CreateIndexModel<MessageThrottle>(indexKeysDefinition, indexOptions);
             _messageThottles = database.GetCollection<MessageThrottle>("MessageThrottles");
             _messageThottles.Indexes.CreateOne(indexModel);
+            _userVoiceStats = database.GetCollection<UserVoiceStats>("UserVoiceStats");
+            _guildData = database.GetCollection<GuildData>("GuildPreferences");
         }
 
         public static (ulong, ulong, ulong) ComputeLevelAndXp(ulong lvl, ulong xp, Action<ulong> cb = null)
@@ -106,6 +111,28 @@ namespace bot.Features.Database
             };
             await _messageThottles.InsertOneAsync(messageThrottle, cancellationToken: cancellationToken);
             return messageThrottle;
+        }
+
+        public UserVoiceStats GetUserVoiceStats(ulong guildId, ulong userId)
+        {
+            var userVoiceStats = _userVoiceStats.Find(ld => ld.guildId.Equals(guildId.ToString()) && ld.userId.Equals(userId.ToString())).FirstOrDefault();
+            if (userVoiceStats != null) return userVoiceStats;
+            userVoiceStats = new UserVoiceStats
+            {
+                guildId = $"{guildId}",
+                userId = $"{userId}",
+                channelId = $"",
+                isActive = false,
+                totalTimeSpentInVoice = 0,
+            };
+            _userVoiceStats.InsertOne(userVoiceStats);
+            return userVoiceStats;
+        }
+
+        public void UpdateUserVoiceStats(UserVoiceStats userVoiceStats)
+        {
+            _userVoiceStats.ReplaceOne(ld => ld.guildId.Equals(userVoiceStats.guildId) && ld.userId.Equals(userVoiceStats.userId),
+                userVoiceStats);
         }
 
         public LevelData GetLevelData(ulong guildId, ulong userId)
@@ -185,7 +212,39 @@ namespace bot.Features.Database
             userData.messageCount++;
             UpdateUserLevelData(userData);
         }
-        
+
+        public GuildData GetGuild(ulong guildId)
+        {
+            var guildData = _guildData.Find(ld => ld.guildId.Equals(guildId.ToString())).FirstOrDefault();
+            if (guildData != null) return guildData;
+            guildData = new GuildData
+            {
+                guildId = $"{guildId}",
+                channelNotifications = new Dictionary<string, string>()
+            };
+            _guildData.InsertOne(guildData);
+            return guildData;
+        }
+
+        public void UpdateGuild(ulong guildId, GuildData data)
+        {
+            var guild = GetGuild(guildId);
+            var guildUpdate = new GuildData(guild.Id, data);
+            UpdateGuild(guildUpdate);
+        }
+
+        public void UpdateGuild(GuildData guildData)
+        {
+            _guildData.ReplaceOne(i => i.Id == guildData.Id, guildData);
+            // _guildData.ReplaceOne(ld => ld.guildId.Equals(guildData.guildId), guildData);
+        }
+
+        internal async Task<IEnumerable<GuildData>> GetGuildsAsync()
+        {
+            var result = await _guildData.Find(Builders<GuildData>.Filter.Empty).ToListAsync();
+            return result;
+        }
+
         /*
         public List<RankData> Get() => 
             _profiles.Find(profile => true).ToList();

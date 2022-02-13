@@ -1,17 +1,20 @@
-﻿using System;
+﻿using QRCoder;
+using System;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
-namespace bot.Services.vic10usAPI
+namespace bot.Services
 {
-    public class Vic10UsApiService
+    public class ImageService
     {
         private readonly HttpClient _client;
 
-        public Vic10UsApiService(IHttpClientFactory clientFactory)
+        public ImageService(IHttpClientFactory clientFactory)
         {
             _client = clientFactory.CreateClient("vic10usapi");
         }
@@ -32,6 +35,22 @@ namespace bot.Services.vic10usAPI
             await stream.CopyToAsync(resultStream);
             resultStream.Position = 0;
             return resultStream;
+        }
+
+        public Task<Stream> CreateQRCode()
+        {
+            QRCodeGenerator qrGenerator = new QRCodeGenerator();
+            var wifiPayload = new PayloadGenerator.WiFi("MyWiFi-SSID", "MyWiFi-Pass", PayloadGenerator.WiFi.Authentication.WPA);
+            var qrCodeData = qrGenerator.CreateQrCode(wifiPayload);
+            // QRCodeData qrCodeData = qrGenerator.CreateQrCode("The text which should be encoded.", QRCodeGenerator.ECCLevel.Q);
+            var qrCode = new BitmapByteQRCode(qrCodeData);
+            var graphic = qrCode.GetGraphic(20);
+            var bm = new Bitmap(new MemoryStream(graphic));
+            var g = Graphics.FromImage(bm);
+            var stream = new MemoryStream();
+            bm.Save(stream, ImageFormat.Png);
+            stream.Position = 0;
+            return Task.FromResult(stream as Stream);
         }
     }
 }
