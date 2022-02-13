@@ -1,27 +1,26 @@
 ﻿using System;
 
-namespace bot.Features.Database.Models
+namespace bot.Features.Database.Models;
+
+public class Xp
 {
-    public class Xp
+    public int total { get; set; }
+    public ulong current { get; set; }
+    public ulong required { get; set; }
+
+    public float percent
     {
-        public int total { get; set; }
-        public ulong current { get; set; }
-        public ulong required { get; set; }
-
-        public float percent
+        get
         {
-            get
-            {
-                return (float)current / (float)required;
-            }
+            return (float)current / (float)required;
         }
+    }
 
-        public int progress
+    public int progress
+    {
+        get
         {
-            get
-            {
-                return (int) Math.Max(18, percent * 316);
-            }
+            return (int)Math.Max(18, percent * 316);
         }
     }
 }

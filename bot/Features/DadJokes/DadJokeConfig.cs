@@ -1,7 +1,6 @@
-﻿namespace bot.Features.DadJokes
+﻿namespace bot.Features.DadJokes;
+
+public class DadJokeConfig
 {
-    public class DadJokeConfig
-    {
-        public string BaseUrl { get; set; }
-    }
+    public string BaseUrl { get; set; }
 }
