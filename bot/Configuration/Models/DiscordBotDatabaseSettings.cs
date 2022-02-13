@@ -1,16 +1,8 @@
-﻿namespace bot.Configuration.Models
-{
-    public class DiscordBotDatabaseSettings : IDatabaseSettings
-    {
-        public string CollectionName { get; set; }
-        public string ConnectionString { get; set; }
-        public string DatabaseName { get; set; }
-    }
+﻿namespace bot.Configuration.Models;
 
-    public interface IDatabaseSettings
-    {
-        string CollectionName { get; set; }
-        string ConnectionString { get; set; }
-        string DatabaseName { get; set; }
-    }
+public class DiscordBotDatabaseSettings : IDatabaseSettings
+{
+    public string CollectionName { get; set; }
+    public string ConnectionString { get; set; }
+    public string DatabaseName { get; set; }
 }

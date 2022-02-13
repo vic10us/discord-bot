@@ -11,198 +11,197 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace bot
+namespace bot;
+
+internal class LifetimeEventsHostedService : IHostedService
 {
-    internal class LifetimeEventsHostedService : IHostedService
+    private readonly ILogger _logger;
+    private readonly IHostApplicationLifetime _appLifetime;
+    private readonly CommandService _commandService;
+    private readonly DiscordSocketClient _discordSocketClient;
+    private readonly CommandHandlingService _commandHandlingService;
+    private readonly IConfiguration _config;
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly BotDataService _botDataService;
+
+    public LifetimeEventsHostedService(
+        ILogger<LifetimeEventsHostedService> logger,
+        IHostApplicationLifetime appLifetime,
+        CommandService commandService,
+        DiscordSocketClient discordSocketClient,
+        CommandHandlingService commandHandlingService,
+        IConfiguration config,
+        BotDataService botDataService,
+        IServiceScopeFactory scopeFactory)
     {
-        private readonly ILogger _logger;
-        private readonly IHostApplicationLifetime _appLifetime;
-        private readonly CommandService _commandService;
-        private readonly DiscordSocketClient _discordSocketClient;
-        private readonly CommandHandlingService _commandHandlingService;
-        private readonly IConfiguration _config;
-        private readonly IServiceScopeFactory _scopeFactory;
-        private readonly BotDataService _botDataService;
+        _logger = logger;
+        _appLifetime = appLifetime;
+        _commandService = commandService;
+        _discordSocketClient = discordSocketClient;
+        _commandHandlingService = commandHandlingService;
+        _config = config;
+        _scopeFactory = scopeFactory;
+        _botDataService = botDataService;
+    }
 
-        public LifetimeEventsHostedService(
-            ILogger<LifetimeEventsHostedService> logger,
-            IHostApplicationLifetime appLifetime,
-            CommandService commandService,
-            DiscordSocketClient discordSocketClient,
-            CommandHandlingService commandHandlingService,
-            IConfiguration config,
-            BotDataService botDataService,
-            IServiceScopeFactory scopeFactory)
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        _appLifetime.ApplicationStarted.Register(OnStarted);
+        _appLifetime.ApplicationStopping.Register(OnStopping);
+        _appLifetime.ApplicationStopped.Register(OnStopped);
+
+        using (var scope = _scopeFactory.CreateScope())
         {
-            _logger = logger;
-            _appLifetime = appLifetime;
-            _commandService = commandService;
-            _discordSocketClient = discordSocketClient;
-            _commandHandlingService = commandHandlingService;
-            _config = config;
-            _scopeFactory = scopeFactory;
-            _botDataService = botDataService;
+            var context = scope.ServiceProvider.GetRequiredService<BotDbContext>();
+            await context.Database.EnsureCreatedAsync(cancellationToken);
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        _discordSocketClient.Log += LogAsync;
+        _commandService.Log += LogAsync;
+
+        await _discordSocketClient.LoginAsync(TokenType.Bot, _config["Discord:Token"]);
+        await _discordSocketClient.StartAsync();
+        _discordSocketClient.Ready += () =>
         {
-            _appLifetime.ApplicationStarted.Register(OnStarted);
-            _appLifetime.ApplicationStopping.Register(OnStopping);
-            _appLifetime.ApplicationStopped.Register(OnStopped);
-
-            using (var scope = _scopeFactory.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<BotDbContext>();
-                await context.Database.EnsureCreatedAsync(cancellationToken);
-            }
-
-            _discordSocketClient.Log += LogAsync;
-            _commandService.Log += LogAsync;
-
-            await _discordSocketClient.LoginAsync(TokenType.Bot, _config["Discord:Token"]);
-            await _discordSocketClient.StartAsync();
-            _discordSocketClient.Ready += () =>
-            {
-                Console.WriteLine("Bot is connected!");
-                return Task.CompletedTask;
-            };
-
-            _discordSocketClient.UserVoiceStateUpdated += DiscordSocketClient_UserVoiceStateUpdated;
-
-            // Here we initialize the logic required to register our commands.
-            await _commandHandlingService.InitializeAsync();
-
-            // return Task.CompletedTask;
-        }
-
-        private static double GetMinutesInVoice(UserVoiceStats userVoiceStats)
-        {
-            if (userVoiceStats == null) return 0;
-            if (userVoiceStats.channelId.Equals(string.Empty)) return 0;
-            if (userVoiceStats.lastJoinedAt.Equals(DateTime.MinValue)) return 0;
-            if (userVoiceStats.lastJoinedAt >= DateTimeOffset.Now) return 0;
-            var diff = userVoiceStats.lastExitedAt - userVoiceStats.lastJoinedAt;
-            var result = diff.TotalMinutes;
-            return result;
-        }
-
-        private async Task SendMessageAsync(ulong guildId, string route, string message)
-        {
-            var guildData = _botDataService.GetGuild(guildId);
-            if (guildData == null) return;
-            var channelId_str = guildData.channelNotifications[route];
-            if (string.IsNullOrWhiteSpace(channelId_str)) return;
-            if (!ulong.TryParse(channelId_str, out var channelId)) return;
-            await SendMessageAsync(channelId, message);
-        }
-
-        private async Task SendMessageAsync(ulong channelId, string message)
-        {
-            var channel = _discordSocketClient.GetChannel(channelId);
-            await (channel as IMessageChannel)?.SendMessageAsync(message);
-        }
-
-        private async Task DiscordSocketClient_UserVoiceStateUpdated(SocketUser user, SocketVoiceState before, SocketVoiceState after)
-        {
-            var userId = user.Id;
-            if (before.VoiceChannel == null)
-            {
-                var m = $"{user} Joined voice in {after} [Server: {after.VoiceChannel.Guild}]";
-                var guildId = after.VoiceChannel.Guild?.Id ?? 0;
-                var voiceStats = _botDataService.GetUserVoiceStats(guildId, userId);
-                voiceStats.channelId = $"{after.VoiceChannel.Id}";
-                voiceStats.lastJoinedAt = DateTimeOffset.Now;
-                voiceStats.isActive = true;
-                _botDataService.UpdateUserVoiceStats(voiceStats);
-                await SendMessageAsync(guildId, "system.log", m);
-                _logger.LogInformation(m);
-            }
-            else if (after.VoiceChannel == null)
-            {
-                var guildId = before.VoiceChannel.Guild?.Id ?? 0;
-                var voiceStats = _botDataService.GetUserVoiceStats(guildId, userId);
-                voiceStats.lastExitedAt = DateTimeOffset.Now;
-                voiceStats.isActive = false;
-                var minutesInVc = !voiceStats.channelId.Equals($"{before.VoiceChannel.Id}") ? (double)0 : GetMinutesInVoice(voiceStats);
-                voiceStats.totalTimeSpentInVoice += (ulong)Math.Round(minutesInVc);
-                voiceStats.lastJoinedAt = DateTimeOffset.MinValue;
-                _botDataService.UpdateUserVoiceStats(voiceStats);
-                var xp = (ulong)(new Random().Next(15, 20) * minutesInVc);
-                _botDataService.AddXp(guildId, userId, xp);
-                var m = $"{user} Left voice in {before} [Server: {before.VoiceChannel.Guild}] and gained {xp}xp in the process [Time: {minutesInVc} minutes]";
-                await SendMessageAsync(guildId, "system.log", m);
-                _logger.LogInformation(m);
-            }
-            else
-            {
-                if (before.VoiceChannel.Id == after.VoiceChannel.Id) return; // Status changed
-                var guildId = after.VoiceChannel.Guild?.Id ?? 0;
-                var voiceStats = _botDataService.GetUserVoiceStats(guildId, userId);
-                voiceStats.channelId = $"{after.VoiceChannel.Id}";
-                voiceStats.isActive = true;
-                _botDataService.UpdateUserVoiceStats(voiceStats);
-                var m = $"{user} Moved voice from {before} to {after} [Server: {after.VoiceChannel.Guild}]";
-                await SendMessageAsync(guildId, "system.log", m);
-                _logger.LogInformation(m);
-            }
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
+            Console.WriteLine("Bot is connected!");
             return Task.CompletedTask;
-        }
+        };
 
-        private void OnStarted()
+        _discordSocketClient.UserVoiceStateUpdated += DiscordSocketClient_UserVoiceStateUpdated;
+
+        // Here we initialize the logic required to register our commands.
+        await _commandHandlingService.InitializeAsync();
+
+        // return Task.CompletedTask;
+    }
+
+    private static double GetMinutesInVoice(UserVoiceStats userVoiceStats)
+    {
+        if (userVoiceStats == null) return 0;
+        if (userVoiceStats.channelId.Equals(string.Empty)) return 0;
+        if (userVoiceStats.lastJoinedAt.Equals(DateTime.MinValue)) return 0;
+        if (userVoiceStats.lastJoinedAt >= DateTimeOffset.Now) return 0;
+        var diff = userVoiceStats.lastExitedAt - userVoiceStats.lastJoinedAt;
+        var result = diff.TotalMinutes;
+        return result;
+    }
+
+    private async Task SendMessageAsync(ulong guildId, string route, string message)
+    {
+        var guildData = _botDataService.GetGuild(guildId);
+        if (guildData == null) return;
+        var channelId_str = guildData.channelNotifications[route];
+        if (string.IsNullOrWhiteSpace(channelId_str)) return;
+        if (!ulong.TryParse(channelId_str, out var channelId)) return;
+        await SendMessageAsync(channelId, message);
+    }
+
+    private async Task SendMessageAsync(ulong channelId, string message)
+    {
+        var channel = _discordSocketClient.GetChannel(channelId);
+        await (channel as IMessageChannel)?.SendMessageAsync(message);
+    }
+
+    private async Task DiscordSocketClient_UserVoiceStateUpdated(SocketUser user, SocketVoiceState before, SocketVoiceState after)
+    {
+        var userId = user.Id;
+        if (before.VoiceChannel == null)
         {
-            _logger.LogInformation("OnStarted has been called.");
-            // var client = services.GetRequiredService<DiscordSocketClient>();
-
-            // Perform post-startup activities here
+            var m = $"{user} Joined voice in {after} [Server: {after.VoiceChannel.Guild}]";
+            var guildId = after.VoiceChannel.Guild?.Id ?? 0;
+            var voiceStats = _botDataService.GetUserVoiceStats(guildId, userId);
+            voiceStats.channelId = $"{after.VoiceChannel.Id}";
+            voiceStats.lastJoinedAt = DateTimeOffset.Now;
+            voiceStats.isActive = true;
+            _botDataService.UpdateUserVoiceStats(voiceStats);
+            await SendMessageAsync(guildId, "system.log", m);
+            _logger.LogInformation(m);
         }
-
-        private void OnStopping()
+        else if (after.VoiceChannel == null)
         {
-            _logger.LogInformation("OnStopping has been called.");
-
-            // Perform on-stopping activities here
+            var guildId = before.VoiceChannel.Guild?.Id ?? 0;
+            var voiceStats = _botDataService.GetUserVoiceStats(guildId, userId);
+            voiceStats.lastExitedAt = DateTimeOffset.Now;
+            voiceStats.isActive = false;
+            var minutesInVc = !voiceStats.channelId.Equals($"{before.VoiceChannel.Id}") ? (double)0 : GetMinutesInVoice(voiceStats);
+            voiceStats.totalTimeSpentInVoice += (ulong)Math.Round(minutesInVc);
+            voiceStats.lastJoinedAt = DateTimeOffset.MinValue;
+            _botDataService.UpdateUserVoiceStats(voiceStats);
+            var xp = (ulong)(new Random().Next(15, 20) * minutesInVc);
+            _botDataService.AddXp(guildId, userId, xp);
+            var m = $"{user} Left voice in {before} [Server: {before.VoiceChannel.Guild}] and gained {xp}xp in the process [Time: {minutesInVc} minutes]";
+            await SendMessageAsync(guildId, "system.log", m);
+            _logger.LogInformation(m);
         }
-
-        private void OnStopped()
+        else
         {
-            _logger.LogInformation("OnStopped has been called.");
-
-            // Perform post-stopped activities here
+            if (before.VoiceChannel.Id == after.VoiceChannel.Id) return; // Status changed
+            var guildId = after.VoiceChannel.Guild?.Id ?? 0;
+            var voiceStats = _botDataService.GetUserVoiceStats(guildId, userId);
+            voiceStats.channelId = $"{after.VoiceChannel.Id}";
+            voiceStats.isActive = true;
+            _botDataService.UpdateUserVoiceStats(voiceStats);
+            var m = $"{user} Moved voice from {before} to {after} [Server: {after.VoiceChannel.Guild}]";
+            await SendMessageAsync(guildId, "system.log", m);
+            _logger.LogInformation(m);
         }
+    }
 
-        private static Task LogAsync(LogMessage message)
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    private void OnStarted()
+    {
+        _logger.LogInformation("OnStarted has been called.");
+        // var client = services.GetRequiredService<DiscordSocketClient>();
+
+        // Perform post-startup activities here
+    }
+
+    private void OnStopping()
+    {
+        _logger.LogInformation("OnStopping has been called.");
+
+        // Perform on-stopping activities here
+    }
+
+    private void OnStopped()
+    {
+        _logger.LogInformation("OnStopped has been called.");
+
+        // Perform post-stopped activities here
+    }
+
+    private static Task LogAsync(LogMessage message)
+    {
+        switch (message.Severity)
         {
-            switch (message.Severity)
-            {
-                case LogSeverity.Critical:
-                case LogSeverity.Error:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    break;
-                case LogSeverity.Warning:
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    break;
-                case LogSeverity.Info:
-                    Console.ForegroundColor = ConsoleColor.White;
-                    break;
-                case LogSeverity.Verbose:
-                case LogSeverity.Debug:
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    break;
-            }
-            Console.WriteLine($"{DateTime.Now,-19} [{message.Severity,8}] {message.Source}: {message.Message} {message.Exception}");
-            Console.ResetColor();
-
-            // If you get an error saying 'CompletedTask' doesn't exist,
-            // your project is targeting .NET 4.5.2 or lower. You'll need
-            // to adjust your project's target framework to 4.6 or higher
-            // (instructions for this are easily Googled).
-            // If you *need* to run on .NET 4.5 for compat/other reasons,
-            // the alternative is to 'return Task.Delay(0);' instead.
-            return Task.CompletedTask;
+            case LogSeverity.Critical:
+            case LogSeverity.Error:
+                Console.ForegroundColor = ConsoleColor.Red;
+                break;
+            case LogSeverity.Warning:
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                break;
+            case LogSeverity.Info:
+                Console.ForegroundColor = ConsoleColor.White;
+                break;
+            case LogSeverity.Verbose:
+            case LogSeverity.Debug:
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                break;
         }
+        Console.WriteLine($"{DateTime.Now,-19} [{message.Severity,8}] {message.Source}: {message.Message} {message.Exception}");
+        Console.ResetColor();
+
+        // If you get an error saying 'CompletedTask' doesn't exist,
+        // your project is targeting .NET 4.5.2 or lower. You'll need
+        // to adjust your project's target framework to 4.6 or higher
+        // (instructions for this are easily Googled).
+        // If you *need* to run on .NET 4.5 for compat/other reasons,
+        // the alternative is to 'return Task.Delay(0);' instead.
+        return Task.CompletedTask;
     }
 }
