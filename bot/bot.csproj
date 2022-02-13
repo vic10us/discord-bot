@@ -77,8 +77,4 @@
       </EmbeddedResource>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Features\Economy\" />
-    </ItemGroup>
-
 </Project>
