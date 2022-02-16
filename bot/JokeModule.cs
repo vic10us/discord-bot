@@ -18,7 +18,7 @@ public class JokeModule : ModuleBase<SocketCommandContext>
     public MondayQuotesService MondayQuotesService { get; set; }
     // ReSharper disable once MemberCanBePrivate.Global
     // ReSharper disable once UnusedAutoPropertyAccessor.Global
-    public RedneckJokeService RedneckJokeService { get; set; }
+    public IRedneckJokeService RedneckJokeService { get; set; }
 
     [Command("dad")]
     [Alias("dj")]

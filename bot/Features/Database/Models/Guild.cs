@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace bot.Features.Database.Models;
 
-public class GuildData
+public class Guild
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
@@ -12,13 +12,13 @@ public class GuildData
     public string guildId { get; set; }
     public IDictionary<string, string> channelNotifications { get; set; } = new Dictionary<string, string>();
 
-    public GuildData() { }
+    public Guild() { }
 
-    public GuildData(string id, GuildData data)
+    public Guild(string id, Guild guild)
     {
         Id = id;
-        guildId = data.guildId;
-        channelNotifications = data.channelNotifications;
+        guildId = guild.guildId;
+        channelNotifications = guild.channelNotifications;
     }
 
 }

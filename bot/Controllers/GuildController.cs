@@ -1,46 +1,65 @@
-﻿using bot.Features.Database;
-using bot.Features.Database.Models;
-using Microsoft.AspNetCore.Http;
+﻿using bot.Commands;
+using bot.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace bot.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class GuildController : ControllerBase
+public class GuildsController : ControllerBase
 {
-    public readonly BotDataService _botDataService;
+    private readonly IMediator _mediator;
+    private readonly ILogger<GuildsController> _logger;
 
-    public GuildController(BotDataService botDataService)
+    public GuildsController(ILogger<GuildsController> logger, IMediator mediator)
     {
-        _botDataService = botDataService;
+        _mediator = mediator;
+        _logger = logger;
     }
 
-    [HttpGet()]
-    public async Task<IEnumerable<GuildData>> ListAsync()
+    [HttpGet]
+    public async Task<IActionResult> GetAllGuilds()
     {
-        return await _botDataService.GetGuildsAsync();
+        var query = new GetAllGuildsQuery();
+        _logger.LogInformation("Retrieving list of Guilds");
+        var result = await _mediator.Send(query);
+        return Ok(result);
     }
 
-    [HttpGet("{id}")]
-    public GuildData Get(ulong id)
+    [HttpGet("{guildId}")]
+    public async Task<IActionResult> GetGuild(ulong guildId)
     {
-        return _botDataService.GetGuild(id);
+        var query = new GetGuildByIdQuery(guildId);
+        _logger.LogInformation($"Retrieving Guild with guildId: {guildId}");
+        var result = await _mediator.Send(query);
+        return result != null ? Ok(result) : NotFound();
     }
 
-    //[HttpPost("{id}")]
-    //public async Task<GuildData> Create(GuildData guildData)
-    //{
-    //    throw new NotImplementedException();
-    //}
-
-    [HttpPut("{id}")]
-    public void Update([FromRoute] ulong id, [FromBody] GuildData guildData)
+    [HttpPost]
+    public async Task<IActionResult> CreateGuild([FromBody] CreateGuildCommand command)
     {
-        if ($"{id}" != guildData.guildId) throw new ArgumentException("Id mismatch", nameof(id));
-        _botDataService.UpdateGuild(id, guildData);
+        var result = await _mediator.Send(command);
+        return CreatedAtAction("GetGuild", new { guildId = result.GuildId }, result);
+    }
+
+    [HttpPut("{guildId}")]
+    public async Task<IActionResult> UpdateGuild([FromRoute] ulong guildId, [FromBody] UpdateGuildCommand command)
+    {
+        if (guildId != command.GuildId) throw new ArgumentException("Id mismatch", nameof(guildId));
+        _logger.LogInformation($"Replacing Guild with guildId: {guildId}");
+        var result = await _mediator.Send(command);
+        return AcceptedAtAction("GetGuild", "Guilds", new { guildId = result });
+    }
+
+    [HttpDelete("{guildId}")]
+    public async Task<IActionResult> DeleteGuild(ulong guildId)
+    {
+        _logger.LogInformation($"Deleting Guild with guildId: {guildId}");
+        var result = await _mediator.Send(new DeleteGuildCommand(guildId));
+        return result ? Accepted() : NotFound();
     }
 }

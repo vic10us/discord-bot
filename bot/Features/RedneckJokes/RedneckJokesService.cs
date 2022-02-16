@@ -10,7 +10,7 @@ using HandlebarsDotNet;
 
 namespace bot.Features.RedneckJokes;
 
-public class RedneckJokeService
+public class RedneckJokeService : IRedneckJokeService
 {
     private readonly BotDbContext _db;
 

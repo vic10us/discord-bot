@@ -10,67 +10,22 @@ using MongoDB.Driver;
 
 namespace bot.Features.Database;
 
-public static class BotLevelingUtils
-{
-    public static ulong XpNeededForLevel(ulong lvl) => (ulong)(5 * Math.Pow(lvl, 2) + 50 * lvl + 100);
-    // public static ulong TotalXpForLevel(ulong level) => (ulong)(5.0f / 6.0f * level * (2 * (ulong)Math.Pow(level,2) + 27 * level + 91));
-    public static ulong TotalXpForLevel(ulong x) => (ulong)(5.0f / 6.0f * x * (x + 7.0f) * (2.0f * x + 13.0f));
-    public static ulong LevelForTotalXp(ulong totalXp)
-    {
-        var lvl = (ulong)0;
-        var totalXpForCurrentLevel = TotalXpForLevel(lvl + 1);
-        while (totalXp >= totalXpForCurrentLevel)
-        {
-            lvl++;
-            totalXpForCurrentLevel = TotalXpForLevel(lvl + 1);
-        }
-        return lvl;
-    }
-
-    // public static ulong LevelForTotalXp(ulong totalXp) => totalXp >= 100 ? 
-    //     (ulong)(0.14057f * Math.Pow(1.7321f * Math.Sqrt(3888.0f * Math.Pow(totalXp, 2) + 291600.0f * totalXp - 207025.0f) + 108.0f * totalXp + 4050.0f, 1.0f/3.0f) - 4.5f) + 1
-    //     : 0;
-
-    public static (ulong, ulong, ulong, ulong) ComputeLevelAndXp(ulong lvl, ulong xp, Action<ulong> cb = null)
-    {
-        while (xp >= XpNeededForLevel(lvl))
-        {
-            xp -= XpNeededForLevel(lvl);
-            lvl++;
-            if (xp < XpNeededForLevel(lvl)) cb?.Invoke(lvl);
-        }
-        var next = XpNeededForLevel(lvl);
-        var totalXp = TotalXpForLevel(lvl) + xp;
-        return (lvl, xp, next, totalXp);
-    }
-}
-
 public class BotDataService
 {
-    // private readonly BotDbContext _dbContext;
-    // private readonly IMongoCollection<RankData> _profiles;
     private readonly IMongoCollection<LevelData> _levelData;
     private readonly IMongoCollection<MessageThrottle> _messageThottles;
     private readonly IMongoCollection<UserVoiceStats> _userVoiceStats;
-    private readonly IMongoCollection<GuildData> _guildData;
+    private readonly IMongoCollection<Guild> _guilds;
 
-    public BotDataService(
-        // BotDbContext dbContext, 
-        IDatabaseSettings settings
-        )
+    public BotDataService(IDatabaseSettings settings)
     {
-        // _dbContext = dbContext;
         var client = new MongoClient(settings.ConnectionString);
         var database = client.GetDatabase(settings.DatabaseName);
-        // _profiles = database.GetCollection<RankData>("RankData");
+
+        _messageThottles = database.GetCollectionWithExpiry<MessageThrottle>("MessageThrottles");
         _levelData = database.GetCollection<LevelData>("LevelData");
-        var indexKeysDefinition = Builders<MessageThrottle>.IndexKeys.Ascending("expiry");
-        var indexOptions = new CreateIndexOptions { ExpireAfter = new TimeSpan(0, 0, 60) };
-        var indexModel = new CreateIndexModel<MessageThrottle>(indexKeysDefinition, indexOptions);
-        _messageThottles = database.GetCollection<MessageThrottle>("MessageThrottles");
-        _messageThottles.Indexes.CreateOne(indexModel);
         _userVoiceStats = database.GetCollection<UserVoiceStats>("UserVoiceStats");
-        _guildData = database.GetCollection<GuildData>("GuildPreferences");
+        _guilds = database.GetCollection<Guild>("Guilds");
     }
 
     public static (ulong, ulong, ulong) ComputeLevelAndXp(ulong lvl, ulong xp, Action<ulong> cb = null)
@@ -214,36 +169,56 @@ public class BotDataService
         UpdateUserLevelData(userData);
     }
 
-    public GuildData GetGuild(ulong guildId)
+    public Guild GetGuild(ulong guildId, bool canCreate = true)
     {
-        var guildData = _guildData.Find(ld => ld.guildId.Equals(guildId.ToString())).FirstOrDefault();
+        var guildData = _guilds.Find(ld => ld.guildId.Equals(guildId.ToString())).FirstOrDefault();
         if (guildData != null) return guildData;
-        guildData = new GuildData
+        if (!canCreate) return null;
+        guildData = new Guild
         {
             guildId = $"{guildId}",
             channelNotifications = new Dictionary<string, string>()
         };
-        _guildData.InsertOne(guildData);
+        _guilds.InsertOne(guildData);
         return guildData;
     }
 
-    public void UpdateGuild(ulong guildId, GuildData data)
+    public void UpdateGuild(ulong guildId, Guild data)
     {
         var guild = GetGuild(guildId);
-        var guildUpdate = new GuildData(guild.Id, data);
+        var guildUpdate = new Guild(guild.Id, data);
         UpdateGuild(guildUpdate);
     }
 
-    public void UpdateGuild(GuildData guildData)
+    public void UpdateGuild(Guild guildData)
     {
-        _guildData.ReplaceOne(i => i.Id == guildData.Id, guildData);
+        _guilds.ReplaceOne(i => i.Id == guildData.Id, guildData);
         // _guildData.ReplaceOne(ld => ld.guildId.Equals(guildData.guildId), guildData);
     }
 
-    internal async Task<IEnumerable<GuildData>> GetGuildsAsync()
+    public async Task<IEnumerable<Guild>> GetGuildsAsync()
     {
-        var result = await _guildData.Find(Builders<GuildData>.Filter.Empty).ToListAsync();
+        var result = await _guilds.Find(Builders<Guild>.Filter.Empty).ToListAsync();
         return result;
+    }
+
+    public async Task<Guild> CreateGuildAsync(Guild guild)
+    {
+        var x = await _guilds.FindAsync((g) => g.guildId.Equals(guild.guildId));
+        if (x.FirstOrDefault() != null) throw new Exception("Guild with that GuildId already exists");
+        var guildData = new Guild
+        {
+            guildId = guild.guildId,
+            channelNotifications = guild.channelNotifications,
+        };
+        await _guilds.InsertOneAsync(guildData);
+        return guildData;
+    }
+
+    public async Task<bool> DeleteGuildAsync(ulong guildId)
+    {
+        var result = await _guilds.DeleteOneAsync(g => g.guildId.Equals($"{guildId}"));
+        return result.IsAcknowledged && result.DeletedCount > 0;
     }
 
     /*
