@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using bot.Commands;
 using bot.Dtos;
 
 namespace bot.Profiles;
@@ -11,5 +12,7 @@ public class MapperProfile : Profile
         CreateMap<ulong, string>().ConvertUsing(x => $"{x}");
         CreateMap<Features.Database.Models.Guild, Guild>();
         CreateMap<Guild, Features.Database.Models.Guild>();
+        CreateMap<CreateGuildRequest, CreateGuildCommand>();
+        CreateMap<UpdateGuildRequest, UpdateGuildCommand>();
     }
 }
