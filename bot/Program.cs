@@ -17,6 +17,9 @@ using bot;
 using Microsoft.AspNetCore.Builder;
 using bot.Services;
 using MediatR;
+using FluentValidation;
+using bot.PipelineBehaviors;
+using bot.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,9 +65,12 @@ builder.Services.AddSingleton<IDatabaseSettings>(sp =>
 
 builder.Services.AddMediatR(typeof(Program));
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 var app = builder.Build();
 
+app.UseFluentValidationExceptionHandler();
 app.UseSwagger();
 app.UseSwaggerUI();
 

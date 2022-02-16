@@ -1,4 +1,6 @@
-﻿using bot.Commands;
+﻿using AutoMapper;
+using bot.Commands;
+using bot.Dtos;
 using bot.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +15,13 @@ namespace bot.Controllers;
 public class GuildsController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IMapper _mapper;
     private readonly ILogger<GuildsController> _logger;
 
-    public GuildsController(ILogger<GuildsController> logger, IMediator mediator)
+    public GuildsController(ILogger<GuildsController> logger, IMediator mediator, IMapper mapper)
     {
         _mediator = mediator;
+        _mapper = mapper;
         _logger = logger;
     }
 
@@ -40,8 +44,9 @@ public class GuildsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateGuild([FromBody] CreateGuildCommand command)
+    public async Task<IActionResult> CreateGuild([FromBody] CreateGuildRequest request)
     {
+        var command = _mapper.Map<CreateGuildCommand>(request);
         var result = await _mediator.Send(command);
         return CreatedAtAction("GetGuild", new { guildId = result.GuildId }, result);
     }
