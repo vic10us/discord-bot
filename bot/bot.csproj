@@ -13,11 +13,11 @@
       <PackageReference Include="AutoMapper" Version="11.0.1" />
       <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
       <PackageReference Include="CoreHtmlToImage" Version="1.0.6" />
-      <PackageReference Include="Discord.Net" Version="3.3.0" />
-      <PackageReference Include="GrapeCity.Documents.Html" Version="5.0.0.770" />
-      <PackageReference Include="GrapeCity.Documents.Html.Linux.X64" Version="5.0.0.770" />
-      <PackageReference Include="GrapeCity.Documents.Html.Windows.X64" Version="5.0.0.770" />
-      <PackageReference Include="GrapeCity.Documents.Imaging" Version="5.0.0.770" />
+      <PackageReference Include="Discord.Net" Version="3.3.2" />
+      <PackageReference Include="GrapeCity.Documents.Html" Version="5.0.0.773" />
+      <PackageReference Include="GrapeCity.Documents.Html.Linux.X64" Version="5.0.0.773" />
+      <PackageReference Include="GrapeCity.Documents.Html.Windows.X64" Version="5.0.0.773" />
+      <PackageReference Include="GrapeCity.Documents.Imaging" Version="5.0.0.773" />
       <PackageReference Include="Handlebars.Net" Version="2.1.0" />
       <PackageReference Include="MediatR" Version="10.0.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.2" />
