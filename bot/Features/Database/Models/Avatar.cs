@@ -1,4 +1,6 @@
-﻿namespace bot.Features.Database.Models;
+﻿using System;
+
+namespace bot.Features.Database.Models;
 
 public class Avatar
 {

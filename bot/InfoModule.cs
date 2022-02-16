@@ -36,10 +36,10 @@ public class InfoModule : ModuleBase<SocketCommandContext>
     public MondayQuotesService MondayQuotesService { get; set; }
     // ReSharper disable once MemberCanBePrivate.Global
     // ReSharper disable once UnusedAutoPropertyAccessor.Global
-    public RedneckJokeService RedneckJokeService { get; set; }
+    public IRedneckJokeService RedneckJokeService { get; set; }
     // ReSharper disable once MemberCanBePrivate.Global
     // ReSharper disable once UnusedAutoPropertyAccessor.Global
-    public ImageService ImageService { get; set; }
+    public ImageApiService ImageService { get; set; }
     public BotDataService BotDataService { get; set; }
 
     [Command("ping")]
@@ -141,7 +141,7 @@ public class InfoModule : ModuleBase<SocketCommandContext>
         await SendImageEmbed(stream, "Random Sea Creature", $"seacreature.{ext}", Color.Green);
     }
 
-    private static async Task<string> GetHandleImageTemplate(string name)
+    private static async Task<string> GetHandlebarsImageTemplate(string name)
     {
         var assembly = Assembly.GetEntryAssembly();
         var resourceStream = assembly?.GetManifestResourceStream($"bot.Features.Images.Templates.{name}");
@@ -251,7 +251,7 @@ public class InfoModule : ModuleBase<SocketCommandContext>
         var userId = user.Id;
         var userData = BotDataService.GetLevelData(guildId, userId);
 
-        var source = await GetHandleImageTemplate("rank.hbs");
+        var source = await GetHandlebarsImageTemplate("rank.hbs");
         var template = Handlebars.Compile(source);
         var data = new RankData();
 
@@ -268,6 +268,12 @@ public class InfoModule : ModuleBase<SocketCommandContext>
 
         var svg = template(data);
 
+        var x = (new[] { 12, 2, 3 }).Select(c => {
+            return ImageService.ConvertSvgImage(svg);
+        }).ToArray();
+
+        Task.WaitAll(x);
+        
         var imageStream = await ImageService.ConvertSvgImage(svg);
         await SendImageEmbed(imageStream, $"{user.Username}#{user.Discriminator} Rank Card", "rank.png", Color.Blue);
     }

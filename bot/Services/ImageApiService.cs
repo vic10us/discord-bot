@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace bot.Services;
 
-public class ImageService
+public class ImageApiService
 {
     private readonly HttpClient _client;
 
-    public ImageService(IHttpClientFactory clientFactory)
+    public ImageApiService(IHttpClientFactory clientFactory)
     {
         _client = clientFactory.CreateClient("vic10usapi");
     }

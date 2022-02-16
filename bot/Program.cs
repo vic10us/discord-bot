@@ -16,6 +16,7 @@ using bot.Features.Games;
 using bot;
 using Microsoft.AspNetCore.Builder;
 using bot.Services;
+using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,19 +46,22 @@ builder.Services.AddSingleton<PictureService>();
 builder.Services.AddSingleton<DadJokeService>();
 builder.Services.AddTransient<Program>();
 builder.Services.AddSingleton<MondayQuotesService>();
-builder.Services.AddSingleton<RedneckJokeService>();
+builder.Services.AddSingleton<IRedneckJokeService, RedneckJokeService>();
 builder.Services.AddSingleton<BotDataService>();
 builder.Services.AddHttpClient<DadJokeService>("DadJokeService", (s, c) =>
 {
     c.BaseAddress = new Uri(builder.Configuration["DadJokes:BaseUrl"]);
 });
 builder.Services.AddHostedService<LifetimeEventsHostedService>();
-builder.Services.AddTransient<ImageService>();
+builder.Services.AddTransient<ImageApiService>();
 builder.Services.Configure<DiscordBotDatabaseSettings>(
     builder.Configuration.GetSection(nameof(DiscordBotDatabaseSettings)));
 
 builder.Services.AddSingleton<IDatabaseSettings>(sp =>
     sp.GetRequiredService<IOptions<DiscordBotDatabaseSettings>>().Value);
+
+builder.Services.AddMediatR(typeof(Program));
+builder.Services.AddAutoMapper(typeof(Program));
 
 var app = builder.Build();
 
