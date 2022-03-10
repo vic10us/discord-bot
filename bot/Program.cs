@@ -20,6 +20,7 @@ using MediatR;
 using FluentValidation;
 using bot.PipelineBehaviors;
 using bot.Extensions;
+using Victoria;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,8 @@ builder.Services.AddHttpClient("vic10usapi", c =>
 {
     c.BaseAddress = new Uri(builder.Configuration["vic10usApi:BaseUrl"]);
 });
+
+//builder.Services.AddJokes(builder.Configuration);
 
 builder.Services.AddDbContext<BotDbContext>
     (x => x.UseSqlite(builder.Configuration.GetConnectionString("BotDb")), ServiceLifetime.Singleton);
@@ -67,6 +70,9 @@ builder.Services.AddMediatR(typeof(Program));
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+builder.Services.AddLavaNode(config => {
+    config.SelfDeaf = true;
+});
 
 var app = builder.Build();
 

@@ -5,10 +5,10 @@ using bot.Features.RedneckJokes;
 using Discord;
 using Discord.Commands;
 
-namespace bot;
+namespace bot.Modules;
 
 [Group("joke")]
-public class JokeModule : ModuleBase<SocketCommandContext>
+public class JokeGroupModule : CustomModule<SocketCommandContext>
 {
     // ReSharper disable once MemberCanBePrivate.Global
     // ReSharper disable once UnusedAutoPropertyAccessor.Global

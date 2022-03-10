@@ -1,21 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using HandlebarsDotNet;
 
 namespace bot.Features.MondayQuotes;
-
-public enum QuoteCategory
-{
-    Funny,
-    Inspirational,
-    Popular
-}
-
 
 public class MondayQuotesService
 {

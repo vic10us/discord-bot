@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using bot.Features.Database;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Victoria;
 
 namespace bot;
 
@@ -22,6 +24,7 @@ internal class LifetimeEventsHostedService : IHostedService
     private readonly CommandHandlingService _commandHandlingService;
     private readonly IConfiguration _config;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly LavaNode _lavaNode;
     private readonly BotDataService _botDataService;
 
     public LifetimeEventsHostedService(
@@ -32,7 +35,8 @@ internal class LifetimeEventsHostedService : IHostedService
         CommandHandlingService commandHandlingService,
         IConfiguration config,
         BotDataService botDataService,
-        IServiceScopeFactory scopeFactory)
+        IServiceScopeFactory scopeFactory,
+        LavaNode lavaNode)
     {
         _logger = logger;
         _appLifetime = appLifetime;
@@ -41,6 +45,7 @@ internal class LifetimeEventsHostedService : IHostedService
         _commandHandlingService = commandHandlingService;
         _config = config;
         _scopeFactory = scopeFactory;
+        _lavaNode = lavaNode;
         _botDataService = botDataService;
     }
 
@@ -57,6 +62,7 @@ internal class LifetimeEventsHostedService : IHostedService
         }
 
         _discordSocketClient.Log += LogAsync;
+        _discordSocketClient.Ready += OnReadyAsync;
         _commandService.Log += LogAsync;
 
         await _discordSocketClient.LoginAsync(TokenType.Bot, _config["Discord:Token"]);
@@ -71,8 +77,26 @@ internal class LifetimeEventsHostedService : IHostedService
 
         // Here we initialize the logic required to register our commands.
         await _commandHandlingService.InitializeAsync();
+    }
 
-        // return Task.CompletedTask;
+    private async Task OnReadyAsync()
+    {
+        if (!_lavaNode.IsConnected)
+        {
+            await _lavaNode.ConnectAsync();
+        }
+        _discordSocketClient.Guilds.ToList().ForEach(c => _logger.LogInformation(c.Name));
+        // var guild = _discordSocketClient.GetGuild(761581939697254431);
+        foreach (var guild in _discordSocketClient.Guilds)
+        {
+            var commands = await guild.GetApplicationCommandsAsync();
+            // var commands = await _discordSocketClient.GetGlobalApplicationCommandsAsync();
+            foreach (var command in commands)
+            {
+                _logger.LogInformation($"slash command {command.Name}");
+                await command.DeleteAsync();
+            }
+        }
     }
 
     private static double GetMinutesInVoice(UserVoiceStats userVoiceStats)
@@ -90,6 +114,7 @@ internal class LifetimeEventsHostedService : IHostedService
     {
         var guildData = _botDataService.GetGuild(guildId);
         if (guildData == null) return;
+        if (!guildData.channelNotifications.ContainsKey(route)) return;
         var channelId_str = guildData.channelNotifications[route];
         if (string.IsNullOrWhiteSpace(channelId_str)) return;
         if (!ulong.TryParse(channelId_str, out var channelId)) return;
