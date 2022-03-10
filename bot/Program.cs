@@ -32,6 +32,7 @@ builder.Services.AddSwaggerGen();
 builder.Configuration.SetBasePath(Directory.GetCurrentDirectory());
 builder.Configuration.AddJsonFile("hostsettings.json", optional: true);
 builder.Configuration.AddEnvironmentVariables(prefix: "BOT_");
+builder.Configuration.AddUserSecrets<Program>();
 builder.Configuration.AddCommandLine(args);
 
 builder.Services.AddHttpClient();
