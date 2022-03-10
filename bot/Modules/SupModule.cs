@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
 
-namespace bot;
+namespace bot.Modules;
 
 [Group("sup")]
-public class SupModule : ModuleBase<SocketCommandContext>
+public class SupModule : CustomModule<SocketCommandContext>
 {
     // ~sample square 20 -> 400
     [Command("square")]

@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace bot.Features.RedneckJokes
+namespace bot.Features.RedneckJokes;
+
+public interface IRedneckJokeService
 {
-    public interface IRedneckJokeService
-    {
-        Task<string> GetQuote();
-    }
+    Task<string> GetQuote();
 }
