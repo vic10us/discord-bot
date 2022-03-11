@@ -72,7 +72,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 builder.Services.AddLavaNode(config => {
-    config.SelfDeaf = true;
+    builder.Configuration?.Bind($"Victoria", config);
 });
 
 var app = builder.Build();

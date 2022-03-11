@@ -1,11 +1,21 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
+EXPOSE 80
+EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-#COPY ["bot/bot.csproj", "bot/"]
-COPY . .
+COPY ["bot/bot.csproj", "bot/"]
+COPY ["v10.Services.DadJokes/v10.Services.DadJokes.csproj", "v10.Services.DadJokes/"]
+COPY ["v10.Services.Jokes/v10.Services.Jokes.csproj", "v10.Services.Jokes/"]
+COPY ["v10.Options.Microsoft/v10.Options.Microsoft.csproj", "v10.Options.Microsoft/"]
+COPY ["v10.Options.Abstractions/v10.Options.Abstractions.csproj", "v10.Options.Abstractions/"]
+COPY ["v10.DependencyInjection.Microsoft/v10.DependencyInjection.Microsoft.csproj", "v10.DependencyInjection.Microsoft/"]
+COPY ["v10.DependencyInjection.Abstractions/v10.DependencyInjection.Abstractions.csproj", "v10.DependencyInjection.Abstractions/"]
 RUN dotnet restore "bot/bot.csproj"
+COPY . .
 WORKDIR "/src/bot"
 RUN dotnet build "bot.csproj" -c Release -o /app/build
 
@@ -15,5 +25,4 @@ RUN dotnet publish "bot.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENV DISCORD__TOKEN=aaa
 ENTRYPOINT ["dotnet", "bot.dll"]
