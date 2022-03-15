@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using bot.Commands;
-using bot.Features.Database;
-using bot.Features.Database.Models;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
+using v10.Data.Abstractions.Models;
+using v10.Data.MongoDB;
 
 namespace bot.Handlers;
 

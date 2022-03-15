@@ -1,92 +1,86 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
-        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-        <UserSecretsId>100ad8ba-7a2d-4fae-b60d-72f13a1e87e5</UserSecretsId>
-    </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<UserSecretsId>100ad8ba-7a2d-4fae-b60d-72f13a1e87e5</UserSecretsId>
+	</PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="AspNetCoreRateLimit" Version="4.0.1" />
-      <PackageReference Include="AspNetCoreRateLimit.Redis" Version="1.0.0" />
-      <PackageReference Include="AutoMapper" Version="11.0.1" />
-      <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
-      <PackageReference Include="CoreHtmlToImage" Version="1.0.6" />
-      <PackageReference Include="Discord.Net" Version="3.3.2" />
-      <PackageReference Include="FluentValidation" Version="10.3.6" />
-      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="10.3.6" />
-      <PackageReference Include="GrapeCity.Documents.Html" Version="5.0.0.774" />
-      <PackageReference Include="GrapeCity.Documents.Html.Linux.X64" Version="5.0.0.774" />
-      <PackageReference Include="GrapeCity.Documents.Html.Windows.X64" Version="5.0.0.774" />
-      <PackageReference Include="GrapeCity.Documents.Imaging" Version="5.0.0.774" />
-      <PackageReference Include="Handlebars.Net" Version="2.1.0" />
-      <PackageReference Include="MediatR" Version="10.0.1" />
-      <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.2" />
-      <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.1" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-      <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
-      <PackageReference Include="MimeTypes" Version="2.3.0">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="MongoDB.Bson" Version="2.14.1" />
-      <PackageReference Include="MongoDB.Driver" Version="2.14.1" />
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-      <PackageReference Include="QRCoder" Version="1.4.3" />
-      <PackageReference Include="Svg" Version="3.4.0" />
-	  <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
-	  <PackageReference Include="Victoria" Version="5.2.7" />
+	<ItemGroup>
+		<ProjectReference Include="..\v10.Data.Abstractions\v10.Data.Abstractions.csproj" />
+		<ProjectReference Include="..\v10.Data.MongoDB\v10.Data.MongoDB.csproj" />
+		<ProjectReference Include="..\v10.Services.DadJokes\v10.Services.DadJokes.csproj" />
+		<ProjectReference Include="..\v10.Services.Jokes\v10.Services.Jokes.csproj" />
 	</ItemGroup>
 
-    <ItemGroup>
-      <None Update="appsettings.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="data\.keep">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="AspNetCoreRateLimit" Version="4.0.1" />
+		<PackageReference Include="AspNetCoreRateLimit.Redis" Version="1.0.0" />
+		<PackageReference Include="AutoMapper" Version="11.0.1" />
+		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+		<PackageReference Include="Discord.Net" Version="3.3.2" />
+		<PackageReference Include="FluentValidation" Version="10.3.6" />
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="10.3.6" />
+		<PackageReference Include="Handlebars.Net" Version="2.1.0" />
+		<PackageReference Include="MediatR" Version="10.0.1" />
+		<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.2" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
+		<PackageReference Include="MimeTypes" Version="2.3.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="MongoDB.Bson" Version="2.14.1" />
+		<PackageReference Include="MongoDB.Driver" Version="2.14.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+		<PackageReference Include="QRCoder" Version="1.4.3" />
+		<PackageReference Include="Svg" Version="3.4.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+		<PackageReference Include="Victoria" Version="5.2.7" />
+	</ItemGroup>
 
-    <ItemGroup>
-      <None Remove="Features\MemeGenerator\Templates\TwitterMeme.html" />
-      <EmbeddedResource Include="Features\MemeGenerator\Templates\TwitterMeme.html" />
-      <None Remove="Features\MondayQuotes\funny.txt" />
-      <EmbeddedResource Include="Features\MondayQuotes\Funny.txt" />
-      <None Remove="Features\MondayQuotes\inspirational.txt" />
-      <EmbeddedResource Include="Features\MondayQuotes\Inspirational.txt" />
-      <None Remove="Features\MondayQuotes\popular.txt" />
-      <EmbeddedResource Include="Features\MondayQuotes\Popular.txt" />
-      <None Remove="Features\RedneckJokes\redneckjokes.txt" />
-      <EmbeddedResource Include="Features\RedneckJokes\redneckjokes.txt" />
-    </ItemGroup>
+	<ItemGroup>
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="data\.keep">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
-    <ItemGroup>
-      <Content Include="Images\*.*">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="media\*\*.*">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-    </ItemGroup>
+	<ItemGroup>
+		<None Remove="Features\MemeGenerator\Templates\TwitterMeme.html" />
+		<EmbeddedResource Include="Features\MemeGenerator\Templates\TwitterMeme.html" />
+		<None Remove="Features\MondayQuotes\funny.txt" />
+		<EmbeddedResource Include="Features\MondayQuotes\Funny.txt" />
+		<None Remove="Features\MondayQuotes\inspirational.txt" />
+		<EmbeddedResource Include="Features\MondayQuotes\Inspirational.txt" />
+		<None Remove="Features\MondayQuotes\popular.txt" />
+		<EmbeddedResource Include="Features\MondayQuotes\Popular.txt" />
+		<None Remove="Features\RedneckJokes\redneckjokes.txt" />
+		<EmbeddedResource Include="Features\RedneckJokes\redneckjokes.txt" />
+		<None Remove="Features\Images\Templates\rank.hbs" />
+		<EmbeddedResource Include="Features\Images\Templates\rank.hbs">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</EmbeddedResource>
+	</ItemGroup>
 
-    <ItemGroup>
-      <None Remove="Features\Images\Templates\rank.hbs" />
-      <EmbeddedResource Include="Features\Images\Templates\rank.hbs">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </EmbeddedResource>
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\v10.Services.DadJokes\v10.Services.DadJokes.csproj" />
-      <ProjectReference Include="..\v10.Services.Jokes\v10.Services.Jokes.csproj" />
-    </ItemGroup>
+	<ItemGroup>
+		<Content Include="Images\*.*">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="media\*\*.*">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 
 </Project>

@@ -4,5 +4,5 @@ public interface IJokeServiceImpl { }
 
 public interface IJokeServiceImpl<T> : IJokeServiceImpl
 {
-    public Task<T> GetJokeAsync();
+  public Task<T> GetJokeAsync();
 }

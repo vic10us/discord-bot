@@ -5,18 +5,18 @@
 /// </summary>
 public enum InjectionMode
 {
-    /// <summary>
-    /// Singleton lifetime
-    /// </summary>
-    Singleton = 1,
+  /// <summary>
+  /// Singleton lifetime
+  /// </summary>
+  Singleton = 1,
 
-    /// <summary>
-    /// Scoped lifetime
-    /// </summary>
-    Scoped = 2,
+  /// <summary>
+  /// Scoped lifetime
+  /// </summary>
+  Scoped = 2,
 
-    /// <summary>
-    /// Transient lifetime
-    /// </summary>
-    Transient = 3
+  /// <summary>
+  /// Transient lifetime
+  /// </summary>
+  Transient = 3
 }

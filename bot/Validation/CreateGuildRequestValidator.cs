@@ -5,9 +5,9 @@ namespace bot.Validation;
 
 public class CreateGuildRequestValidator : AbstractValidator<CreateGuildRequest>
 {
-    public CreateGuildRequestValidator()
-    {
-        RuleFor(x => x.GuildId).NotEmpty().GreaterThan((ulong)0).LessThan(ulong.MaxValue);
-        RuleFor(x => x.ChannelNotifications).NotNull();
-    }
+  public CreateGuildRequestValidator()
+  {
+    RuleFor(x => x.GuildId).NotEmpty().GreaterThan((ulong)0).LessThan(ulong.MaxValue);
+    RuleFor(x => x.ChannelNotifications).NotNull();
+  }
 }

@@ -2,6 +2,6 @@
 
 public interface IJokeServiceConfiguration
 {
-    string ConfigurationKey { get; set; }
-    Task Validate();
+  string ConfigurationKey { get; set; }
+  Task Validate();
 }

@@ -6,10 +6,10 @@
 [AttributeUsage(AttributeTargets.Class)]
 public class TransientAttribute : InjectableAttribute
 {
-    /// <summary>
-    /// Create new instance.
-    /// </summary>
-    public TransientAttribute() : base(InjectionMode.Transient)
-    {
-    }
+  /// <summary>
+  /// Create new instance.
+  /// </summary>
+  public TransientAttribute() : base(InjectionMode.Transient)
+  {
+  }
 }
