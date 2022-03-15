@@ -10,27 +10,26 @@ namespace bot.Extensions;
 
 public static class ApplicationBuilderExtensions
 {
-    public static void UseFluentValidationExceptionHandler(this IApplicationBuilder app)
+  public static void UseFluentValidationExceptionHandler(this IApplicationBuilder app)
+  {
+    app.UseExceptionHandler(x =>
     {
-        app.UseExceptionHandler(x =>
-        {
-            x.Run(async context =>
-            {
-                var errorFeature = context.Features.Get<IExceptionHandlerFeature>();
-                var exception = errorFeature.Error;
-                if (exception is not ValidationException validationException) throw exception;
-                var errors = validationException.Errors.Select(x => new
-                {
-                    x.PropertyName,
-                    x.ErrorMessage,
-                    x.ErrorCode,
-                    x.Severity,
-                }).Distinct();
-                var errorText = JsonConvert.SerializeObject(errors);
-                context.Response.StatusCode = 400;
-                context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync(errorText, Encoding.UTF8);
-            });
+      x.Run(async context =>
+          {
+          var errorFeature = context.Features.Get<IExceptionHandlerFeature>();
+          var exception = errorFeature.Error;
+          if (exception is not ValidationException validationException) throw exception;
+          var errors = validationException.Errors.Select(x => new {
+            x.PropertyName,
+            x.ErrorMessage,
+            x.ErrorCode,
+            x.Severity,
+          }).Distinct();
+          var errorText = JsonConvert.SerializeObject(errors);
+          context.Response.StatusCode = 400;
+          context.Response.ContentType = "application/json";
+          await context.Response.WriteAsync(errorText, Encoding.UTF8);
         });
-    }
+    });
+  }
 }

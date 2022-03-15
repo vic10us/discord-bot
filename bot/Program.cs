@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using bot.Configuration.Models;
 using Microsoft.Extensions.DependencyInjection;
 using bot.Features.DadJokes;
 using bot.Features.Database;
@@ -21,6 +20,9 @@ using FluentValidation;
 using bot.PipelineBehaviors;
 using bot.Extensions;
 using Victoria;
+using v10.Data.Abstractions;
+using v10.Data.Abstractions.Interfaces;
+using v10.Data.MongoDB;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,7 +40,7 @@ builder.Configuration.AddCommandLine(args);
 builder.Services.AddHttpClient();
 builder.Services.AddHttpClient("vic10usapi", c =>
 {
-    c.BaseAddress = new Uri(builder.Configuration["vic10usApi:BaseUrl"]);
+  c.BaseAddress = new Uri(builder.Configuration["vic10usApi:BaseUrl"]);
 });
 
 //builder.Services.AddJokes(builder.Configuration);
@@ -57,7 +59,7 @@ builder.Services.AddSingleton<IRedneckJokeService, RedneckJokeService>();
 builder.Services.AddSingleton<BotDataService>();
 builder.Services.AddHttpClient<DadJokeService>("DadJokeService", (s, c) =>
 {
-    c.BaseAddress = new Uri(builder.Configuration["DadJokes:BaseUrl"]);
+  c.BaseAddress = new Uri(builder.Configuration["DadJokes:BaseUrl"]);
 });
 builder.Services.AddHostedService<LifetimeEventsHostedService>();
 builder.Services.AddTransient<ImageApiService>();
@@ -71,8 +73,9 @@ builder.Services.AddMediatR(typeof(Program));
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
-builder.Services.AddLavaNode(config => {
-    builder.Configuration?.Bind($"Victoria", config);
+builder.Services.AddLavaNode(config =>
+{
+  builder.Configuration?.Bind($"Victoria", config);
 });
 
 var app = builder.Build();

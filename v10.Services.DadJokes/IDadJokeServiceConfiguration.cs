@@ -4,5 +4,5 @@ namespace v10.Services.DadJokes;
 
 public interface IDadJokeServiceConfiguration : IJokeServiceConfiguration
 {
-    string BaseUrl { get; set; }
+  string BaseUrl { get; set; }
 }

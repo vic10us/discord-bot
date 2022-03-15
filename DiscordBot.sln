@@ -11,15 +11,32 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Services.DadJokes", "v1
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Services.Jokes", "v10.Services.Jokes\v10.Services.Jokes.csproj", "{53474D91-FE5E-4497-BD24-0F4462B182C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.Options.Abstractions", "v10.Options.Abstractions\v10.Options.Abstractions.csproj", "{FBE7641F-2230-4EAB-8EEF-285603C9B2A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Options.Abstractions", "v10.Options.Abstractions\v10.Options.Abstractions.csproj", "{FBE7641F-2230-4EAB-8EEF-285603C9B2A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.Options.Microsoft", "v10.Options.Microsoft\v10.Options.Microsoft.csproj", "{C191CF33-3650-45C5-9DDE-46649AF45B90}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Options.Microsoft", "v10.Options.Microsoft\v10.Options.Microsoft.csproj", "{C191CF33-3650-45C5-9DDE-46649AF45B90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.DependencyInjection.Abstractions", "v10.DependencyInjection.Abstractions\v10.DependencyInjection.Abstractions.csproj", "{FB70DCB1-FC22-4207-8113-779A02B16CA7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.DependencyInjection.Abstractions", "v10.DependencyInjection.Abstractions\v10.DependencyInjection.Abstractions.csproj", "{FB70DCB1-FC22-4207-8113-779A02B16CA7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.DependencyInjection.Microsoft", "v10.DependencyInjection.Microsoft\v10.DependencyInjection.Microsoft.csproj", "{2A7D3610-C112-453B-B6FE-4B8CBF372C7F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.DependencyInjection.Microsoft", "v10.DependencyInjection.Microsoft\v10.DependencyInjection.Microsoft.csproj", "{2A7D3610-C112-453B-B6FE-4B8CBF372C7F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DI", "DI", "{30246371-00ED-4793-BB81-8DC50DDAA77D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5E40C87D-49E5-41E1-8560-871FEF388C05}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bot-ui", "bot-ui\bot-ui.csproj", "{3864098D-C58F-4167-A5DC-95F98E9572D7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{3DFBCF29-3EC6-45FF-87D2-D12B25D7B508}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.Data.Abstractions", "v10.Data.Abstractions\v10.Data.Abstractions.csproj", "{F45C3045-6AA1-402C-8603-966C37D37433}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.Data.MongoDB", "v10.Data.MongoDB\v10.Data.MongoDB.csproj", "{9F0A1FCB-3F01-4855-819B-FE2250DCBECD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{104C7B96-B4CB-4A7B-A1FB-8F089486E24F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.Bot.Core", "v10.Bot.Core\v10.Bot.Core.csproj", "{92E9FFE9-ED8C-42E0-9DC2-8F274C1A3817}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +76,22 @@ Global
 		{2A7D3610-C112-453B-B6FE-4B8CBF372C7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A7D3610-C112-453B-B6FE-4B8CBF372C7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A7D3610-C112-453B-B6FE-4B8CBF372C7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3864098D-C58F-4167-A5DC-95F98E9572D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3864098D-C58F-4167-A5DC-95F98E9572D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3864098D-C58F-4167-A5DC-95F98E9572D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3864098D-C58F-4167-A5DC-95F98E9572D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F45C3045-6AA1-402C-8603-966C37D37433}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F45C3045-6AA1-402C-8603-966C37D37433}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F45C3045-6AA1-402C-8603-966C37D37433}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F45C3045-6AA1-402C-8603-966C37D37433}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F0A1FCB-3F01-4855-819B-FE2250DCBECD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F0A1FCB-3F01-4855-819B-FE2250DCBECD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F0A1FCB-3F01-4855-819B-FE2250DCBECD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F0A1FCB-3F01-4855-819B-FE2250DCBECD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92E9FFE9-ED8C-42E0-9DC2-8F274C1A3817}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92E9FFE9-ED8C-42E0-9DC2-8F274C1A3817}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92E9FFE9-ED8C-42E0-9DC2-8F274C1A3817}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92E9FFE9-ED8C-42E0-9DC2-8F274C1A3817}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,6 +101,9 @@ Global
 		{C191CF33-3650-45C5-9DDE-46649AF45B90} = {30246371-00ED-4793-BB81-8DC50DDAA77D}
 		{FB70DCB1-FC22-4207-8113-779A02B16CA7} = {30246371-00ED-4793-BB81-8DC50DDAA77D}
 		{2A7D3610-C112-453B-B6FE-4B8CBF372C7F} = {30246371-00ED-4793-BB81-8DC50DDAA77D}
+		{F45C3045-6AA1-402C-8603-966C37D37433} = {3DFBCF29-3EC6-45FF-87D2-D12B25D7B508}
+		{9F0A1FCB-3F01-4855-819B-FE2250DCBECD} = {3DFBCF29-3EC6-45FF-87D2-D12B25D7B508}
+		{92E9FFE9-ED8C-42E0-9DC2-8F274C1A3817} = {104C7B96-B4CB-4A7B-A1FB-8F089486E24F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B2608AF6-BDEE-4217-8A33-871F7EC50CC3}

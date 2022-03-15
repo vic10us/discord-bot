@@ -6,10 +6,10 @@
 [AttributeUsage(AttributeTargets.Class)]
 public class ScopedAttribute : InjectableAttribute
 {
-    /// <summary>
-    /// Create new instance.
-    /// </summary>
-    public ScopedAttribute() : base(InjectionMode.Scoped)
-    {
-    }
+  /// <summary>
+  /// Create new instance.
+  /// </summary>
+  public ScopedAttribute() : base(InjectionMode.Scoped)
+  {
+  }
 }

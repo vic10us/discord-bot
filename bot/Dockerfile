@@ -14,6 +14,9 @@ COPY ["v10.Options.Microsoft/v10.Options.Microsoft.csproj", "v10.Options.Microso
 COPY ["v10.Options.Abstractions/v10.Options.Abstractions.csproj", "v10.Options.Abstractions/"]
 COPY ["v10.DependencyInjection.Microsoft/v10.DependencyInjection.Microsoft.csproj", "v10.DependencyInjection.Microsoft/"]
 COPY ["v10.DependencyInjection.Abstractions/v10.DependencyInjection.Abstractions.csproj", "v10.DependencyInjection.Abstractions/"]
+COPY ["v10.Data.Abstractions/v10.Data.Abstractions.csproj", "v10.Data.Abstractions/"]
+COPY ["v10.Data.MongoDB/v10.Data.MongoDB.csproj", "v10.Data.MongoDB/"]
+COPY ["v10.Bot.Core/v10.Bot.Core.csproj", "v10.Bot.Core/"]
 RUN dotnet restore "bot/bot.csproj"
 COPY . .
 WORKDIR "/src/bot"
