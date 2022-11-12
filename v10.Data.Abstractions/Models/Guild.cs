@@ -21,3 +21,12 @@ public class Guild
   }
 
 }
+
+public class GuildAutoRoles
+{
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; }
+    public string guildId { get; set; }
+    public string category { get; set; }
+}
