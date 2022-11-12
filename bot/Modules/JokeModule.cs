@@ -1,38 +1,40 @@
 ﻿using System.Threading.Tasks;
-using bot.Features.DadJokes;
-using bot.Features.MondayQuotes;
-using bot.Features.RedneckJokes;
+using bot.Queries;
 using Discord;
 using Discord.Commands;
+using MediatR;
 
 namespace bot.Modules;
 
 public class JokeModule : CustomModule<SocketCommandContext>
 {
-  public DadJokeService DadJokeService { get; set; }
-  public MondayQuotesService MondayQuotesService { get; set; }
-  public IRedneckJokeService RedneckJokeService { get; set; }
+    private readonly IMediator _mediator;
 
-  [Command("dadjoke")]
-  [Alias("dj")]
-  public async Task DadJoke()
-  {
-    var joke = await DadJokeService.GetDadJoke();
-    await ReplyAsync(joke.Joke, messageReference: new MessageReference(Context.Message.Id));
-  }
+    public JokeModule(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
 
-  [Command("monday")]
-  public async Task MondayQuote()
-  {
-    var joke = await MondayQuotesService.GetQuote();
-    await ReplyAsync(joke, messageReference: new MessageReference(Context.Message.Id));
-  }
+    [Command("dadjoke")]
+    [Alias("dj")]
+    public async Task DadJoke()
+    {
+        var joke = await _mediator.Send(new GetDadJokeResponse());
+        await ReplyAsync(joke.Joke, messageReference: new MessageReference(Context.Message.Id));
+    }
 
-  [Command("redneckjoke")]
-  [Alias("redneck", "rn")]
-  public async Task RedneckJoke()
-  {
-    var joke = await RedneckJokeService.GetQuote();
-    await ReplyAsync(joke, messageReference: new MessageReference(Context.Message.Id));
-  }
+    [Command("monday")]
+    public async Task MondayQuote()
+    {
+        var joke = await _mediator.Send(new GetMondayJokeResponse());
+        await ReplyAsync(joke, messageReference: new MessageReference(Context.Message.Id));
+    }
+
+    [Command("redneckjoke")]
+    [Alias("redneck", "rn")]
+    public async Task RedneckJoke()
+    {
+        var joke = await _mediator.Send(new GetRedneckJokeResponse());
+        await ReplyAsync(joke, messageReference: new MessageReference(Context.Message.Id));
+    }
 }

@@ -46,7 +46,7 @@ public class ImageApiService
     var qrCode = new BitmapByteQRCode(qrCodeData);
     var graphic = qrCode.GetGraphic(20);
     var bm = new Bitmap(new MemoryStream(graphic));
-    var g = Graphics.FromImage(bm);
+    _ = Graphics.FromImage(bm);
     var stream = new MemoryStream();
     bm.Save(stream, ImageFormat.Png);
     stream.Position = 0;
