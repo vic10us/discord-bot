@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 using v10.Data.Abstractions.Models;
 using v10.Data.MongoDB;
 using Victoria;
@@ -30,6 +31,7 @@ internal class LifetimeEventsHostedService : IHostedService
     private readonly LavaNode _lavaNode;
     private readonly BotDataService _botDataService;
     private readonly InteractionService _interactions;
+    private readonly IServiceProvider _serviceProvider;
 
     public LifetimeEventsHostedService(
         ILogger<LifetimeEventsHostedService> logger,
@@ -41,6 +43,7 @@ internal class LifetimeEventsHostedService : IHostedService
         BotDataService botDataService,
         IServiceScopeFactory scopeFactory,
         InteractionService interactions,
+        IServiceProvider serviceProvider,
         LavaNode lavaNode)
     {
         _logger = logger;
@@ -53,6 +56,7 @@ internal class LifetimeEventsHostedService : IHostedService
         _lavaNode = lavaNode;
         _botDataService = botDataService;
         _interactions = interactions;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -70,6 +74,7 @@ internal class LifetimeEventsHostedService : IHostedService
         _discordSocketClient.Log += LogAsync;
         _discordSocketClient.Ready += OnReadyAsync;
         // _commandService.Log += LogAsync;
+        // _discordSocketClient.ButtonExecuted += _discordSocketClient_ButtonExecuted;
 
         await _discordSocketClient.LoginAsync(TokenType.Bot, _config["Discord:Token"]);
         await _discordSocketClient.StartAsync();
@@ -83,6 +88,13 @@ internal class LifetimeEventsHostedService : IHostedService
 
         // Here we initialize the logic required to register our commands.
         await _commandHandlingService.InitializeAsync();
+    }
+
+    private async Task _discordSocketClient_ButtonExecuted(SocketMessageComponent arg)
+    {
+        _logger.LogInformation("Button was clicked", arg);
+        //var ctx = new SocketInteractionContext<SocketMessageComponent>(_discordSocketClient, arg);
+        //await _interactions.ExecuteCommandAsync(ctx, _serviceProvider);
     }
 
     private async Task OnReadyAsync()
