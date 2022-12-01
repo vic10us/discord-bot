@@ -189,7 +189,7 @@ public sealed class MusicModule : CustomModule<SocketCommandContext>
         if (player == null) return;
         var voiceState = Context.User as IVoiceState;
         await _lavaNode.LeaveAsync(voiceState.VoiceChannel);
-        await ReplyAsync("Left voice channel");
+        await ReplyAsync("Left voice channel... sadness");
     }
 
     [Command("stop")]
