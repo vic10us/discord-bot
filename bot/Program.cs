@@ -25,7 +25,6 @@ using v10.Data.Abstractions.Interfaces;
 using v10.Data.MongoDB;
 using bot.Features.HealthChecks;
 using OpenTelemetry.Metrics;
-using OpenTelemetry;
 using OpenTelemetry.Trace;
 using bot.Features.Metrics;
 using System.Net;
@@ -33,7 +32,6 @@ using Microsoft.Extensions.Logging;
 using OpenTelemetry.Logs;
 using Discord.Interactions;
 using bot.Features.EightBall;
-using MongoDB.Driver;
 using Discord;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);

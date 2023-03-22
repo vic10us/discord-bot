@@ -23,7 +23,7 @@ public static class BotLevelingUtils
   //     (ulong)(0.14057f * Math.Pow(1.7321f * Math.Sqrt(3888.0f * Math.Pow(totalXp, 2) + 291600.0f * totalXp - 207025.0f) + 108.0f * totalXp + 4050.0f, 1.0f/3.0f) - 4.5f) + 1
   //     : 0;
 
-  public static (ulong, ulong, ulong, ulong) ComputeLevelAndXp(ulong lvl, ulong xp, Action<ulong> cb = null)
+  public static (ulong level, ulong xp, ulong next, ulong totalXp) ComputeLevelAndXp(ulong lvl, ulong xp, Action<ulong> cb = null)
   {
     while (xp >= XpNeededForLevel(lvl))
     {

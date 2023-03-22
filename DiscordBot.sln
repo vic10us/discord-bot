@@ -24,19 +24,20 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5E40C87D-49E5-41E1-8560-871FEF388C05}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bot-ui", "bot-ui\bot-ui.csproj", "{3864098D-C58F-4167-A5DC-95F98E9572D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bot-ui", "bot-ui\bot-ui.csproj", "{3864098D-C58F-4167-A5DC-95F98E9572D7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{3DFBCF29-3EC6-45FF-87D2-D12B25D7B508}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.Data.Abstractions", "v10.Data.Abstractions\v10.Data.Abstractions.csproj", "{F45C3045-6AA1-402C-8603-966C37D37433}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Data.Abstractions", "v10.Data.Abstractions\v10.Data.Abstractions.csproj", "{F45C3045-6AA1-402C-8603-966C37D37433}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.Data.MongoDB", "v10.Data.MongoDB\v10.Data.MongoDB.csproj", "{9F0A1FCB-3F01-4855-819B-FE2250DCBECD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Data.MongoDB", "v10.Data.MongoDB\v10.Data.MongoDB.csproj", "{9F0A1FCB-3F01-4855-819B-FE2250DCBECD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{104C7B96-B4CB-4A7B-A1FB-8F089486E24F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.Bot.Core", "v10.Bot.Core\v10.Bot.Core.csproj", "{92E9FFE9-ED8C-42E0-9DC2-8F274C1A3817}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Bot.Core", "v10.Bot.Core\v10.Bot.Core.csproj", "{92E9FFE9-ED8C-42E0-9DC2-8F274C1A3817}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
