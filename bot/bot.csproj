@@ -71,7 +71,7 @@
 		<None Update="data\.keep">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-    <Content Include="stanford-corenlp-4.4.0-models\**">
+    <Content Include="stanford-corenlp-models\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -114,7 +114,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Features\Events\Producers\" />
-	  <Folder Include="stanford-corenlp-4.4.0-models\edu\stanford\nlp\models\coref\hybrid\" />
+	  <Folder Include="stanford-corenlp-models\" />
 	</ItemGroup>
 
 </Project>

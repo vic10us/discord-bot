@@ -149,7 +149,7 @@ services.AddSingleton(c => {
     props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
     props.setProperty("sutime.binders", "0");
 
-    var jarRoot = @"stanford-corenlp-4.4.0-models\";
+    var jarRoot = @"stanford-corenlp-models";
     var curDir = Environment.CurrentDirectory;
     Directory.SetCurrentDirectory(jarRoot);
     var pipeline = new StanfordCoreNLP(props);

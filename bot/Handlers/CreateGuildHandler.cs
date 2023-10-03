@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using bot.Commands;
 using MediatR;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using v10.Data.Abstractions.Models;
@@ -25,6 +26,7 @@ public class CreateGuildHandler : IRequestHandler<CreateGuildCommand, Dtos.Guild
         {
             guildId = $"{request.GuildId}",
             channelNotifications = request.ChannelNotifications,
+            staffRoles = request.StaffRoles
         };
         return _mapper.Map<Dtos.Guild>(await _botDataService.CreateGuildAsync(x));
     }
