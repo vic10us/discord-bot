@@ -6,7 +6,7 @@ public static class StringExtensions
 {
     public static string[] ExtractSentences(this string input)
     {
-        string pattern = @"([^.!?]+[.!?])";
+        string pattern = @"([^!.?]+[.!?])|([^!.?]+)\s*";
 
         MatchCollection matches = Regex.Matches(input, pattern);
 
