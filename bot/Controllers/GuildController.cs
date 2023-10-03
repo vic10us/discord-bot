@@ -67,7 +67,7 @@ public class GuildsController : ControllerBase
     public async Task<IActionResult> GetGuild(ulong guildId)
     {
         var query = new GetGuildByIdQuery(guildId);
-        _logger.LogInformation($"Retrieving Guild with guildId: {guildId}");
+        _logger.LogInformation("Retrieving Guild with guildId: {guildId}", guildId);
         var result = await _mediator.Send(query);
         return result != null ? Ok(result) : NotFound();
     }
@@ -84,16 +84,19 @@ public class GuildsController : ControllerBase
     public async Task<IActionResult> UpdateGuild(
       [FromRoute] ulong guildId, [FromBody] UpdateGuildCommand command)
     {
-        if (guildId != command.GuildId) throw new ArgumentException("Id mismatch", nameof(guildId));
-        _logger.LogInformation($"Replacing Guild with guildId: {guildId}");
+        if (guildId != StringToNullableUInt64(command.GuildId)) throw new ArgumentException("Id mismatch", nameof(guildId));
+        _logger.LogInformation("Replacing Guild with guildId: {guildId}", guildId);
         var result = await _mediator.Send(command);
         return AcceptedAtAction("GetGuild", "Guilds", new { guildId = result });
     }
 
+    ulong? StringToNullableUInt64(string value)
+        => ulong.TryParse(value, out ulong val) ? (ulong?)val : null;
+
     [HttpDelete("{guildId}")]
     public async Task<IActionResult> DeleteGuild(ulong guildId)
     {
-        _logger.LogInformation($"Deleting Guild with guildId: {guildId}");
+        _logger.LogInformation("Deleting Guild with guildId: {guildId}", guildId);
         var result = await _mediator.Send(new DeleteGuildCommand(guildId));
         return result ? Accepted() : NotFound();
     }

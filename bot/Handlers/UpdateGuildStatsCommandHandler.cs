@@ -68,8 +68,8 @@ public class UpdateGuildStatsCommandHandler : IRequestHandler<UpdateGuildStatsCo
             var memberCount      = guild.Users.Count(x => !x.IsBot);
             var onlineCount      = guild.Users.Count(x => !x.IsBot && !new[] { UserStatus.Offline, UserStatus.Invisible }.Contains(x.Status));
             
-            var staffCount       = guild.Users.Count(x => !x.IsBot && x.Roles.Any(y => guildData.staffRoles.Contains(y.Id)));
-            var onlineStaffCount = guild.Users.Count(x => !x.IsBot && !new[] { UserStatus.Offline, UserStatus.Invisible }.Contains(x.Status) && x.Roles.Any(y => guildData.staffRoles.Contains(y.Id)));
+            var staffCount       = guild.Users.Count(x => !x.IsBot && x.Roles.Any(y => guildData.staffRoles.Contains(y.Id.ToString())));
+            var onlineStaffCount = guild.Users.Count(x => !x.IsBot && !new[] { UserStatus.Offline, UserStatus.Invisible }.Contains(x.Status) && x.Roles.Any(y => guildData.staffRoles.Contains(y.Id.ToString())));
             var boosts = guild.PremiumSubscriptionCount;
             var boostLevel = guild.PremiumTier;
             var donators = guild.Users.Count(x => !x.IsBot && x.Roles.Any(y => y.Name.ToLower().Contains("donator")));
@@ -110,7 +110,7 @@ public class UpdateGuildStatsCommandHandler : IRequestHandler<UpdateGuildStatsCo
             if (!string.IsNullOrWhiteSpace(statBoostsChannelId))
             {
                 var statBoostsChannel = guild.GetVoiceChannel(ulong.Parse(statBoostsChannelId));
-                await statBoostsChannel.ModifyAsync(prop => prop.Name = $"🚀 Boosts: {boosts} (Level {boostLevel})");
+                await statBoostsChannel.ModifyAsync(prop => prop.Name = $"🚀 Boosts: {boosts} ({boostLevel})");
             }
 
             if (!string.IsNullOrWhiteSpace(statDonatorsChannelId))

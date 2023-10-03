@@ -282,7 +282,8 @@ public class BotDataService
         guildData = new Guild
         {
             guildId = $"{guildId}",
-            channelNotifications = new Dictionary<string, string>()
+            channelNotifications = new Dictionary<string, string>(),
+            staffRoles = Array.Empty<string>(),
         };
         _guilds.InsertOne(guildData);
         return guildData;

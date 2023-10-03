@@ -28,4 +28,5 @@ RUN dotnet publish "bot.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY ["bot/stanford-corenlp-models/**", "/app/stanford-corenlp-models"]
 ENTRYPOINT ["dotnet", "bot.dll"]

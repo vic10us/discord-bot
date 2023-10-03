@@ -10,7 +10,7 @@ public class Guild
     public string Id { get; set; }
     public string guildId { get; set; }
     public IDictionary<string, string> channelNotifications { get; set; } = new Dictionary<string, string>();
-    public ulong[] staffRoles { get; set; } = Array.Empty<ulong>();
+    public string[] staffRoles { get; set; } = Array.Empty<string>();
 
     public Guild() { }
 
