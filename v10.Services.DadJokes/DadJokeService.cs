@@ -9,7 +9,8 @@ public class DadJokeService : IDadJokeService, IJokeServiceImpl<IDadJoke>
     private readonly HttpClient _httpClient;
 
     public DadJokeService(
-        HttpClient client
+        HttpClient client, 
+        IDadJokeServiceConfiguration config
         )
     {
         _httpClient = client;
