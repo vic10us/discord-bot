@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using bot.Queries;
-using com.sun.org.apache.bcel.@internal.generic;
 using Discord;
 using Discord.Interactions;
 using MediatR;
