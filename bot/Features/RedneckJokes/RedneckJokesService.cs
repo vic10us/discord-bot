@@ -29,7 +29,6 @@ public class RedneckJokeService : IRedneckJokeService
             }
         }
 
-        //var result = reader.ReadToEnd();
         return result;
     }
 

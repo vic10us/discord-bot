@@ -1,6 +1,5 @@
 ﻿using bot.Commands;
 using MediatR;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using v10.Data.Abstractions.Models;

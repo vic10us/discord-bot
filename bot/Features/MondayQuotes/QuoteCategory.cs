@@ -2,7 +2,7 @@
 
 public enum QuoteCategory
 {
-  Funny,
-  Inspirational,
-  Popular
+    Funny,
+    Inspirational,
+    Popular
 }

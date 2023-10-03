@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using bot.Commands;
+using bot.Modules.Enums;
 using Discord;
 using Discord.Interactions;
 using MediatR;

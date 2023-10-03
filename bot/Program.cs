@@ -66,64 +66,67 @@ services.AddSwaggerGen();
 services.AddHttpClient();
 services.AddHttpClient("vic10usApi", c =>
 {
-  c.BaseAddress = new Uri(builder.Configuration["vic10usApi:BaseUrl"]);
+    c.BaseAddress = new Uri(builder.Configuration["vic10usApi:BaseUrl"]);
 });
 
 //services.AddOpenTelemetry();
 
 TelemetryTools.Init();
+var otlpUrl = builder.Configuration["Telemetry:OtlpExporter:Url"];
+var prometheusListenerUrl = builder.Configuration["Telemetry:PrometheusExporter:Url"];
 
 // Configure metrics
-services.AddOpenTelemetryMetrics(builder =>
+services.AddOpenTelemetryMetrics(telemetryBuilder =>
 {
-  builder.AddConsoleExporter();
-  builder.AddAspNetCoreInstrumentation();
-  builder.AddHttpClientInstrumentation();
-  builder.AddMeter("DiscordBotMetrics");
-  builder.AddOtlpExporter(options => options.Endpoint = new Uri("http://10.198.2.17:4317"));
-  builder.AddPrometheusExporter(config =>
-  {
-    config.StartHttpListener = true;
-    config.HttpListenerPrefixes = new[] { "http://localhost:9464/" };
-    TelemetryTools.Init();
-  });
+    telemetryBuilder.AddConsoleExporter();
+    telemetryBuilder.AddAspNetCoreInstrumentation();
+    telemetryBuilder.AddHttpClientInstrumentation();
+    telemetryBuilder.AddMeter("DiscordBotMetrics");
+    var otlpUrl = builder.Configuration["Telemetry:OtlpExporter:Url"];
+    telemetryBuilder.AddOtlpExporter(options => options.Endpoint = new Uri(otlpUrl));
+    telemetryBuilder.AddPrometheusExporter(config =>
+    {
+        config.StartHttpListener = true;
+        config.HttpListenerPrefixes = new[] { prometheusListenerUrl };
+        TelemetryTools.Init();
+    });
 });
 
 // Configure tracing
-services.AddOpenTelemetryTracing(builder => 
+services.AddOpenTelemetryTracing(tracerProviderBuilder =>
 {
-  builder.AddHttpClientInstrumentation(options => {
-    options.Enrich = (activity, eventName, rawObject) =>
+    tracerProviderBuilder.AddHttpClientInstrumentation(options =>
     {
-      if (eventName.Equals("OnStartActivity"))
-      {
-        if (rawObject is HttpWebRequest request)
+        options.Enrich = (activity, eventName, rawObject) =>
         {
-          activity.SetTag("requestUri", request.RequestUri);
-        }
-      }
-    };
-  });
-  builder.AddAspNetCoreInstrumentation();
-  builder.AddSource("DiscordBotActivitySource");
-  builder.AddConsoleExporter();
-  builder.AddOtlpExporter(options => options.Endpoint = new Uri("http://10.198.2.17:4317"));
+            if (eventName.Equals("OnStartActivity"))
+            {
+                if (rawObject is HttpWebRequest request)
+                {
+                    activity.SetTag("requestUri", request.RequestUri);
+                }
+            }
+        };
+    });
+    tracerProviderBuilder.AddAspNetCoreInstrumentation();
+    tracerProviderBuilder.AddSource("DiscordBotActivitySource");
+    tracerProviderBuilder.AddConsoleExporter();
+    tracerProviderBuilder.AddOtlpExporter(options => options.Endpoint = new Uri(otlpUrl));
 });
 
 // Configure logging
 builder.Logging.AddOpenTelemetry(builder =>
 {
-  builder.IncludeFormattedMessage = true;
-  builder.IncludeScopes = true;
-  builder.ParseStateValues = true;
-  builder.AddOtlpExporter(options => options.Endpoint = new Uri("http://10.198.2.17:4317"));
+    builder.IncludeFormattedMessage = true;
+    builder.IncludeScopes = true;
+    builder.ParseStateValues = true;
+    builder.AddOtlpExporter(options => options.Endpoint = new Uri(otlpUrl));
 });
 
 services.AddHostedService<StartupBackgroundService>();
 services.AddSingleton<StartupHealthCheck>();
 
 services.AddEvents(builder.Configuration);
-// services.AddEventMessaging();
 
 services.AddHealthChecks()
   .AddCheck<ImageApiHealthCheck>("ImageApi")
@@ -132,9 +135,10 @@ services.AddHealthChecks()
         tags: new[] { "ready" });
 
 //services.AddDbContext<BotDbContext>
-//    (x => x.UseSqlite(builder.Configuration.GetConnectionString("BotDb")), ServiceLifetime.Singleton);
+//    (x => x.UseSqlite(telemetryBuilder.Configuration.GetConnectionString("BotDb")), ServiceLifetime.Singleton);
 services.AddSingleton<DiceGame>();
-services.AddSingleton(sc => {
+services.AddSingleton(sc =>
+{
     // var allExcept = GatewayIntents.All - GatewayIntents.GuildScheduledEvents;
     var config = new DiscordSocketConfig()
     {
@@ -157,7 +161,7 @@ services.AddSingleton<IStrangeLawsService, StrangeLawsService>();
 services.AddSingleton<BotDataService>();
 services.AddHttpClient<DadJokeService>("DadJokeService", (s, c) =>
 {
-  c.BaseAddress = new Uri(builder.Configuration["DadJokes:BaseUrl"]);
+    c.BaseAddress = new Uri(builder.Configuration["DadJokes:BaseUrl"]);
 });
 services.AddHostedService<LifetimeEventsHostedService>();
 services.AddTransient<ImageApiService>();
@@ -185,7 +189,7 @@ services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>
 services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 //services.AddLavaNode(config =>
 //{
-//  builder.Configuration?.Bind($"Victoria", config);
+//  telemetryBuilder.Configuration?.Bind($"Victoria", config);
 //});
 
 var app = builder.Build();

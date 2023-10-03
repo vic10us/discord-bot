@@ -6,20 +6,20 @@ namespace bot.Features.HealthChecks;
 
 public class ImageApiHealthCheck : IHealthCheck
 {
-  public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
-  {
-    var isHealthy = true;
-
-    // ...
-
-    if (isHealthy)
+    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-      return Task.FromResult(
-          HealthCheckResult.Healthy("A healthy result."));
-    }
+        var isHealthy = true;
 
-    return Task.FromResult(
-        new HealthCheckResult(
-            context.Registration.FailureStatus, "An unhealthy result."));
-  }
+        // ...
+
+        if (isHealthy)
+        {
+            return Task.FromResult(
+                HealthCheckResult.Healthy("A healthy result."));
+        }
+
+        return Task.FromResult(
+            new HealthCheckResult(
+                context.Registration.FailureStatus, "An unhealthy result."));
+    }
 }

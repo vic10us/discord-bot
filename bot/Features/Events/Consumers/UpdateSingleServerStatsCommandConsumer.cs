@@ -10,17 +10,13 @@ namespace bot.Features.Events.Consumers;
 public class UpdateSingleServerStatsCommandConsumer : IConsumer<UpdateSingleServerStatsCommand>
 {
     private readonly ILogger<UpdateAllServerStatsCommandConsumer> _logger;
-    // private readonly DiscordSocketClient _discordSocketClient;
     private readonly IMediator _mediator;
 
     public UpdateSingleServerStatsCommandConsumer(
-        ILogger<UpdateAllServerStatsCommandConsumer> logger
-        // , DiscordSocketClient discordSocketClient
-        ,IMediator mediator
-        )
+        ILogger<UpdateAllServerStatsCommandConsumer> logger,
+        IMediator mediator)
     {
         _logger = logger;
-        //_discordSocketClient = discordSocketClient;
         _mediator = mediator;
     }
 

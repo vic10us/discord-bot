@@ -6,10 +6,10 @@
 [AttributeUsage(AttributeTargets.Class)]
 public class SingletonAttribute : InjectableAttribute
 {
-  /// <summary>
-  /// Create new instance.
-  /// </summary>
-  public SingletonAttribute() : base(InjectionMode.Singleton)
-  {
-  }
+    /// <summary>
+    /// Create new instance.
+    /// </summary>
+    public SingletonAttribute() : base(InjectionMode.Singleton)
+    {
+    }
 }

@@ -11,22 +11,16 @@ public class UpdateAllServerStatsCommandConsumer : IConsumer<UpdateAllServerStat
     private readonly ILogger<UpdateAllServerStatsCommandConsumer> _logger;
     private readonly IBusControl _bus;
     private readonly DiscordSocketClient _discordSocketClient;
-    //private readonly IMediator _mediator;
-    //private readonly IDistributedCache _cache;
 
     public UpdateAllServerStatsCommandConsumer(
         ILogger<UpdateAllServerStatsCommandConsumer> logger
         ,IBusControl bus
         ,DiscordSocketClient discordSocketClient
-        //,IMediator _mediator
-        //,IDistributedCache cache
         )
     {
         _logger = logger;
         _bus = bus;
         _discordSocketClient = discordSocketClient;
-        //_mediator = _mediator;
-        //_cache = cache;
     }
 
     public async Task Consume(ConsumeContext<UpdateAllServerStatsCommand> context)

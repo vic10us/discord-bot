@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using bot.Features.Database;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -18,7 +17,7 @@ using bot.Features.NaturalLanguageProcessing;
 using System.Text.RegularExpressions;
 using bot.Commands;
 using MediatR;
-using bot.Modules;
+using bot.Modules.Enums;
 
 namespace bot;
 
@@ -29,7 +28,6 @@ internal class LifetimeEventsHostedService : IHostedService
     private readonly DiscordSocketClient _discordSocketClient;
     private readonly CommandHandlingService _commandHandlingService;
     private readonly IConfiguration _config;
-    private readonly IServiceScopeFactory _scopeFactory;
     private readonly LavaNode _lavaNode;
     private readonly BotDataService _botDataService;
     private readonly InteractionService _interactions;
@@ -43,7 +41,6 @@ internal class LifetimeEventsHostedService : IHostedService
         CommandHandlingService commandHandlingService,
         IConfiguration config,
         BotDataService botDataService,
-        IServiceScopeFactory scopeFactory,
         InteractionService interactions,
         IServiceProvider serviceProvider,
         IMediator mediator
@@ -54,7 +51,6 @@ internal class LifetimeEventsHostedService : IHostedService
         _discordSocketClient = discordSocketClient;
         _commandHandlingService = commandHandlingService;
         _config = config;
-        _scopeFactory = scopeFactory;
         _botDataService = botDataService;
         _interactions = interactions;
         _serviceProvider = serviceProvider;

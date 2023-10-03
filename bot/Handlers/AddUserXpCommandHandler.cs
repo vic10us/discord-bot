@@ -6,8 +6,8 @@ using v10.Data.MongoDB;
 using Discord.WebSocket;
 using Discord;
 using v10.Data.Abstractions.Models;
-using bot.Modules;
 using System;
+using bot.Modules.Enums;
 
 namespace bot.Handlers;
 

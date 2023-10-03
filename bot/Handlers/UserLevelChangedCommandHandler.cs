@@ -2,7 +2,6 @@
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using System;
 using v10.Data.MongoDB;
 using Discord.WebSocket;
 using Discord;

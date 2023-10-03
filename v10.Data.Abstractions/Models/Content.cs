@@ -2,5 +2,5 @@
 
 public class Content
 {
-  public ColorSettings background { get; set; }
+    public ColorSettings background { get; set; }
 }
