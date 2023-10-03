@@ -39,8 +39,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{10
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Bot.Core", "v10.Bot.Core\v10.Bot.Core.csproj", "{92E9FFE9-ED8C-42E0-9DC2-8F274C1A3817}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestConsoleApp1", "TestConsoleApp1\TestConsoleApp1.csproj", "{03DECC41-1519-445B-B87D-77532DDF37FF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Messaging", "v10.Messaging\v10.Messaging.csproj", "{153B8693-0E0D-489B-A488-2AB987708336}"
 EndProject
 Global
@@ -97,10 +95,6 @@ Global
 		{92E9FFE9-ED8C-42E0-9DC2-8F274C1A3817}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92E9FFE9-ED8C-42E0-9DC2-8F274C1A3817}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92E9FFE9-ED8C-42E0-9DC2-8F274C1A3817}.Release|Any CPU.Build.0 = Release|Any CPU
-		{03DECC41-1519-445B-B87D-77532DDF37FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{03DECC41-1519-445B-B87D-77532DDF37FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{03DECC41-1519-445B-B87D-77532DDF37FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{03DECC41-1519-445B-B87D-77532DDF37FF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{153B8693-0E0D-489B-A488-2AB987708336}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{153B8693-0E0D-489B-A488-2AB987708336}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{153B8693-0E0D-489B-A488-2AB987708336}.Release|Any CPU.ActiveCfg = Release|Any CPU

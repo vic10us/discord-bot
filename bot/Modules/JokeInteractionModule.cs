@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using bot.Modules.Enums;
 using bot.Queries;
 using Discord;
 using Discord.Interactions;

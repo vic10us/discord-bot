@@ -2,23 +2,23 @@
 
 public class Xp
 {
-  public int total { get; set; }
-  public ulong current { get; set; }
-  public ulong required { get; set; }
+    public int total { get; set; }
+    public ulong current { get; set; }
+    public ulong required { get; set; }
 
-  public float percent
-  {
-    get
+    public float percent
     {
-      return current / (float)required;
+        get
+        {
+            return current / (float)required;
+        }
     }
-  }
 
-  public int progress
-  {
-    get
+    public int progress
     {
-      return (int)Math.Max(18, percent * 316);
+        get
+        {
+            return (int)Math.Max(18, percent * 316);
+        }
     }
-  }
 }

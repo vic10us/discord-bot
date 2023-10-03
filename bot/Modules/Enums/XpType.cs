@@ -1,6 +1,6 @@
 ﻿using Discord.Interactions;
 
-namespace bot.Modules;
+namespace bot.Modules.Enums;
 
 public enum XpType
 {

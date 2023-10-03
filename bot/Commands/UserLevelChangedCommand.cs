@@ -1,4 +1,4 @@
-﻿using bot.Modules;
+﻿using bot.Modules.Enums;
 using MediatR;
 
 namespace bot.Commands;

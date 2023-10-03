@@ -11,71 +11,71 @@ namespace v10.Options.Microsoft;
 /// </summary>
 public static class OptionsRegistrar
 {
-  /// <summary>
-  /// Scan app domain assemblies and register all options.
-  /// </summary>
-  /// <param name="services"></param>
-  /// <param name="configuration"></param>
-  /// <exception cref="ArgumentException"></exception>
-  public static void ConfigureOptionsRegistries(this IServiceCollection services, IConfiguration configuration)
-  {
-    var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-    services.ConfigureOptionsRegistries(configuration, assemblies);
-  }
-
-  /// <summary>
-  /// Scan entry assemblies and register all options.
-  /// </summary>
-  /// <param name="services"></param>
-  /// <param name="configuration"></param>
-  /// <param name="assemblies"></param>
-  /// <exception cref="ArgumentException"></exception>
-  public static void ConfigureOptionsRegistries(this IServiceCollection services, IConfiguration configuration, params Assembly[] assemblies)
-  {
-    var options = from assembly in assemblies
-                  from option in assembly.FindOptions()
-                  select option;
-
-    foreach (var option in options)
+    /// <summary>
+    /// Scan app domain assemblies and register all options.
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <exception cref="ArgumentException"></exception>
+    public static void ConfigureOptionsRegistries(this IServiceCollection services, IConfiguration configuration)
     {
-      services.ConfigureOption(configuration, option);
-    }
-  }
-
-  private static IEnumerable<(Type Type, string Section)> FindOptions(this Assembly assembly)
-  {
-    var options = from type in assembly.GetTypes()
-                  let optionsAttribute = (OptionsAttribute?)type.GetCustomAttributes()
-                                                              .FirstOrDefault(c => c.GetType() == typeof(OptionsAttribute))
-                  where optionsAttribute is not null
-                  select (type, optionsAttribute.Section);
-
-    return options;
-  }
-
-  private static void ConfigureOption(this IEnumerable services, IConfiguration configuration, (Type Type, string Section) option)
-  {
-    if (configuration is null)
-    {
-      throw new ArgumentNullException(nameof(configuration));
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        services.ConfigureOptionsRegistries(configuration, assemblies);
     }
 
-    var section = configuration.GetSection(option.Section);
-    var extensionType = typeof(OptionsConfigurationServiceCollectionExtensions);
-    const string MethodName = nameof(OptionsConfigurationServiceCollectionExtensions.Configure);
+    /// <summary>
+    /// Scan entry assemblies and register all options.
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <param name="assemblies"></param>
+    /// <exception cref="ArgumentException"></exception>
+    public static void ConfigureOptionsRegistries(this IServiceCollection services, IConfiguration configuration, params Assembly[] assemblies)
+    {
+        var options = from assembly in assemblies
+                      from option in assembly.FindOptions()
+                      select option;
 
-    extensionType.GetMethods()
-                 .Where(c => c.Name == MethodName)
-                 .First(c =>
-                 {
-                   var parameters = c.GetParameters()
-                                         .ToArray();
+        foreach (var option in options)
+        {
+            services.ConfigureOption(configuration, option);
+        }
+    }
 
-                   return parameters.Length == 2 &&
-                              parameters[0].ParameterType == typeof(IServiceCollection) &&
-                              parameters[1].ParameterType == typeof(IConfiguration);
-                 })
-                 .MakeGenericMethod(option.Type)
-                 .Invoke(null, new object[] { services, section });
-  }
+    private static IEnumerable<(Type Type, string Section)> FindOptions(this Assembly assembly)
+    {
+        var options = from type in assembly.GetTypes()
+                      let optionsAttribute = (OptionsAttribute?)type.GetCustomAttributes()
+                                                                  .FirstOrDefault(c => c.GetType() == typeof(OptionsAttribute))
+                      where optionsAttribute is not null
+                      select (type, optionsAttribute.Section);
+
+        return options;
+    }
+
+    private static void ConfigureOption(this IEnumerable services, IConfiguration configuration, (Type Type, string Section) option)
+    {
+        if (configuration is null)
+        {
+            throw new ArgumentNullException(nameof(configuration));
+        }
+
+        var section = configuration.GetSection(option.Section);
+        var extensionType = typeof(OptionsConfigurationServiceCollectionExtensions);
+        const string MethodName = nameof(OptionsConfigurationServiceCollectionExtensions.Configure);
+
+        extensionType.GetMethods()
+                     .Where(c => c.Name == MethodName)
+                     .First(c =>
+                     {
+                         var parameters = c.GetParameters()
+                                           .ToArray();
+
+                         return parameters.Length == 2 &&
+                                parameters[0].ParameterType == typeof(IServiceCollection) &&
+                                parameters[1].ParameterType == typeof(IConfiguration);
+                     })
+                     .MakeGenericMethod(option.Type)
+                     .Invoke(null, new object[] { services, section });
+    }
 }

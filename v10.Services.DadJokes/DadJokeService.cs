@@ -7,17 +7,13 @@ namespace v10.Services.DadJokes;
 public class DadJokeService : IDadJokeService, IJokeServiceImpl<IDadJoke>
 {
     private readonly HttpClient _httpClient;
-    private readonly IDadJokeServiceConfiguration _config;
 
     public DadJokeService(
-        HttpClient client, 
-        IDadJokeServiceConfiguration config, 
-        IServiceProvider sp
+        HttpClient client
         )
     {
         _httpClient = client;
         _httpClient.BaseAddress = new Uri(config.BaseUrl);
-        _config = config;
     }
 
     public async Task<IDadJoke> GetJokeAsync()
@@ -28,8 +24,6 @@ public class DadJokeService : IDadJokeService, IJokeServiceImpl<IDadJoke>
         o.EnsureSuccessStatusCode();
         var json = await o.Content.ReadAsStringAsync();
         var resp = JsonConvert.DeserializeObject<DadJoke>(json);
-        // var o = await _httpClient.GetFromJsonAsync<DadJoke>("/");
-        if (resp == null) throw new Exception("Unable to get dad joke :(");
-        return resp;
+        return resp == null ? throw new Exception("Unable to get dad joke :(") : (IDadJoke)resp;
     }
 }

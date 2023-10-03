@@ -6,17 +6,17 @@
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
 public class OptionsAttribute : Attribute
 {
-  /// <summary>
-  /// Create new instance, section mode used to bind application settings property to annotated class.
-  /// </summary>
-  /// <param name="section"></param>
-  public OptionsAttribute(string section)
-  {
-    Section = section ?? throw new ArgumentNullException(nameof(section));
-  }
+    /// <summary>
+    /// Create new instance, section mode used to bind application settings property to annotated class.
+    /// </summary>
+    /// <param name="section"></param>
+    public OptionsAttribute(string section)
+    {
+        Section = section ?? throw new ArgumentNullException(nameof(section));
+    }
 
-  /// <summary>
-  /// Section name
-  /// </summary>
-  public string Section { get; }
+    /// <summary>
+    /// Section name
+    /// </summary>
+    public string Section { get; }
 }

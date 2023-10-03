@@ -8,15 +8,15 @@ namespace bot.Handlers;
 
 public class DeleteGuildHandler : IRequestHandler<DeleteGuildCommand, bool>
 {
-  private readonly BotDataService _botDataService;
+    private readonly BotDataService _botDataService;
 
-  public DeleteGuildHandler(BotDataService botDataService)
-  {
-    _botDataService = botDataService;
-  }
+    public DeleteGuildHandler(BotDataService botDataService)
+    {
+        _botDataService = botDataService;
+    }
 
-  public async Task<bool> Handle(DeleteGuildCommand request, CancellationToken cancellationToken)
-  {
-    return await _botDataService.DeleteGuildAsync(request.GuildId);
-  }
+    public async Task<bool> Handle(DeleteGuildCommand request, CancellationToken cancellationToken)
+    {
+        return await _botDataService.DeleteGuildAsync(request.GuildId);
+    }
 }

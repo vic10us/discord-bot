@@ -2,7 +2,7 @@
 
 public interface IDadJoke
 {
-  string Id { get; set; }
-  string Joke { get; set; }
-  int Status { get; set; }
+    string Id { get; set; }
+    string Joke { get; set; }
+    int Status { get; set; }
 }

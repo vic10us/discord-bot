@@ -9,83 +9,83 @@ namespace v10.DependencyInjection.Microsoft;
 /// </summary>
 public static class DependencyRegistrar
 {
-  /// <summary>
-  /// Scan app domain assemblies and register all dependencies that have any reguto attributes.
-  /// </summary>
-  /// <param name="services"></param>
-  public static void AddAutoServices(this IServiceCollection services)
-  {
-    var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-    services.AddAutoServices(assemblies);
-  }
-
-  /// <summary>
-  /// Scan entry assemblies and register all dependencies that have any reguto attributes.
-  /// </summary>
-  /// <param name="services"></param>
-  /// <param name="assemblies"></param>
-  public static void AddAutoServices(this IServiceCollection services, params Assembly[] assemblies)
-  {
-    services.ScanAndRegister(assemblies, InjectionMode.Singleton, true);
-    services.ScanAndRegister(assemblies, InjectionMode.Scoped, true);
-    services.ScanAndRegister(assemblies, InjectionMode.Transient, true);
-    services.ScanAndRegister(assemblies, InjectionMode.Singleton, false);
-    services.ScanAndRegister(assemblies, InjectionMode.Scoped, false);
-    services.ScanAndRegister(assemblies, InjectionMode.Transient, false);
-  }
-
-  private static void ScanAndRegister(this IServiceCollection services,
-                                      Assembly[] assemblies,
-                                      InjectionMode injectionMode,
-                                      bool asSelf)
-  {
-    services.Scan(scan =>
+    /// <summary>
+    /// Scan app domain assemblies and register all dependencies that have any reguto attributes.
+    /// </summary>
+    /// <param name="services"></param>
+    public static void AddAutoServices(this IServiceCollection services)
     {
-      var serviceTypeSelector = scan.FromAssemblies(assemblies)
-                                        .AddClasses(classes => classes.Where(type =>
-                                        {
-                                        var injectionAttributeType = typeof(InjectableAttribute);
-                                        var customAttribute = type.GetCustomAttributes()
-                                                                       .FirstOrDefault(attribute =>
-                                                                       {
-                                                                       var attributeType = attribute.GetType();
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        services.AddAutoServices(assemblies);
+    }
 
-                                                                       return attributeType == injectionAttributeType ||
-                                                                                  attributeType.IsSubclassOf(injectionAttributeType);
-                                                                     });
+    /// <summary>
+    /// Scan entry assemblies and register all dependencies that have any reguto attributes.
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="assemblies"></param>
+    public static void AddAutoServices(this IServiceCollection services, params Assembly[] assemblies)
+    {
+        services.ScanAndRegister(assemblies, InjectionMode.Singleton, true);
+        services.ScanAndRegister(assemblies, InjectionMode.Scoped, true);
+        services.ScanAndRegister(assemblies, InjectionMode.Transient, true);
+        services.ScanAndRegister(assemblies, InjectionMode.Singleton, false);
+        services.ScanAndRegister(assemblies, InjectionMode.Scoped, false);
+        services.ScanAndRegister(assemblies, InjectionMode.Transient, false);
+    }
 
-                                        if (customAttribute is null)
-                                        {
-                                          return false;
-                                        }
+    private static void ScanAndRegister(this IServiceCollection services,
+                                        Assembly[] assemblies,
+                                        InjectionMode injectionMode,
+                                        bool asSelf)
+    {
+        services.Scan(scan =>
+        {
+            var serviceTypeSelector = scan.FromAssemblies(assemblies)
+                                          .AddClasses(classes => classes.Where(type =>
+                                          {
+                                                var injectionAttributeType = typeof(InjectableAttribute);
+                                                var customAttribute = type.GetCustomAttributes()
+                                                                           .FirstOrDefault(attribute =>
+                                                                           {
+                                                                               var attributeType = attribute.GetType();
 
-                                        var injectableAttribute = (InjectableAttribute)customAttribute;
+                                                                               return attributeType == injectionAttributeType ||
+                                                                                      attributeType.IsSubclassOf(injectionAttributeType);
+                                                                           });
 
-                                        return injectableAttribute.AsSelf == asSelf &&
-                                                   injectableAttribute.Mode == injectionMode;
-                                      }));
+                                                if (customAttribute is null)
+                                                {
+                                                    return false;
+                                                }
 
-      var lifeTimeSelector = asSelf ? serviceTypeSelector.AsSelf() : serviceTypeSelector.AsImplementedInterfaces();
-      switch (injectionMode)
-      {
-        case InjectionMode.Singleton:
-          {
-            lifeTimeSelector.WithSingletonLifetime();
-            break;
-          }
-        case InjectionMode.Scoped:
-          {
-            lifeTimeSelector.WithScopedLifetime();
-            break;
-          }
-        case InjectionMode.Transient:
-          {
-            lifeTimeSelector.WithTransientLifetime();
-            break;
-          }
-        default:
-          throw new ArgumentOutOfRangeException(nameof(injectionMode), injectionMode, null);
-      }
-    });
-  }
+                                                var injectableAttribute = (InjectableAttribute)customAttribute;
+
+                                                return injectableAttribute.AsSelf == asSelf &&
+                                                       injectableAttribute.Mode == injectionMode;
+                                            }));
+
+            var lifeTimeSelector = asSelf ? serviceTypeSelector.AsSelf() : serviceTypeSelector.AsImplementedInterfaces();
+            switch (injectionMode)
+            {
+                case InjectionMode.Singleton:
+                    {
+                        lifeTimeSelector.WithSingletonLifetime();
+                        break;
+                    }
+                case InjectionMode.Scoped:
+                    {
+                        lifeTimeSelector.WithScopedLifetime();
+                        break;
+                    }
+                case InjectionMode.Transient:
+                    {
+                        lifeTimeSelector.WithTransientLifetime();
+                        break;
+                    }
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(injectionMode), injectionMode, null);
+            }
+        });
+    }
 }
