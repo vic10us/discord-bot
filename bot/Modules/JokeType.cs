@@ -10,6 +10,9 @@ public enum JokeType
     Monday,
     [ChoiceDisplay("Redneck joke")]
     Redneck,
+    [ChoiceDisplay("Random Strange Laws")]
+    StrangeLaw,
     [ChoiceDisplay("Pick for me! (random)")]
     Random
 }
+

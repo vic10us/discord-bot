@@ -2,15 +2,11 @@
 using bot.Commands;
 using bot.Dtos;
 using bot.Queries;
-using LanguageExt;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson.IO;
-using Newtonsoft.Json;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace bot.Controllers;
@@ -36,9 +32,9 @@ public class WebHookController : ControllerBase
         HttpContext.Request.Headers.TryGetValue("x-zendesk-webhook-signature-timestamp", out var timestamp);
 
         _logger.LogInformation("Received a webhook call from Zendesk");
-        _logger.LogInformation($"X-Zendesk-Webhook-Id: {webhookId}");
-        _logger.LogInformation($"X-Zendesk-Webhook-Signature: {signature}");
-        _logger.LogInformation($"X-Zendesk-Webhook-Signature-Timestamp: {timestamp}");
+        _logger.LogInformation("X-Zendesk-Webhook-Id: {webhookId}", webhookId);
+        _logger.LogInformation("X-Zendesk-Webhook-Signature: {signature}", signature);
+        _logger.LogInformation("X-Zendesk-Webhook-Signature-Timestamp: {timestamp}", timestamp);
         _logger.LogInformation(rawMessage);
     }
 }

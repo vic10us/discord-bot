@@ -1,5 +1,4 @@
-﻿using bot.Dtos;
-using bot.Features.EightBall;
+﻿using bot.Features.EightBall;
 using bot.Queries;
 using MediatR;
 using System.Threading;

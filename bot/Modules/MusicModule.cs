@@ -1,5 +1,7 @@
-﻿using Discord;
+﻿using bot.Features.FeatureManagement;
+using Discord;
 using Discord.Commands;
+using Microsoft.FeatureManagement;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,14 +12,21 @@ using Victoria.Responses.Search;
 namespace bot.Modules;
 
 [Group("player")]
+[FeatureModuleGate("Music")]
 public sealed class MusicModule : CustomModule<SocketCommandContext>
 {
     private readonly LavaNode _lavaNode;
+    private readonly IFeatureManager _featureManager;
 
-    public MusicModule(LavaNode lavaNode)
+    public MusicModule(IFeatureManager featureManager)
     {
-        _lavaNode = lavaNode;
+        _featureManager = featureManager;
     }
+
+    //public MusicModule(LavaNode lavaNode)
+    //{
+    //    _lavaNode = lavaNode;
+    //}
 
     /*
      * add : Add a song to the queue

@@ -1,13 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using bot.Commands;
+using bot.Features.FeatureManagement;
 using bot.Features.Metrics;
+using bot.Modules;
 using Discord;
 using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
+using MediatR;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.FeatureManagement;
 using v10.Data.MongoDB;
 
 namespace bot;
@@ -20,8 +28,9 @@ public class CommandHandlingService
     private readonly IServiceProvider _services;
     private readonly ILogger<CommandHandlingService> _logger;
     private readonly BotDataService _botDataService;
+    private readonly IMediator _mediator;
 
-    public CommandHandlingService(IServiceProvider services, ILogger<CommandHandlingService> logger)
+    public CommandHandlingService(IServiceProvider services, ILogger<CommandHandlingService> logger, IMediator mediator)
     {
         _commands = services.GetRequiredService<CommandService>();
         _interactions = services.GetRequiredService<InteractionService>();
@@ -30,18 +39,44 @@ public class CommandHandlingService
         _services = services;
         _logger = logger;
 
-
         // Hook CommandExecuted to handle post-command-execution logic.
         _commands.CommandExecuted += CommandExecutedAsync;
         // Hook MessageReceived so we can process each message to see
         // if it qualifies as a command.
         _client.MessageReceived += MessageReceivedAsync;
+        _mediator = mediator;
+    }
+
+    protected internal IEnumerable<Type> GetEnabledModules()
+    {
+        var featureManager = _services.GetService<IFeatureManager>();
+
+        var types = Assembly.GetEntryAssembly()
+            .GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract && t.GetInterfaces().Any(i => typeof(IModuleBase).IsAssignableFrom(i)));
+        
+        return types.Where(t =>
+        {
+            var hasFeatureGate = t.GetCustomAttributes(typeof(FeatureModuleGateAttribute), true).FirstOrDefault() as FeatureModuleGateAttribute;
+            if (hasFeatureGate == null) return true;
+            return hasFeatureGate.Features.Any(feature => featureManager.IsEnabledAsync(feature).GetAwaiter().GetResult());
+        });
+    }
+
+    protected internal async Task AddEnabledModulesAsync() {
+        var enabledModules = GetEnabledModules();
+        foreach (var module in enabledModules)
+        {
+            await _commands.AddModuleAsync(module, _services);
+        }
     }
 
     public async Task InitializeAsync()
     {
         // Register modules that are public and inherit ModuleBase<T>.
-        await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+        // await _commands.AddModuleAsync<MusicModule>(_services);
+        await AddEnabledModulesAsync();
+        // await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
         await _interactions.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
 
         // Process the InteractionCreated payloads to execute Interactions commands
@@ -140,10 +175,14 @@ public class CommandHandlingService
         if ((DateTimeOffset.UtcNow - userLevel.lastUpdated) < TimeSpan.FromMinutes(1)) return;
         var xp = (ulong)new Random().Next(15, 20);
         _botDataService.AddXp(guildId, userId, xp,
-            (newLevel) =>
-            {
-                ReplyAsync(context, $"Congratulations, you leveled up!!! New Level: {newLevel}",
-                    messageReference: new MessageReference(context.Message.Id)).Wait();
+            (newLevel) => {
+                _mediator.Send(new UserLevelChangedCommand
+                {
+                    GuildId = guildId,
+                    UserId = userId,
+                    NewLevel = newLevel,
+                    Type = XpType.Text
+                });
             });
     }
 

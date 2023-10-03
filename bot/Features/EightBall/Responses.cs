@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 
 namespace bot.Features.EightBall;
 
@@ -47,13 +44,3 @@ public class EightBallService
         return _responses[index];
     }
 }
-
-public record EightBallResponse(int Id, string Text, AnswerType Type);
-
-public enum AnswerType
-{
-    Affirmative = 1,
-    NonCommittal = 0,
-    Negative = -1
-}
-

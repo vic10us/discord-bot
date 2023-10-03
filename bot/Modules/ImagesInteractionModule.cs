@@ -1,11 +1,8 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using bot.Features.Pictures;
 using bot.Queries;
-using bot.Services;
 using Discord;
 using Discord.Interactions;
 using MediatR;

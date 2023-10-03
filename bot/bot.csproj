@@ -5,12 +5,13 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 		<UserSecretsId>100ad8ba-7a2d-4fae-b60d-72f13a1e87e5</UserSecretsId>
-        <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\v10.Data.Abstractions\v10.Data.Abstractions.csproj" />
 		<ProjectReference Include="..\v10.Data.MongoDB\v10.Data.MongoDB.csproj" />
+		<ProjectReference Include="..\v10.Messaging\v10.Messaging.csproj" />
 		<ProjectReference Include="..\v10.Services.DadJokes\v10.Services.DadJokes.csproj" />
 		<ProjectReference Include="..\v10.Services.Jokes\v10.Services.Jokes.csproj" />
 	</ItemGroup>
@@ -20,14 +21,17 @@
 		<PackageReference Include="AspNetCoreRateLimit.Redis" Version="1.0.1" />
 		<PackageReference Include="AutoMapper" Version="12.0.0" />
 		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
-		<PackageReference Include="Discord.Net" Version="3.8.1" />
+		<PackageReference Include="Discord.Net" Version="3.12.0" />
 		<PackageReference Include="FluentValidation" Version="11.2.2" />
 		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.2.2" />
 		<PackageReference Include="Handlebars.Net" Version="2.1.2" />
 		<PackageReference Include="LanguageExt.Core" Version="4.2.9" />
+		<PackageReference Include="LazyProxy" Version="1.0.2" />
+		<PackageReference Include="LazyProxy.ServiceProvider" Version="0.1.3" />
 		<PackageReference Include="MediatR" Version="11.0.0" />
 		<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.7" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
@@ -36,6 +40,7 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
+		<PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="2.5.1" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
 		<PackageReference Include="MimeTypes" Version="2.4.0">
 			<PrivateAssets>all</PrivateAssets>
@@ -43,7 +48,7 @@
 		</PackageReference>
 		<PackageReference Include="MongoDB.Bson" Version="2.18.0" />
 		<PackageReference Include="MongoDB.Driver" Version="2.18.0" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.3.1" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.3.1" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" Version="1.0.0-rc9" />
@@ -52,6 +57,8 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9" />
 		<PackageReference Include="QRCoder" Version="1.4.3" />
+		<PackageReference Include="StackExchange.Redis" Version="2.6.116" />
+		<PackageReference Include="Stanford.NLP.CoreNLP" Version="4.5.0" />
 		<PackageReference Include="Svg" Version="3.4.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
 		<PackageReference Include="Victoria" Version="6.0.1026" />
@@ -64,10 +71,14 @@
 		<None Update="data\.keep">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-	</ItemGroup>
+    <Content Include="stanford-corenlp-4.4.0-models\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
 	<ItemGroup>
 		<None Remove="Features\MemeGenerator\Templates\TwitterMeme.html" />
+		<None Remove="Features\StrangeLaws\data.txt" />
 		<EmbeddedResource Include="Features\MemeGenerator\Templates\TwitterMeme.html" />
 		<None Remove="Features\MondayQuotes\funny.txt" />
 		<EmbeddedResource Include="Features\MondayQuotes\Funny.txt" />
@@ -81,6 +92,7 @@
 		<EmbeddedResource Include="Features\Images\Templates\rank.hbs">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</EmbeddedResource>
+		<EmbeddedResource Include="Features\StrangeLaws\data.txt" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -98,6 +110,11 @@
 
 	<ItemGroup>
 	  <None Include="C:\git\vic10us\discord-bot\bot\.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Features\Events\Producers\" />
+	  <Folder Include="stanford-corenlp-4.4.0-models\edu\stanford\nlp\models\coref\hybrid\" />
 	</ItemGroup>
 
 </Project>

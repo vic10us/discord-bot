@@ -1,0 +1,491 @@
+﻿{
+  "Afrikaans": [ [ "ja", "formal" ] ],
+  "Akan": [
+    [ "ɛyɛ", "informal" ],
+    [ "da", "formal" ]
+  ],
+  "Albanian": [
+    [ "po", "formal" ],
+    [ "po të lutem", "formal" ]
+  ],
+  "Arabic": [
+    [ "نعم", "formal" ],
+    [ "أجل", "formal" ],
+    [ "آه", "informal" ],
+    [ "صحيح", "formal" ]
+  ],
+  "Armenian": [ [ "այո", "formal" ] ],
+  "Azerbaijani": [
+    [ "bəli", "formal" ],
+    [ "hə", "informal" ],
+    [ "məhə", "informal" ]
+  ],
+  "Bengali": [
+    [ "হ্যাঁ", "formal" ],
+    [ "আছে", "informal" ]
+  ],
+  "Bulgarian": [
+    [ "да", "formal" ],
+    [ "уау", "informal" ],
+    [ "хъа", "informal" ],
+    [ "ха", "informal" ],
+    [ "ай", "informal" ],
+    [ "уай", "informal" ]
+  ],
+  "Cantonese": [
+    [ "係", "informal" ],
+    [ "係嘅", "informal" ],
+    [ "係嘢", "informal" ]
+  ],
+  "Catalan": [ [ "sí", "formal" ] ],
+  "Chinese (Simplified)": [
+    [ "是", "formal" ],
+    [ "对", "formal" ],
+    [ "好的", "informal" ],
+    [ "行", "informal" ],
+    [ "恩", "informal" ],
+    [ "是的", "formal" ]
+  ],
+  "Chinese (Traditional)": [
+    [ "是", "formal" ],
+    [ "對", "formal" ],
+    [ "好的", "informal" ],
+    [ "行", "informal" ],
+    [ "恩", "informal" ],
+    [ "是的", "formal" ]
+  ],
+  "Corsican": [ [ "iò", "informal" ] ],
+  "Croatian": [
+    [ "da", "formal" ],
+    [ "dać", "informal" ],
+    [ "u redu", "formal" ],
+    [ "uh", "informal" ],
+    [ "aha", "informal" ],
+    [ "hajde", "informal" ]
+  ],
+  "Czech": [
+    [ "ano", "formal" ],
+    [ "jo", "informal" ],
+    [ "jistě", "formal" ],
+    [ "jasné", "formal" ],
+    [ "ovšem", "formal" ]
+  ],
+  "Danish": [
+    [ "ja", "formal" ],
+    [ "jep", "informal" ],
+    [ "jo", "informal" ]
+  ],
+  "Dutch": [
+    [ "ja", "formal" ],
+    [ "jazeker", "formal" ],
+    [ "jawel", "formal" ],
+    [ "jep", "informal" ],
+    [ "jo", "informal" ]
+  ],
+  "English": [
+    [ "yes", "formal" ],
+    [ "yeah", "informal" ],
+    [ "yep", "informal" ],
+    [ "yup", "informal" ],
+    [ "uh-huh", "informal" ]
+  ],
+  "Esperanto": [ [ "jes", "formal" ] ],
+  "Estonian": [
+    [ "jah", "formal" ],
+    [ "oi", "informal" ],
+    [ "otsa", "informal" ]
+  ],
+  "Ewe": [ [ "eye", "formal" ] ],
+  "Finnish": [
+    [ "kyllä", "formal" ],
+    [ "joo", "informal" ],
+    [ "jep", "informal" ],
+    [ "jees", "informal" ]
+  ],
+  "French": [
+    [ "oui", "formal" ],
+    [ "ouais", "informal" ],
+    [ "ouaip", "informal" ],
+    [ "ouep", "informal" ]
+  ],
+  "Frisian": [
+    [ "ja", "formal" ],
+    [ "jo", "informal" ]
+  ],
+  "Galician": [ [ "si", "formal" ] ],
+  "Georgian": [ [ "დიახ", "formal" ] ],
+  "German": [
+    [ "ja", "formal" ],
+    [ "jep", "informal" ],
+    [ "jo", "informal" ],
+    [ "jawohl", "formal" ],
+    [ "jo mei", "informal" ]
+  ],
+  "Greek": [
+    [ "ναι", "formal" ],
+    [ "ναί", "formal" ],
+    [ "ναι ρε", "informal" ],
+    [ "μωρέ", "informal" ]
+  ],
+  "Gujarati": [
+    [ "હા", "formal" ],
+    [ "આવો", "informal" ],
+    [ "હાં", "formal" ]
+  ],
+  "Haitian Creole": [
+    [ "wi", "formal" ],
+    [ "ouè", "informal" ]
+  ],
+  "Hawaiian": [
+    [ "ʻae", "formal" ],
+    [ "hē", "informal" ]
+  ],
+  "Hebrew": [
+    [ "כן", "formal" ],
+    [ "נכון", "formal" ],
+    [ "הן", "informal" ]
+  ],
+  "Hindi": [
+    [ "हाँ", "formal" ],
+    [ "हो", "informal" ],
+    [ "बिल्कुल", "informal" ],
+    [ "येस", "informal" ]
+  ],
+  "Hungarian": [
+    [ "igen", "formal" ],
+    [ "persze", "formal" ],
+    [ "ó", "informal" ],
+    [ "jah", "informal" ]
+  ],
+  "Icelandic": [
+    [ "já", "formal" ],
+    [ "jamm", "informal" ],
+    [ "jú", "informal" ]
+  ],
+  "Igbo": [
+    [ "ēē", "informal" ],
+    [ "ēnyi", "informal" ]
+  ],
+  "Indonesian": [
+    [ "ya", "formal" ],
+    [ "iyo", "informal" ],
+    [ "benar", "formal" ],
+    [ "betul", "formal" ],
+    [ "oke", "informal" ]
+  ],
+  "Irish": [
+    [ "tá", "formal" ],
+    [ "sea", "informal" ],
+    [ "aisteach", "informal" ],
+    [ "iníon", "informal" ]
+  ],
+  "Italian": [
+    [ "sì", "formal" ],
+    [ "certo", "formal" ],
+    [ "ehi", "informal" ],
+    [ "ui", "informal" ]
+  ],
+  "Japanese": [
+    [ "はい", "formal" ],
+    [ "ええ", "informal" ],
+    [ "まあ", "informal" ],
+    [ "うん", "informal" ],
+    [ "そうですね", "formal" ]
+  ],
+  "Javanese": [
+    [ "iya", "formal" ],
+    [ "e", "informal" ],
+    [ "ènggih", "formal" ]
+  ],
+  "Kannada": [
+    [ "ಹೌದು", "formal" ],
+    [ "ಆಗಿದೆ", "informal" ],
+    [ "ಸರಿ", "formal" ]
+  ],
+  "Kazakh": [
+    [ "иә", "formal" ],
+    [ "жақсы", "formal" ],
+    [ "ой", "informal" ],
+    [ "абырой", "informal" ]
+  ],
+  "Khmer": [
+    [ "បាទ/ចាស", "formal" ],
+    [ "យល់ដឹងតិច", "formal" ],
+    [ "យល់ដឹងហើយ", "formal" ]
+  ],
+  "Korean": [
+    [ "네", "formal" ],
+    [ "예", "formal" ],
+    [ "어", "informal" ],
+    [ "그래", "informal" ],
+    [ "응", "informal" ]
+  ],
+  "Kurdish": [
+    [ "به‌ڵێ", "formal" ],
+    [ "بەڵێ", "formal" ],
+    [ "به‌ڵێم", "informal" ],
+    [ "بەڵێم", "informal" ],
+    [ "بەڵێکەوە", "informal" ]
+  ],
+  "Kyrgyz": [
+    [ "ооба", "formal" ],
+    [ "йок", "informal" ],
+    [ "аракет", "informal" ]
+  ],
+  "Lao": [
+    [ "ຂ້ອຍ", "formal" ],
+    [ "ແມ່ນແລ້ວ", "formal" ],
+    [ "ເຮົາ", "informal" ]
+  ],
+  "Latin": [ [ "sic", "formal" ] ],
+  "Latvian": [
+    [ "jā", "formal" ],
+    [ "jās", "informal" ],
+    [ "tieši", "informal" ]
+  ],
+  "Lithuanian": [
+    [ "taip", "formal" ],
+    [ "taip pat", "formal" ],
+    [ "ai", "informal" ]
+  ],
+  "Luxembourgish": [
+    [ "jo", "formal" ],
+    [ "jo sicher", "informal" ],
+    [ "jo awer", "informal" ],
+    [ "jo wuel", "informal" ]
+  ],
+  "Macedonian": [
+    [ "да", "formal" ],
+    [ "мм", "informal" ],
+    [ "ма", "informal" ]
+  ],
+  "Malagasy": [
+    [ "eny", "formal" ],
+    [ "è! è!", "informal" ],
+    [ "è!", "informal" ]
+  ],
+  "Malay": [
+    [ "ya", "formal" ],
+    [ "ah", "informal" ],
+    [ "ok", "informal" ],
+    [ "betul", "formal" ]
+  ],
+  "Malayalam": [
+    [ "അതെ", "informal" ],
+    [ "അതുപോലെ", "informal" ]
+  ],
+  "Maltese": [
+    [ "iva", "formal" ],
+    [ "le", "informal" ],
+    [ "ahseb", "informal" ]
+  ],
+  "Maori": [
+    [ "āe", "formal" ],
+    [ "ē", "informal" ]
+  ],
+  "Marathi": [
+    [ "होय", "formal" ],
+    [ "हो", "informal" ],
+    [ "म्ह्म", "informal" ]
+  ],
+  "Mongolian": [
+    [ "тийм", "formal" ],
+    [ "байна", "informal" ],
+    [ "энэ", "informal" ]
+  ],
+  "Nepali": [
+    [ "हो", "formal" ],
+    [ "होइन", "formal" ],
+    [ "हामीले", "informal" ]
+  ],
+  "Norwegian": [
+    [ "ja", "formal" ],
+    [ "jo", "informal" ],
+    [ "joda", "informal" ]
+  ],
+  "Odia": [
+    [ "ହଁ", "formal" ],
+    [ "ହଁଜି", "formal" ],
+    [ "ହଁଜିଏ", "informal" ]
+  ],
+  "Pashto": [
+    [ "هو", "formal" ],
+    [ "هوي", "informal" ],
+    [ "هيله", "informal" ]
+  ],
+  "Persian": [
+    [ "بله", "formal" ],
+    [ "آره", "informal" ],
+    [ "به", "informal" ],
+    [ "ها", "informal" ]
+  ],
+  "Polish": [
+    [ "tak", "formal" ],
+    [ "takie", "formal" ],
+    [ "oczywiście", "formal" ],
+    [ "no", "informal" ]
+  ],
+  "Portuguese": [
+    [ "sim", "formal" ],
+    [ "é", "informal" ],
+    [ "yep", "informal" ],
+    [ "epá", "informal" ]
+  ],
+  "Punjabi": [
+    [ "ਹਾਂ", "formal" ],
+    [ "ਵਾਹਿਗੁਰੂ", "informal" ],
+    [ "ਹਾਂ ਜੀ", "formal" ],
+    [ "ਜੀ ਹਾਂ", "formal" ]
+  ],
+  "Romanian": [
+    [ "da", "formal" ],
+    [ "bine", "formal" ],
+    [ "exact", "formal" ],
+    [ "corect", "formal" ]
+  ],
+  "Russian": [
+    [ "да", "formal" ],
+    [ "ага", "informal" ],
+    [ "о да", "informal" ]
+  ],
+  "Samoan": [
+    [ "ioe", "formal" ],
+    [ "ē", "informal" ]
+  ],
+  "Scots Gaelic": [
+    [ "tha", "formal" ],
+    [ "oil", "informal" ],
+    [ "cò", "informal" ]
+  ],
+  "Serbian": [
+    [ "да", "formal" ],
+    [ "у реду", "formal" ],
+    [ "у реду је", "formal" ],
+    [ "ајде", "informal" ]
+  ],
+  "Shona": [ [ "ewe", "formal" ] ],
+  "Sindhi": [
+    [ "هو", "formal" ],
+    [ "هون", "formal" ],
+    [ "آهي", "informal" ]
+  ],
+  "Sinhala": [
+    [ "ඔව්", "formal" ],
+    [ "ඔවුන්ගේ", "informal" ]
+  ],
+  "Slovak": [
+    [ "áno", "formal" ],
+    [ "no", "informal" ],
+    [ "presne", "formal" ],
+    [ "iste", "formal" ]
+  ],
+  "Slovenian": [
+    [ "ja", "formal" ],
+    [ "okej", "formal" ],
+    [ "jep", "informal" ],
+    [ "ej", "informal" ]
+  ],
+  "Somali": [
+    [ "haa", "formal" ],
+    [ "aa", "informal" ],
+    [ "eh", "informal" ]
+  ],
+  "Spanish": [
+    [ "sí", "formal" ],
+    [ "si", "informal" ],
+    [ "claro", "formal" ],
+    [ "vale", "formal" ],
+    [ "oye", "informal" ]
+  ],
+  "Swahili": [
+    [ "ndiyo", "formal" ],
+    [ "eh", "informal" ],
+    [ "yo", "informal" ],
+    [ "sawa", "formal" ]
+  ],
+  "Swedish": [
+    [ "ja", "formal" ],
+    [ "jo", "informal" ],
+    [ "jaha", "informal" ]
+  ],
+  "Tagalog": [
+    [ "oo", "formal" ],
+    [ "sige", "informal" ],
+    [ "oo nga", "informal" ]
+  ],
+  "Tajik": [
+    [ "ҳа", "formal" ],
+    [ "як", "informal" ],
+    [ "дарусти", "informal" ]
+  ],
+  "Tamil": [
+    [ "ஆம்", "formal" ],
+    [ "ஆமாம்", "formal" ],
+    [ "ஆம்மா", "informal" ],
+    [ "சரி", "formal" ]
+  ],
+  "Telugu": [
+    [ "అవును", "formal" ],
+    [ "అయ్యి", "informal" ],
+    [ "అవునుగా", "formal" ],
+    [ "అవ్వూ", "informal" ]
+  ],
+  "Thai": [
+    [ "ใช่", "formal" ],
+    [ "ค่ะ", "formal" ],
+    [ "ครับ", "formal" ],
+    [ "เอ่อ", "informal" ],
+    [ "เออ", "informal" ]
+  ],
+  "Turkish": [
+    [ "evet", "formal" ],
+    [ "tamam", "formal" ],
+    [ "peki", "informal" ],
+    [ "olur", "informal" ]
+  ],
+  "Turkmen": [
+    [ "howa", "formal" ],
+    [ "hawa", "formal" ],
+    [ "äti", "informal" ],
+    [ "älem", "informal" ]
+  ],
+  "Ukrainian": [
+    [ "так", "formal" ],
+    [ "ой", "informal" ],
+    [ "ага", "informal" ]
+  ],
+  "Urdu": [
+    [ "جی ہاں", "formal" ],
+    [ "ہاں", "formal" ],
+    [ "ہاں جی", "formal" ],
+    [ "اچھا", "informal" ]
+  ],
+  "Uzbek": [
+    [ "ha", "formal" ],
+    [ "ehtimol", "formal" ],
+    [ "oo", "informal" ]
+  ],
+  "Vietnamese": [
+    [ "vâng", "formal" ],
+    [ "ừ", "informal" ],
+    [ "đúng", "formal" ]
+  ],
+  "Welsh": [
+    [ "ydw", "formal" ],
+    [ "ie", "informal" ],
+    [ "of course", "formal" ]
+  ],
+  "Xhosa": [ [ "ewu", "informal" ] ],
+  "Yiddish": [
+    [ "זכיר", "formal" ],
+    [ "נאַטירליך", "formal" ]
+  ],
+  "Yoruba": [
+    [ "bẹẹni", "formal" ],
+    [ "bẹẹ", "informal" ]
+  ],
+  "Zulu": [
+    [ "yebo", "formal" ],
+    [ "cha", "informal" ]
+  ]
+}

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace v10.Data.Abstractions.Models;
+﻿namespace v10.Data.Abstractions.Models;
 
 public class Background
 {
