@@ -34,8 +34,6 @@ using Discord;
 using Microsoft.FeatureManagement;
 using bot.Features.FeatureManagement;
 using bot.Features.StrangeLaws;
-using edu.stanford.nlp.pipeline;
-using java.util;
 using LazyProxy.ServiceProvider;
 using bot.Features.NaturalLanguageProcessing;
 using bot.Features.Events;
@@ -144,18 +142,7 @@ services.AddSingleton(sc => {
     };
     return new DiscordSocketClient(config);
 });
-services.AddSingleton(c => {
-    var props = new Properties();
-    props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
-    props.setProperty("sutime.binders", "0");
 
-    var jarRoot = @"stanford-corenlp-models";
-    var curDir = Environment.CurrentDirectory;
-    Directory.SetCurrentDirectory(jarRoot);
-    var pipeline = new StanfordCoreNLP(props);
-    Directory.SetCurrentDirectory(curDir);
-    return pipeline;
-});
 services.AddLazySingleton<INLPService, NLPService>();
 services.AddSingleton<CommandService>();
 services.AddSingleton<CommandHandlingService>();

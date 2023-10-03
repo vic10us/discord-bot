@@ -58,7 +58,6 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9" />
 		<PackageReference Include="QRCoder" Version="1.4.3" />
 		<PackageReference Include="StackExchange.Redis" Version="2.6.116" />
-		<PackageReference Include="Stanford.NLP.CoreNLP" Version="4.5.0" />
 		<PackageReference Include="Svg" Version="3.4.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
 		<PackageReference Include="Victoria" Version="6.0.1026" />
@@ -71,9 +70,6 @@
 		<None Update="data\.keep">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-    <Content Include="stanford-corenlp-models\**">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 	<ItemGroup>
@@ -114,7 +110,6 @@
 
 	<ItemGroup>
 	  <Folder Include="Features\Events\Producers\" />
-	  <Folder Include="stanford-corenlp-models\" />
 	</ItemGroup>
 
 </Project>
