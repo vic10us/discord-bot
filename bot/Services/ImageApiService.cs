@@ -16,7 +16,7 @@ public class ImageApiService
 
     public ImageApiService(IHttpClientFactory clientFactory)
     {
-        _client = clientFactory.CreateClient("vic10usapi");
+        _client = clientFactory.CreateClient("vic10usApi");
     }
 
     public async Task<Stream> ConvertSvgImage(string svg)

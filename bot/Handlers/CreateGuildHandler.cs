@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using bot.Commands;
-using bot.Queries;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using bot.Features.Games;
 using bot.Features.MondayQuotes;
-using Microsoft.Extensions.Hosting;
 using MongoDB.Driver;
 using Xunit;
 using Xunit.Abstractions;

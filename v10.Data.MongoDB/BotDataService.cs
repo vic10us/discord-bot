@@ -1,5 +1,4 @@
-﻿using System;
-using LanguageExt.Common;
+﻿using LanguageExt.Common;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using v10.Bot.Core;
@@ -148,7 +147,12 @@ public class BotDataService
 
     public ulong GetUserRank(ulong guildId, ulong userId)
     {
-        var x = _levelData.Find(e => e.guildId.Equals(guildId)).SortByDescending(a => a.level).ThenByDescending(a => a.xp).ToList();
+        var x = _levelData.Find(e => e.guildId.Equals(guildId))
+            .SortByDescending(a => a.level)
+            .ThenByDescending(a => a.voiceLevel)
+            .ThenByDescending(a => a.xp)
+            .ThenByDescending(a => a.voiceXp)
+            .ToList();
         return (ulong)x.FindIndex(a => a.userId.Equals($"{userId}")) + 1;
     }
 
@@ -178,16 +182,82 @@ public class BotDataService
         return userData;
     }
 
-    public LevelData RemoveXp(ulong guildId, ulong userId, ulong amt)
+    public LevelData AddVoiceXp(ulong guildId, ulong userId, ulong i, Action<ulong> cb = null)
+    {
+        var userData = GetLevelData(guildId, userId);
+        userData.voiceXp += i;
+        (userData.voiceLevel, userData.voiceXp, _, userData.totalVoiceXp) = BotLevelingUtils.ComputeLevelAndXp(userData.voiceLevel, userData.voiceXp, cb);
+        userData.lastUpdated = DateTimeOffset.UtcNow;
+        UpdateUserLevelData(userData);
+        return userData;
+    }
+
+    public LevelData SetXp(ulong guildId, ulong userId, ulong amt, Action<ulong, string> cb = null)
+    {
+        var userData = GetLevelData(guildId, userId);
+        var newLevel = BotLevelingUtils.LevelForTotalXp(amt);
+        if (userData.level != newLevel)
+        {
+            var direction = userData.level < newLevel ? "up" : "down";
+            cb?.Invoke(newLevel, direction);
+        }
+        userData.level = newLevel;
+        userData.xp = amt - BotLevelingUtils.TotalXpForLevel(newLevel);
+        userData.totalXp = amt;
+        UpdateUserLevelData(userData);
+        return userData;
+    }
+
+    public LevelData SetVoiceXp(ulong guildId, ulong userId, ulong amt, Action<ulong, string> cb = null)
+    {
+        var userData = GetLevelData(guildId, userId);
+        var newLevel = BotLevelingUtils.LevelForTotalXp(amt);
+        if (userData.voiceLevel != newLevel)
+        {
+            var direction = userData.level < newLevel ? "up" : "down";
+            cb?.Invoke(newLevel, direction);
+        }
+        userData.voiceLevel = newLevel;
+        userData.voiceXp = amt - BotLevelingUtils.TotalXpForLevel(newLevel);
+        userData.totalVoiceXp = amt;
+        UpdateUserLevelData(userData);
+        return userData;
+    }
+
+    public LevelData RemoveXp(ulong guildId, ulong userId, ulong amt, Action<ulong> cb = null)
     {
         var userData = GetLevelData(guildId, userId);
         var totalXp = userData.totalXp > 0
             ? userData.totalXp
             : BotLevelingUtils.TotalXpForLevel(userData.level) + userData.xp;
         totalXp -= amt;
-        userData.level = BotLevelingUtils.LevelForTotalXp(totalXp);
+        var newLevel = BotLevelingUtils.LevelForTotalXp(totalXp);
+        if (userData.level != newLevel)
+        {
+            cb?.Invoke(newLevel);
+        }
+        userData.level = newLevel;
         userData.xp = totalXp - BotLevelingUtils.TotalXpForLevel(userData.level);
         userData.totalXp = totalXp;
+        UpdateUserLevelData(userData);
+        return userData;
+    }
+
+    public LevelData RemoveVoiceXp(ulong guildId, ulong userId, ulong amt, Action<ulong> cb = null)
+    {
+        var userData = GetLevelData(guildId, userId);
+        var totalXp = userData.totalVoiceXp > 0
+            ? userData.totalVoiceXp
+            : BotLevelingUtils.TotalXpForLevel(userData.voiceLevel) + userData.voiceXp;
+        totalXp -= amt;
+        var newLevel = BotLevelingUtils.LevelForTotalXp(totalXp);
+        if (userData.voiceLevel != newLevel)
+        {
+            cb?.Invoke(newLevel);
+        }
+        userData.voiceLevel = BotLevelingUtils.LevelForTotalXp(totalXp);
+        userData.voiceXp = totalXp - BotLevelingUtils.TotalXpForLevel(newLevel);
+        userData.totalVoiceXp = totalXp;
         UpdateUserLevelData(userData);
         return userData;
     }

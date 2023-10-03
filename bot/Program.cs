@@ -2,7 +2,6 @@
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using bot.Features.DadJokes;
-using bot.Features.Database;
 using bot.Features.MondayQuotes;
 using bot.Features.Pictures;
 using bot.Features.RedneckJokes;
@@ -19,7 +18,6 @@ using MediatR;
 using FluentValidation;
 using bot.PipelineBehaviors;
 using bot.Extensions;
-using Victoria;
 using v10.Data.Abstractions;
 using v10.Data.Abstractions.Interfaces;
 using v10.Data.MongoDB;
@@ -33,32 +31,52 @@ using OpenTelemetry.Logs;
 using Discord.Interactions;
 using bot.Features.EightBall;
 using Discord;
+using Microsoft.FeatureManagement;
+using bot.Features.FeatureManagement;
+using bot.Features.StrangeLaws;
+using edu.stanford.nlp.pipeline;
+using java.util;
+using LazyProxy.ServiceProvider;
+using bot.Features.NaturalLanguageProcessing;
+using bot.Features.Events;
+using v10.Messaging;
+
+Console.OutputEncoding = System.Text.Encoding.Unicode;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
+// Configuration
 builder.Configuration.SetBasePath(Directory.GetCurrentDirectory());
 builder.Configuration.AddJsonFile("hostsettings.json", optional: true);
 builder.Configuration.AddEnvironmentVariables(prefix: "BOT_");
 builder.Configuration.AddUserSecrets<Program>();
 builder.Configuration.AddCommandLine(args);
-builder.Services.AddHttpClient();
-builder.Services.AddHttpClient("vic10usapi", c =>
+
+// Services
+var services = builder.Services;
+
+services.AddFeatureManagement()
+    .AddFeatureFilter<DevEnvironmentFilter>()
+    .AddFeatureFilter<ProdTestAccountsFilter>();
+
+services.AddControllers();
+services.AddEndpointsApiExplorer();
+services.AddSwaggerGen();
+
+services.AddHttpClient();
+services.AddHttpClient("vic10usApi", c =>
 {
   c.BaseAddress = new Uri(builder.Configuration["vic10usApi:BaseUrl"]);
 });
 
-//builder.Services.AddOpenTelemetry();
+//services.AddOpenTelemetry();
 
 TelemetryTools.Init();
 
 // Configure metrics
-builder.Services.AddOpenTelemetryMetrics(builder =>
+services.AddOpenTelemetryMetrics(builder =>
 {
   builder.AddConsoleExporter();
   builder.AddAspNetCoreInstrumentation();
@@ -74,7 +92,7 @@ builder.Services.AddOpenTelemetryMetrics(builder =>
 });
 
 // Configure tracing
-builder.Services.AddOpenTelemetryTracing(builder => 
+services.AddOpenTelemetryTracing(builder => 
 {
   builder.AddHttpClientInstrumentation(options => {
     options.Enrich = (activity, eventName, rawObject) =>
@@ -103,67 +121,85 @@ builder.Logging.AddOpenTelemetry(builder =>
   builder.AddOtlpExporter(options => options.Endpoint = new Uri("http://10.198.2.17:4317"));
 });
 
-//using MeterProvider meterProvider = Sdk.CreateMeterProviderBuilder()
-//            .AddMeter("HatCo.HatStore")
-//            .AddPrometheusExporter(opt =>
-//            {
-//              opt.StartHttpListener = true;
-//              opt.HttpListenerPrefixes = new string[] { $"http://localhost:9184/" };
-//            })
-//            .Build();
+services.AddHostedService<StartupBackgroundService>();
+services.AddSingleton<StartupHealthCheck>();
 
-builder.Services.AddHostedService<StartupBackgroundService>();
-builder.Services.AddSingleton<StartupHealthCheck>();
+services.AddEvents(builder.Configuration);
+// services.AddEventMessaging();
 
-builder.Services.AddHealthChecks()
+services.AddHealthChecks()
   .AddCheck<ImageApiHealthCheck>("ImageApi")
   .AddCheck<StartupHealthCheck>(
         "Startup",
         tags: new[] { "ready" });
 
-builder.Services.AddDbContext<BotDbContext>
-    (x => x.UseSqlite(builder.Configuration.GetConnectionString("BotDb")), ServiceLifetime.Singleton);
-builder.Services.AddSingleton<DiceGame>();
-builder.Services.AddSingleton(sc => {
+//services.AddDbContext<BotDbContext>
+//    (x => x.UseSqlite(builder.Configuration.GetConnectionString("BotDb")), ServiceLifetime.Singleton);
+services.AddSingleton<DiceGame>();
+services.AddSingleton(sc => {
+    // var allExcept = GatewayIntents.All - GatewayIntents.GuildScheduledEvents;
     var config = new DiscordSocketConfig()
     {
-        GatewayIntents = GatewayIntents.All
+        GatewayIntents = GatewayIntents.All ^ GatewayIntents.GuildScheduledEvents
     };
     return new DiscordSocketClient(config);
 });
-builder.Services.AddSingleton<CommandService>();
-builder.Services.AddSingleton<CommandHandlingService>();
-builder.Services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
-builder.Services.AddSingleton<PictureService>();
-builder.Services.AddSingleton<DadJokeService>();
-builder.Services.AddSingleton<EightBallService>();
-builder.Services.AddTransient<Program>();
-builder.Services.AddSingleton<MondayQuotesService>();
-builder.Services.AddSingleton<IRedneckJokeService, RedneckJokeService>();
-builder.Services.AddSingleton<BotDataService>();
-builder.Services.AddHttpClient<DadJokeService>("DadJokeService", (s, c) =>
+services.AddSingleton(c => {
+    var props = new Properties();
+    props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+    props.setProperty("sutime.binders", "0");
+
+    var jarRoot = @"stanford-corenlp-4.4.0-models\";
+    var curDir = Environment.CurrentDirectory;
+    Directory.SetCurrentDirectory(jarRoot);
+    var pipeline = new StanfordCoreNLP(props);
+    Directory.SetCurrentDirectory(curDir);
+    return pipeline;
+});
+services.AddLazySingleton<INLPService, NLPService>();
+services.AddSingleton<CommandService>();
+services.AddSingleton<CommandHandlingService>();
+services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
+services.AddSingleton<PictureService>();
+services.AddSingleton<DadJokeService>();
+services.AddSingleton<EightBallService>();
+services.AddTransient<Program>();
+services.AddSingleton<MondayQuotesService>();
+services.AddSingleton<IRedneckJokeService, RedneckJokeService>();
+services.AddSingleton<IStrangeLawsService, StrangeLawsService>();
+services.AddSingleton<BotDataService>();
+services.AddHttpClient<DadJokeService>("DadJokeService", (s, c) =>
 {
   c.BaseAddress = new Uri(builder.Configuration["DadJokes:BaseUrl"]);
 });
-builder.Services.AddHostedService<LifetimeEventsHostedService>();
-builder.Services.AddTransient<ImageApiService>();
-builder.Services.Configure<DiscordBotDatabaseSettings>(
+services.AddHostedService<LifetimeEventsHostedService>();
+services.AddTransient<ImageApiService>();
+services.Configure<DiscordBotDatabaseSettings>(
     builder.Configuration.GetSection(nameof(DiscordBotDatabaseSettings)));
 
-builder.Services.AddSingleton<IDatabaseSettings>(sp =>
+services.Configure<MassTransitOptions>(
+    builder.Configuration.GetSection("MassTransit"));
+
+services.AddSingleton<IDatabaseSettings>(sp =>
     sp.GetRequiredService<IOptions<DiscordBotDatabaseSettings>>().Value);
+
+services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("AppCache");
+    options.InstanceName = "SampleInstance";
+});
 
 //var metrics = AppMetrics.CreateDefaultBuilder()
 //            .Build();
-//builder.Services.AddMetrics(metrics);
-builder.Services.AddMediatR(typeof(Program));
-builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
-builder.Services.AddLavaNode(config =>
-{
-  builder.Configuration?.Bind($"Victoria", config);
-});
+//services.AddMetrics(metrics);
+services.AddMediatR(typeof(Program));
+services.AddAutoMapper(typeof(Program));
+services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+//services.AddLavaNode(config =>
+//{
+//  builder.Configuration?.Bind($"Victoria", config);
+//});
 
 var app = builder.Build();
 

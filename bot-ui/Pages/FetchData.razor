@@ -1,5 +1,7 @@
 ﻿@page "/fetchdata"
+@using ClientStructures.ServiceFabric.Api.Client;
 @inject HttpClient Http
+@inject ClientStructureApiClient clientStructureApiClient
 
 <PageTitle>Weather forecast</PageTitle>
 
@@ -41,6 +43,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        var x = await clientStructureApiClient.ClientsGETAsync(Guid.NewGuid());
+
         forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
     }
 

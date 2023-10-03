@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using bot.Queries;
+using com.sun.org.apache.bcel.@internal.generic;
 using Discord;
 using Discord.Interactions;
 using MediatR;
@@ -21,7 +22,7 @@ public class JokeInteractionModule : InteractionModuleBase<SocketInteractionCont
         _logger = logger;
     }
 
-    private JokeType GetRandomJokeType()
+    private static JokeType GetRandomJokeType()
     {
         var jokeTypes = Enum.GetValues<JokeType>().Where(jt => jt != JokeType.Random).ToArray();
         var random = new Random();
@@ -38,6 +39,7 @@ public class JokeInteractionModule : InteractionModuleBase<SocketInteractionCont
             JokeType.Redneck => await _mediator.Send(new GetRedneckJokeResponse()),
             JokeType.Monday => await _mediator.Send(new GetMondayJokeResponse()),
             JokeType.Dad => (await _mediator.Send(new GetDadJokeResponse())).Joke,
+            JokeType.StrangeLaw => (await _mediator.Send(new GetStrangeLawResponse())),
             _ => (await _mediator.Send(new GetDadJokeResponse())).Joke,
         };
         var builder = new ComponentBuilder()
@@ -49,7 +51,7 @@ public class JokeInteractionModule : InteractionModuleBase<SocketInteractionCont
     [ComponentInteraction("joke:*")]
     public async Task JokeButtonInteraction(string type)
     {
-        _logger.LogInformation($"User pressed the {type} joke button", Context);
+        _logger.LogInformation("User pressed the {type} joke button", type);
         var jokeType = Enum.Parse<JokeType>(type, true);
         await TellJoke(jokeType);
     }
