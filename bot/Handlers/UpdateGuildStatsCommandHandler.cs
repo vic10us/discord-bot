@@ -32,13 +32,13 @@ public class UpdateGuildStatsCommandHandler : IRequestHandler<UpdateGuildStatsCo
         _botDataService = botDataService;
     }
 
-    public async Task<Unit> Handle(UpdateGuildStatsCommand request, CancellationToken cancellationToken)
+    public async Task Handle(UpdateGuildStatsCommand request, CancellationToken cancellationToken)
     {
         var guild = _discordSocketClient.GetGuild(request.GuildId);
         if (guild is null)
         {
             _logger.LogWarning("Attempt to update guild with Id {GuildId} was cancelled. [GUILD_NOT_FOUND]", request.GuildId);
-            return Unit.Value;
+            return;
         }
 
         var cacheKey = $"updated-guild:{request.GuildId}";
@@ -48,14 +48,14 @@ public class UpdateGuildStatsCommandHandler : IRequestHandler<UpdateGuildStatsCo
         if (!string.IsNullOrWhiteSpace(updatedGuildCacheValue))
         {
             _logger.LogWarning("Attempt to update guild with Id {GuildId} was cancelled. [RATE_LIMTED]", request.GuildId);
-            return Unit.Value;
+            return;
         }
 
         var guildData = _botDataService.GetGuild(request.GuildId);
         if (guildData is null)
         {
             _logger.LogWarning("Attempt to update guild with Id {GuildId} was cancelled. [GUILD_NOT_FOUND]", request.GuildId);
-            return Unit.Value;
+            return;
         }
 
         await _cache.SetStringAsync(cacheKey, "true", new DistributedCacheEntryOptions()
@@ -123,7 +123,6 @@ public class UpdateGuildStatsCommandHandler : IRequestHandler<UpdateGuildStatsCo
         {
             _logger.LogError("Error updating guild stats [{ex.Message}]", ex);
         }
-
-        return Unit.Value;
     }
+
 }

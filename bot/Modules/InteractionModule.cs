@@ -2,6 +2,7 @@
 using bot.Queries;
 using Discord.Interactions;
 using MediatR;
+using v10.Games.EightBall.Queries;
 
 namespace bot.Modules;
 

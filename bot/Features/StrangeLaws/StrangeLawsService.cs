@@ -9,11 +9,12 @@ namespace bot.Features.StrangeLaws;
 
 public class StrangeLawsService : IStrangeLawsService
 {
-    private string[] _strangeLaws;
-    private List<string> _cache = new();
+    private readonly string[] _strangeLaws;
+    private readonly List<string> _cache = new();
 
     public StrangeLawsService()
     {
+        _strangeLaws = GetStrangeLaws().Result.ToArray();
     }
 
     protected async Task<IEnumerable<string>> GetStrangeLaws()
