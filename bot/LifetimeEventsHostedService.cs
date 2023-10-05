@@ -150,7 +150,7 @@ internal class LifetimeEventsHostedService : IHostedService
 
     private Task _discordSocketClient_ButtonExecuted(SocketMessageComponent arg)
     {
-        _logger.LogInformation("Button was clicked", arg);
+        _logger.LogInformation("Button was clicked");
         return Task.CompletedTask;
     }
 

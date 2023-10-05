@@ -1,7 +1,7 @@
 ﻿using LanguageExt.Common;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using v10.Bot.Core;
+using v10.Bot.Core.Utils;
 using v10.Data.Abstractions.Interfaces;
 using v10.Data.Abstractions.Models;
 
@@ -40,13 +40,13 @@ public class BotDataService
 
     public static (ulong, ulong, ulong) ComputeLevelAndXp(ulong lvl, ulong xp, Action<ulong> cb = null)
     {
-        while (xp >= BotLevelingUtils.XpNeededForLevel(lvl))
+        while (xp >= BotLeveling.XpNeededForLevel(lvl))
         {
-            xp -= BotLevelingUtils.XpNeededForLevel(lvl);
+            xp -= BotLeveling.XpNeededForLevel(lvl);
             lvl++;
-            if (xp < BotLevelingUtils.XpNeededForLevel(lvl)) cb?.Invoke(lvl);
+            if (xp < BotLeveling.XpNeededForLevel(lvl)) cb?.Invoke(lvl);
         }
-        var next = BotLevelingUtils.XpNeededForLevel(lvl);
+        var next = BotLeveling.XpNeededForLevel(lvl);
         return (lvl, xp, next);
     }
 
@@ -176,7 +176,7 @@ public class BotDataService
     {
         var userData = GetLevelData(guildId, userId);
         userData.xp += i;
-        (userData.level, userData.xp, _, userData.totalXp) = BotLevelingUtils.ComputeLevelAndXp(userData.level, userData.xp, cb);
+        (userData.level, userData.xp, _, userData.totalXp) = BotLeveling.ComputeLevelAndXp(userData.level, userData.xp, cb);
         userData.lastUpdated = DateTimeOffset.UtcNow;
         UpdateUserLevelData(userData);
         return userData;
@@ -186,7 +186,7 @@ public class BotDataService
     {
         var userData = GetLevelData(guildId, userId);
         userData.voiceXp += i;
-        (userData.voiceLevel, userData.voiceXp, _, userData.totalVoiceXp) = BotLevelingUtils.ComputeLevelAndXp(userData.voiceLevel, userData.voiceXp, cb);
+        (userData.voiceLevel, userData.voiceXp, _, userData.totalVoiceXp) = BotLeveling.ComputeLevelAndXp(userData.voiceLevel, userData.voiceXp, cb);
         userData.lastUpdated = DateTimeOffset.UtcNow;
         UpdateUserLevelData(userData);
         return userData;
@@ -195,14 +195,14 @@ public class BotDataService
     public LevelData SetXp(ulong guildId, ulong userId, ulong amt, Action<ulong, string> cb = null)
     {
         var userData = GetLevelData(guildId, userId);
-        var newLevel = BotLevelingUtils.LevelForTotalXp(amt);
+        var newLevel = BotLeveling.LevelForTotalXp(amt);
         if (userData.level != newLevel)
         {
             var direction = userData.level < newLevel ? "up" : "down";
             cb?.Invoke(newLevel, direction);
         }
         userData.level = newLevel;
-        userData.xp = amt - BotLevelingUtils.TotalXpForLevel(newLevel);
+        userData.xp = amt - BotLeveling.TotalXpForLevel(newLevel);
         userData.totalXp = amt;
         UpdateUserLevelData(userData);
         return userData;
@@ -211,14 +211,14 @@ public class BotDataService
     public LevelData SetVoiceXp(ulong guildId, ulong userId, ulong amt, Action<ulong, string> cb = null)
     {
         var userData = GetLevelData(guildId, userId);
-        var newLevel = BotLevelingUtils.LevelForTotalXp(amt);
+        var newLevel = BotLeveling.LevelForTotalXp(amt);
         if (userData.voiceLevel != newLevel)
         {
             var direction = userData.level < newLevel ? "up" : "down";
             cb?.Invoke(newLevel, direction);
         }
         userData.voiceLevel = newLevel;
-        userData.voiceXp = amt - BotLevelingUtils.TotalXpForLevel(newLevel);
+        userData.voiceXp = amt - BotLeveling.TotalXpForLevel(newLevel);
         userData.totalVoiceXp = amt;
         UpdateUserLevelData(userData);
         return userData;
@@ -229,15 +229,15 @@ public class BotDataService
         var userData = GetLevelData(guildId, userId);
         var totalXp = userData.totalXp > 0
             ? userData.totalXp
-            : BotLevelingUtils.TotalXpForLevel(userData.level) + userData.xp;
+            : BotLeveling.TotalXpForLevel(userData.level) + userData.xp;
         totalXp -= amt;
-        var newLevel = BotLevelingUtils.LevelForTotalXp(totalXp);
+        var newLevel = BotLeveling.LevelForTotalXp(totalXp);
         if (userData.level != newLevel)
         {
             cb?.Invoke(newLevel);
         }
         userData.level = newLevel;
-        userData.xp = totalXp - BotLevelingUtils.TotalXpForLevel(userData.level);
+        userData.xp = totalXp - BotLeveling.TotalXpForLevel(userData.level);
         userData.totalXp = totalXp;
         UpdateUserLevelData(userData);
         return userData;
@@ -248,15 +248,15 @@ public class BotDataService
         var userData = GetLevelData(guildId, userId);
         var totalXp = userData.totalVoiceXp > 0
             ? userData.totalVoiceXp
-            : BotLevelingUtils.TotalXpForLevel(userData.voiceLevel) + userData.voiceXp;
+            : BotLeveling.TotalXpForLevel(userData.voiceLevel) + userData.voiceXp;
         totalXp -= amt;
-        var newLevel = BotLevelingUtils.LevelForTotalXp(totalXp);
+        var newLevel = BotLeveling.LevelForTotalXp(totalXp);
         if (userData.voiceLevel != newLevel)
         {
             cb?.Invoke(newLevel);
         }
-        userData.voiceLevel = BotLevelingUtils.LevelForTotalXp(totalXp);
-        userData.voiceXp = totalXp - BotLevelingUtils.TotalXpForLevel(newLevel);
+        userData.voiceLevel = BotLeveling.LevelForTotalXp(totalXp);
+        userData.voiceXp = totalXp - BotLeveling.TotalXpForLevel(newLevel);
         userData.totalVoiceXp = totalXp;
         UpdateUserLevelData(userData);
         return userData;
@@ -267,7 +267,7 @@ public class BotDataService
         var userData = GetLevelData(guildId, userId);
         if (userData.messageCount <= 0)
         {
-            var averageMessages = (BotLevelingUtils.TotalXpForLevel(userData.level) + userData.xp) / 18;
+            var averageMessages = (BotLeveling.TotalXpForLevel(userData.level) + userData.xp) / 18;
             userData.messageCount = averageMessages;
         }
         userData.messageCount++;

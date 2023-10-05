@@ -22,16 +22,16 @@ public class UserLevelChangedCommandHandler : IRequestHandler<UserLevelChangedCo
         _discordSocketClient = discordSocketClient;
     }
 
-    public async Task<Unit> Handle(UserLevelChangedCommand request, CancellationToken cancellationToken)
+    public async Task Handle(UserLevelChangedCommand request, CancellationToken cancellationToken)
     {
         var user = _discordSocketClient.GetUser(request.UserId);
         if (request.Direction == "down")
         {
             await SendMessageAsync(request.GuildId, "level.log", $"Oh no {user.Mention}! You've lost a level! Your {request.Type} level is now {request.NewLevel}!", allowedMentions: new AllowedMentions(AllowedMentionTypes.Everyone), cancellationToken: cancellationToken);
-            return Unit.Value;
+            return;
         }
         await SendMessageAsync(request.GuildId, "level.log", $"Congratulations {user.Mention}! You've leveled up! Your {request.Type} level is now {request.NewLevel}!", allowedMentions: new AllowedMentions(AllowedMentionTypes.Everyone), cancellationToken: cancellationToken);
-        return Unit.Value;
+        return;
     }
 
     private async Task SendMessageAsync(ulong guildId, string route, string message, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null, MessageComponent components = null, ISticker[] stickers = null, Embed[] embeds = null, MessageFlags flags = MessageFlags.None, CancellationToken cancellationToken = default)
