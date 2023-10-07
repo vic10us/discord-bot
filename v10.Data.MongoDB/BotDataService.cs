@@ -147,7 +147,7 @@ public class BotDataService
 
     public ulong GetUserRank(ulong guildId, ulong userId)
     {
-        var x = _levelData.Find(e => e.guildId.Equals(guildId))
+        var x = _levelData.Find(e => e.guildId.Equals(guildId.ToString()))
             .SortByDescending(a => a.level)
             .ThenByDescending(a => a.voiceLevel)
             .ThenByDescending(a => a.xp)

@@ -1,4 +1,5 @@
-﻿using QRCoder;
+﻿using Newtonsoft.Json;
+using QRCoder;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -6,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace bot.Services;
@@ -30,6 +32,17 @@ public class ImageApiService
         content.Add(new StringContent("false"), "keep");
         using var message =
             await _client.PostAsync("images/conversions", content);
+        var stream = await message.Content.ReadAsStreamAsync();
+        var resultStream = new MemoryStream();
+        await stream.CopyToAsync(resultStream);
+        resultStream.Position = 0;
+        return resultStream;
+    }
+
+    public async Task<Stream> CreateRankCard(RankCardRequest rankCardRequest)
+    {
+        var json = JsonConvert.SerializeObject(rankCardRequest);
+        using var message = await _client.PostAsync("images/rankCard", new StringContent(json, Encoding.UTF8, "application/json"));
         var stream = await message.Content.ReadAsStreamAsync();
         var resultStream = new MemoryStream();
         await stream.CopyToAsync(resultStream);

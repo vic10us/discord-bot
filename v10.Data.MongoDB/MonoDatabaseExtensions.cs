@@ -13,4 +13,14 @@ public static class MonoDatabaseExtensions
         r.Indexes.CreateOne(indexModel);
         return r;
     }
+
+    public static IMongoCollection<T> GetCollection<T>(this IMongoDatabase database)
+    {
+        return database.GetCollection<T>(typeof(T).Name);
+    }
+
+    public static IMongoCollection<T> GetCollection<T>(this IMongoDatabase database, string name)
+    {
+        return database.GetCollection<T>(name);
+    }
 }
