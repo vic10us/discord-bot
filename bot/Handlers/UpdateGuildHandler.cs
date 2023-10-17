@@ -21,6 +21,7 @@ public class UpdateGuildHandler : IRequestHandler<UpdateGuildCommand, ulong>
         var x = new Guild
         {
             guildId = $"{request.GuildId}",
+            guildName = $"{request.GuildName}",
             channelNotifications = request.ChannelNotifications,
             staffRoles = request.StaffRoles
         };

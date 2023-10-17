@@ -1,8 +1,9 @@
-﻿using v10.Games.EightBall.Models;
+﻿using v10.Bot.Core.Abstractions;
+using v10.Games.EightBall.Models;
 
 namespace v10.Games.EightBall;
 
-public class EightBallService : IEightBallService
+public class EightBallService : IEightBallService, IMediatorAssembly
 {
     private static readonly EightBallResponse[] _responses = new[]
     {

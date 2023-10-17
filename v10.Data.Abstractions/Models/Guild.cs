@@ -9,6 +9,7 @@ public class Guild
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; }
     public string guildId { get; set; }
+    public string guildName { get; set; }
     public IDictionary<string, string> channelNotifications { get; set; } = new Dictionary<string, string>();
     public string[] staffRoles { get; set; } = Array.Empty<string>();
 
@@ -18,6 +19,7 @@ public class Guild
     {
         Id = id;
         guildId = guild.guildId;
+        guildName = guild.guildName;
         channelNotifications = guild.channelNotifications;
         staffRoles = guild.staffRoles;
     }

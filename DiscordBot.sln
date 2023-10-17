@@ -39,11 +39,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Bot.Core", "v10.Bot.Cor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Messaging", "v10.Messaging\v10.Messaging.csproj", "{153B8693-0E0D-489B-A488-2AB987708336}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bot-api", "bot-api\bot-api.csproj", "{BA688DEF-ED2A-4B2E-AE0B-1625D7686522}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bot-api", "bot-api\bot-api.csproj", "{BA688DEF-ED2A-4B2E-AE0B-1625D7686522}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.Events.Core", "v10.Events.Core\v10.Events.Core.csproj", "{1E72D29E-0035-4C46-9083-5FFBBBCD81F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Events.Core", "v10.Events.Core\v10.Events.Core.csproj", "{1E72D29E-0035-4C46-9083-5FFBBBCD81F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.Games.EightBall", "v10.Games.EightBall\v10.Games.EightBall.csproj", "{69C91C02-1085-482A-832A-74B9776E54E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Games.EightBall", "v10.Games.EightBall\v10.Games.EightBall.csproj", "{69C91C02-1085-482A-832A-74B9776E54E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.Bot.Discord", "v10.Bot.Discord\v10.Bot.Discord.csproj", "{371AB036-1578-40E6-A0B2-548CB60A8414}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.Bot.Core.Abstractions", "v10.Bot.Core.Abstractions\v10.Bot.Core.Abstractions.csproj", "{BE6B3973-6296-4128-AF96-4C5EB7E200E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -111,6 +115,14 @@ Global
 		{69C91C02-1085-482A-832A-74B9776E54E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69C91C02-1085-482A-832A-74B9776E54E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69C91C02-1085-482A-832A-74B9776E54E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{371AB036-1578-40E6-A0B2-548CB60A8414}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{371AB036-1578-40E6-A0B2-548CB60A8414}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{371AB036-1578-40E6-A0B2-548CB60A8414}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{371AB036-1578-40E6-A0B2-548CB60A8414}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE6B3973-6296-4128-AF96-4C5EB7E200E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE6B3973-6296-4128-AF96-4C5EB7E200E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE6B3973-6296-4128-AF96-4C5EB7E200E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE6B3973-6296-4128-AF96-4C5EB7E200E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -124,6 +136,8 @@ Global
 		{9F0A1FCB-3F01-4855-819B-FE2250DCBECD} = {3DFBCF29-3EC6-45FF-87D2-D12B25D7B508}
 		{92E9FFE9-ED8C-42E0-9DC2-8F274C1A3817} = {104C7B96-B4CB-4A7B-A1FB-8F089486E24F}
 		{69C91C02-1085-482A-832A-74B9776E54E2} = {104C7B96-B4CB-4A7B-A1FB-8F089486E24F}
+		{371AB036-1578-40E6-A0B2-548CB60A8414} = {104C7B96-B4CB-4A7B-A1FB-8F089486E24F}
+		{BE6B3973-6296-4128-AF96-4C5EB7E200E3} = {104C7B96-B4CB-4A7B-A1FB-8F089486E24F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B2608AF6-BDEE-4217-8A33-871F7EC50CC3}

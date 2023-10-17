@@ -1,4 +1,5 @@
 ﻿using LanguageExt.Common;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using v10.Bot.Core.Utils;
@@ -13,8 +14,9 @@ public class BotDataService
     private readonly IMongoCollection<MessageThrottle> _messageThottles;
     private readonly IMongoCollection<UserVoiceStats> _userVoiceStats;
     private readonly IMongoCollection<Guild> _guilds;
+    private readonly ILogger<BotDataService> _logger;
 
-    public BotDataService(IDatabaseSettings settings)
+    public BotDataService(IDatabaseSettings settings, ILogger<BotDataService> logger)
     {
         var client = new MongoClient(settings.ConnectionString);
         var database = client.GetDatabase(settings.DatabaseName);
@@ -23,6 +25,7 @@ public class BotDataService
         _levelData = database.GetCollection<LevelData>("LevelData");
         _userVoiceStats = database.GetCollection<UserVoiceStats>("UserVoiceStats");
         _guilds = database.GetCollection<Guild>("Guilds");
+        _logger = logger;
     }
 
     public async Task<Result<ulong>> GetUserBalance(ulong guildId, ulong userId)
@@ -282,6 +285,7 @@ public class BotDataService
         guildData = new Guild
         {
             guildId = $"{guildId}",
+            guildName = string.Empty,
             channelNotifications = new Dictionary<string, string>(),
             staffRoles = Array.Empty<string>(),
         };
@@ -325,6 +329,14 @@ public class BotDataService
     {
         var result = await _guilds.DeleteOneAsync(g => g.guildId.Equals($"{guildId}"));
         return result.IsAcknowledged && result.DeletedCount > 0;
+    }
+
+    public Task<bool> UpdateGuildName(ulong guildId, string guildName, CancellationToken cancellationToken)
+    {
+        var guildData = GetGuild(guildId);
+        guildData.guildName = guildName;
+        UpdateGuild(guildData);
+        return Task.FromResult(true);
     }
 
     /*
