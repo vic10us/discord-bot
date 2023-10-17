@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
-using bot.Features.DadJokes;
 using bot.Features.MondayQuotes;
-using bot.Features.RedneckJokes;
 using Discord;
 using Discord.Commands;
+using v10.Services.DadJokes;
+using v10.Services.RedneckJokes;
 
 namespace bot.Modules;
 
@@ -12,7 +12,7 @@ public class JokeGroupModule : CustomModule<SocketCommandContext>
 {
   // ReSharper disable once MemberCanBePrivate.Global
   // ReSharper disable once UnusedAutoPropertyAccessor.Global
-  public DadJokeService DadJokeService { get; set; }
+  public IDadJokeService DadJokeService { get; set; }
   // ReSharper disable once MemberCanBePrivate.Global
   // ReSharper disable once UnusedAutoPropertyAccessor.Global
   public MondayQuotesService MondayQuotesService { get; set; }
@@ -24,7 +24,7 @@ public class JokeGroupModule : CustomModule<SocketCommandContext>
   [Alias("dj")]
   public async Task DadJoke()
   {
-    var joke = await DadJokeService.GetDadJoke();
+    var joke = await DadJokeService.GetJokeAsync();
     await ReplyAsync(joke.Joke, messageReference: new MessageReference(Context.Message.Id));
   }
 

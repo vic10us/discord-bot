@@ -8,6 +8,7 @@ using Discord.Interactions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver.Linq;
+using v10.Services.DadJokes.Queries;
 
 namespace bot.Modules;
 

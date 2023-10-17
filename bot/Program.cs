@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
-using bot.Features.DadJokes;
 using bot.Features.MondayQuotes;
 using bot.Features.Pictures;
-using bot.Features.RedneckJokes;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
@@ -41,6 +39,8 @@ using v10.Bot.Discord;
 using StackExchange.Redis;
 using LanguageExt;
 using System.Linq;
+using v10.Services.DadJokes;
+using v10.Services.RedneckJokes;
 
 Console.OutputEncoding = System.Text.Encoding.Unicode;
 
@@ -151,14 +151,14 @@ services.AddSingleton<CommandService>();
 services.AddSingleton<CommandHandlingService>();
 services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
 services.AddSingleton<PictureService>();
-services.AddSingleton<DadJokeService>();
+services.AddSingleton<IDadJokeService, DadJokeService>();
 services.AddSingleton<EightBallService>();
 services.AddTransient<Program>();
 services.AddSingleton<MondayQuotesService>();
 services.AddSingleton<IRedneckJokeService, RedneckJokeService>();
 services.AddSingleton<IStrangeLawsService, StrangeLawsService>();
 services.AddSingleton<BotDataService>();
-services.AddHttpClient<DadJokeService>("DadJokeService", (s, c) =>
+services.AddHttpClient<IDadJokeService>("DadJokeService", (s, c) =>
 {
     c.BaseAddress = new Uri(builder.Configuration["DadJokes:BaseUrl"]);
 });

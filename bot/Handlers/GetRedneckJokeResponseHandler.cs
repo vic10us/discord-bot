@@ -1,8 +1,8 @@
-﻿using bot.Features.RedneckJokes;
-using bot.Queries;
+﻿using bot.Queries;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
+using v10.Services.RedneckJokes;
 
 namespace bot.Handlers;
 

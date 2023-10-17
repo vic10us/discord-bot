@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 
-namespace bot.Features.RedneckJokes;
+namespace v10.Services.RedneckJokes;
 
 public class RedneckJokeService : IRedneckJokeService
 {
@@ -17,7 +12,7 @@ public class RedneckJokeService : IRedneckJokeService
     {
         var result = new List<string>();
         var assembly = Assembly.GetExecutingAssembly();
-        var resourceName = $"bot.Features.RedneckJokes.redneckjokes.txt";
+        var resourceName = $"v10.Services.RedneckJokes.redneckjokes.txt";
         using var stream = assembly.GetManifestResourceStream(resourceName);
         using (var reader = new StreamReader(stream))
         {

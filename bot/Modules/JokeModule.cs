@@ -3,6 +3,7 @@ using bot.Queries;
 using Discord;
 using Discord.Commands;
 using MediatR;
+using v10.Services.DadJokes.Queries;
 
 namespace bot.Modules;
 
