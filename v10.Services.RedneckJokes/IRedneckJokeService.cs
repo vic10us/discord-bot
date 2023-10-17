@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace bot.Features.RedneckJokes;
+﻿namespace v10.Services.RedneckJokes;
 
 public interface IRedneckJokeService
 {

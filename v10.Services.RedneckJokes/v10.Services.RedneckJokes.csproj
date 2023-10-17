@@ -7,19 +7,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="redneckjokes.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="redneckjokes.txt" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <PackageReference Include="MediatR" Version="12.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.4" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
-
+  
   <ItemGroup>
-    <Folder Include="Extensions\" />
+    <Folder Include="Commands\" />
+    <Folder Include="Queries\" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\v10.Services.Jokes\v10.Services.Jokes.csproj" />
-  </ItemGroup>
-
+  
 </Project>

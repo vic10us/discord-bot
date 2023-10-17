@@ -16,6 +16,7 @@
 		<ProjectReference Include="..\v10.Messaging\v10.Messaging.csproj" />
 		<ProjectReference Include="..\v10.Services.DadJokes\v10.Services.DadJokes.csproj" />
 		<ProjectReference Include="..\v10.Services.Jokes\v10.Services.Jokes.csproj" />
+		<ProjectReference Include="..\v10.Services.RedneckJokes\v10.Services.RedneckJokes.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -83,8 +84,6 @@
 		<EmbeddedResource Include="Features\MondayQuotes\Inspirational.txt" />
 		<None Remove="Features\MondayQuotes\popular.txt" />
 		<EmbeddedResource Include="Features\MondayQuotes\Popular.txt" />
-		<None Remove="Features\RedneckJokes\redneckjokes.txt" />
-		<EmbeddedResource Include="Features\RedneckJokes\redneckjokes.txt" />
 		<None Remove="Features\Images\Templates\rank.hbs" />
 		<EmbeddedResource Include="Features\Images\Templates\rank.hbs">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -111,6 +110,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Features\Events\Producers\" />
+	  <Folder Include="Features\RedneckJokes\" />
 	</ItemGroup>
 
 </Project>
