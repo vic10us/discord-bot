@@ -9,6 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\v10.Bot.Discord\v10.Bot.Discord.csproj" />
 		<ProjectReference Include="..\v10.Data.Abstractions\v10.Data.Abstractions.csproj" />
 		<ProjectReference Include="..\v10.Data.MongoDB\v10.Data.MongoDB.csproj" />
 		<ProjectReference Include="..\v10.Games.EightBall\v10.Games.EightBall.csproj" />

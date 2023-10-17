@@ -18,6 +18,9 @@ using System.Text.RegularExpressions;
 using bot.Commands;
 using MediatR;
 using bot.Modules.Enums;
+using v10.Bot.Discord;
+using StackExchange.Redis;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace bot;
 
@@ -33,6 +36,8 @@ internal class LifetimeEventsHostedService : IHostedService
     private readonly InteractionService _interactions;
     private readonly IServiceProvider _serviceProvider;
     private readonly IMediator _mediator;
+    private readonly IDiscordMessageService _messageService;
+    private readonly IDatabase _database;
 
     public LifetimeEventsHostedService(
         ILogger<LifetimeEventsHostedService> logger,
@@ -43,8 +48,8 @@ internal class LifetimeEventsHostedService : IHostedService
         BotDataService botDataService,
         InteractionService interactions,
         IServiceProvider serviceProvider,
-        IMediator mediator
-        )
+        IMediator mediator,
+        IDiscordMessageService messageService)
     {
         _logger = logger;
         _appLifetime = appLifetime;
@@ -55,6 +60,11 @@ internal class LifetimeEventsHostedService : IHostedService
         _interactions = interactions;
         _serviceProvider = serviceProvider;
         _mediator = mediator;
+        _messageService = messageService;
+        var server = serviceProvider.GetRequiredService<IServer>();
+        _database = server.Multiplexer.GetDatabase();
+        // var x = ConnectionMultiplexer.Connect();
+        // _database = serviceProvider.GetRequiredService<IDatabase>();
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -77,6 +87,8 @@ internal class LifetimeEventsHostedService : IHostedService
         _discordSocketClient.InviteDeleted += _discordSocketClient_InviteDeleted;
         _discordSocketClient.GuildAvailable += _discordSocketClient_GuildAvailable;
         _discordSocketClient.PresenceUpdated += _discordSocketClient_PresenceUpdated;
+        _discordSocketClient.UserJoined += _discordSocketClient_UserJoined;
+        _discordSocketClient.UserLeft += _discordSocketClient_UserLeft;
         // _commandService.Log += LogAsync;
         // _discordSocketClient.ButtonExecuted += _discordSocketClient_ButtonExecuted;
 
@@ -89,10 +101,42 @@ internal class LifetimeEventsHostedService : IHostedService
         await _commandHandlingService.InitializeAsync();
     }
 
+    private async Task _discordSocketClient_UserJoined(SocketGuildUser user)
+    {
+        await _messageService.SendMessageAsync(user.Guild.Id, "welcome.log", $"Welcome {user.Mention} to {user.Guild.Name}! Please read the rules and enjoy your stay!", allowedMentions: new AllowedMentions(AllowedMentionTypes.Everyone));
+    }
+
+    private async Task _discordSocketClient_UserLeft(SocketGuild guild, SocketUser user)
+    {
+        await _messageService.SendMessageAsync(guild.Id, "goodbye.log", $"Goodbye {user.Mention} from {guild.Name}! We hope you enjoyed your stay!", allowedMentions: new AllowedMentions(AllowedMentionTypes.Everyone));
+    }
+
     private Task _discordSocketClient_MessageReceived(SocketMessage arg)
     {
         _logger.LogInformation("Message received {Content}", arg.Content);
         
+        RedisKey key = $"_discordSocketClient_MessageReceived_{arg.Id}";
+        RedisValue token = Environment.MachineName;
+
+        var lockTaken = _database.LockTake(key, token, TimeSpan.FromSeconds(10));
+        if (!lockTaken)
+        {
+            // another service is already processing the message
+            _logger.LogWarning("Message is already being processed {Content}", arg.Content);
+            return Task.CompletedTask;
+        }
+
+        try
+        {
+            return ProcessMessage(arg);
+        }
+        finally
+        {
+            _database.LockRelease(key, token);
+        }
+    }
+
+    private Task ProcessMessage(SocketMessage arg) {
         if (arg.Author.IsBot)
             return Task.CompletedTask;
 
@@ -125,6 +169,12 @@ internal class LifetimeEventsHostedService : IHostedService
     private Task _discordSocketClient_GuildAvailable(SocketGuild guild)
     {
         _logger.LogInformation("Guild {guild} became available", guild);
+        // var guildData = _botDataService.GetGuild(guild.Id);
+        // if (guildData.guildName == null || guildData.guildName.Equals(guild.Name)) return Task.CompletedTask;
+        _mediator.Send(new UpdateGuildNameCommand() {
+            GuildId = $"{guild.Id}",
+            GuildName = guild.Name
+        });
         return Task.CompletedTask;
     }
 
@@ -198,22 +248,22 @@ internal class LifetimeEventsHostedService : IHostedService
         return result;
     }
 
-    private async Task SendMessageAsync(ulong guildId, string route, string message, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null, MessageComponent components = null, ISticker[] stickers = null, Embed[] embeds = null, MessageFlags flags = MessageFlags.None)
-    {
-        var guildData = _botDataService.GetGuild(guildId);
-        if (guildData == null) return;
-        if (!guildData.channelNotifications.ContainsKey(route)) return;
-        var channelId_str = guildData.channelNotifications[route];
-        if (string.IsNullOrWhiteSpace(channelId_str)) return;
-        if (!ulong.TryParse(channelId_str, out var channelId)) return;
-        await SendMessageAsync(channelId, message, isTTS, embed, options, allowedMentions, messageReference, components, stickers, embeds, flags);
-    }
+    //private async Task SendMessageAsync(ulong guildId, string route, string message, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null, MessageComponent components = null, ISticker[] stickers = null, Embed[] embeds = null, MessageFlags flags = MessageFlags.None)
+    //{
+    //    var guildData = _botDataService.GetGuild(guildId);
+    //    if (guildData == null) return;
+    //    if (!guildData.channelNotifications.ContainsKey(route)) return;
+    //    var channelId_str = guildData.channelNotifications[route];
+    //    if (string.IsNullOrWhiteSpace(channelId_str)) return;
+    //    if (!ulong.TryParse(channelId_str, out var channelId)) return;
+    //    await SendMessageAsync(channelId, message, isTTS, embed, options, allowedMentions, messageReference, components, stickers, embeds, flags);
+    //}
 
-    private async Task SendMessageAsync(ulong channelId, string message, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null, MessageComponent components = null, ISticker[] stickers = null, Embed[] embeds = null, MessageFlags flags = MessageFlags.None)
-    {
-        var channel = _discordSocketClient.GetChannel(channelId);
-        await (channel as IMessageChannel)?.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference, components, stickers, embeds, flags);
-    }
+    //private async Task SendMessageAsync(ulong channelId, string message, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null, MessageComponent components = null, ISticker[] stickers = null, Embed[] embeds = null, MessageFlags flags = MessageFlags.None)
+    //{
+    //    var channel = _discordSocketClient.GetChannel(channelId);
+    //    await (channel as IMessageChannel)?.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference, components, stickers, embeds, flags);
+    //}
 
     private async Task DiscordSocketClient_UserVoiceStateUpdated(SocketUser user, SocketVoiceState before, SocketVoiceState after)
     {
@@ -227,7 +277,7 @@ internal class LifetimeEventsHostedService : IHostedService
             voiceStats.lastJoinedAt = DateTimeOffset.Now;
             voiceStats.isActive = true;
             _botDataService.UpdateUserVoiceStats(voiceStats);
-            await SendMessageAsync(guildId, "system.log", m);
+            await _messageService.SendMessageAsync(guildId, "system.log", m);
             _logger.LogInformation(m);
         }
         else if (after.VoiceChannel == null)
@@ -251,7 +301,7 @@ internal class LifetimeEventsHostedService : IHostedService
                 // SendMessageAsync(guildId, "level.log", $"Congratulations {user.Mention}, you leveled up your Voice Level!!! New Voice Level: {newLevel}").Wait();
             });
             var m = $"{user} Left voice in {before} [Server: {before.VoiceChannel.Guild}] and gained {xp}xp in the process [Time: {minutesInVc} minutes]";
-            await SendMessageAsync(guildId, "system.log", m);
+            await _messageService.SendMessageAsync(guildId, "system.log", m);
             _logger.LogInformation(m);
         }
         else
@@ -263,7 +313,7 @@ internal class LifetimeEventsHostedService : IHostedService
             voiceStats.isActive = true;
             _botDataService.UpdateUserVoiceStats(voiceStats);
             var m = $"{user} Moved voice from {before} to {after} [Server: {after.VoiceChannel.Guild}]";
-            await SendMessageAsync(guildId, "system.log", m);
+            await _messageService.SendMessageAsync(guildId, "system.log", m);
             _logger.LogInformation(m);
         }
     }

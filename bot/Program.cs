@@ -37,6 +37,10 @@ using bot.Features.NaturalLanguageProcessing;
 using bot.Features.Events;
 using v10.Messaging;
 using v10.Games.EightBall;
+using v10.Bot.Discord;
+using StackExchange.Redis;
+using LanguageExt;
+using System.Linq;
 
 Console.OutputEncoding = System.Text.Encoding.Unicode;
 
@@ -99,12 +103,8 @@ services.AddOpenTelemetryTracing(tracerProviderBuilder =>
         options.Enrich = (activity, eventName, rawObject) =>
         {
             if (eventName.Equals("OnStartActivity"))
-            {
                 if (rawObject is HttpWebRequest request)
-                {
                     activity.SetTag("requestUri", request.RequestUri);
-                }
-            }
         };
     });
     tracerProviderBuilder.AddAspNetCoreInstrumentation();
@@ -138,7 +138,6 @@ services.AddHealthChecks()
 services.AddSingleton<DiceGame>();
 services.AddSingleton(sc =>
 {
-    // var allExcept = GatewayIntents.All - GatewayIntents.GuildScheduledEvents;
     var config = new DiscordSocketConfig()
     {
         GatewayIntents = GatewayIntents.All ^ GatewayIntents.GuildScheduledEvents
@@ -146,6 +145,7 @@ services.AddSingleton(sc =>
     return new DiscordSocketClient(config);
 });
 
+services.AddSingleton<IDiscordMessageService, DiscordMessageService>();
 services.AddLazySingleton<INLPService, NLPService>();
 services.AddSingleton<CommandService>();
 services.AddSingleton<CommandHandlingService>();
@@ -172,6 +172,20 @@ services.Configure<MassTransitOptions>(
 
 services.AddSingleton<IDatabaseSettings>(sp =>
     sp.GetRequiredService<IOptions<DiscordBotDatabaseSettings>>().Value);
+
+builder.Services.AddSingleton(provider => new RedisConfiguration
+{
+    ConnectionString = builder.Configuration.GetConnectionString("AppCache")
+});
+
+builder.Services.AddSingleton(provider => { 
+    var redisConfiguration = provider.GetRequiredService<RedisConfiguration>();
+    var redis = ConnectionMultiplexer.Connect(redisConfiguration.ConnectionString);
+    var firstEndPoint = redis.GetEndPoints().FirstOrDefault();
+    return firstEndPoint == null
+        ? throw new ArgumentException("The endpoints collection was empty. Could not get an end point from Redis connection multiplexer.")
+        : redis.GetServer(firstEndPoint);
+});
 
 services.AddStackExchangeRedisCache(options =>
 {

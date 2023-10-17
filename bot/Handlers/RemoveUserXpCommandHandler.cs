@@ -8,6 +8,7 @@ using Discord;
 using v10.Data.Abstractions.Models;
 using System;
 using bot.Modules.Enums;
+using v10.Bot.Discord;
 
 namespace bot.Handlers;
 
@@ -16,15 +17,18 @@ public class RemoveUserXpCommandHandler : IRequestHandler<RemoveUserXpCommand, L
     private readonly BotDataService _botDataService;
     private readonly DiscordSocketClient _discordSocketClient;
     private readonly IMediator _mediator;
+    private readonly IDiscordMessageService _messageService;
 
     public RemoveUserXpCommandHandler(
             BotDataService botDataService,
             DiscordSocketClient discordSocketClient,
-            IMediator mediator)
+            IMediator mediator,
+            IDiscordMessageService messageService)
     {
         _botDataService = botDataService;
         _discordSocketClient = discordSocketClient;
         _mediator = mediator;
+        _messageService = messageService;
     }
 
     public async Task<LevelData> Handle(RemoveUserXpCommand request, CancellationToken cancellationToken)
@@ -57,25 +61,8 @@ public class RemoveUserXpCommandHandler : IRequestHandler<RemoveUserXpCommand, L
             XpType.Voice => newData.totalVoiceXp,
             _ => default
         };
-        await SendMessageAsync(request.GuildId, "system.log", $"Removed {request.Amount} {request.Type} xp from User {user.Mention}! New {request.Type} XP is {newXp}", allowedMentions: new AllowedMentions(AllowedMentionTypes.Everyone), cancellationToken: cancellationToken);
+        await _messageService.SendMessageAsync(request.GuildId, "system.log", $"Removed {request.Amount} {request.Type} xp from User {user.Mention}! New {request.Type} XP is {newXp}", allowedMentions: new AllowedMentions(AllowedMentionTypes.Everyone), cancellationToken: cancellationToken);
         return newData;
-    }
-
-    private async Task SendMessageAsync(ulong guildId, string route, string message, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null, MessageComponent components = null, ISticker[] stickers = null, Embed[] embeds = null, MessageFlags flags = MessageFlags.None, CancellationToken cancellationToken = default)
-    {
-        var guildData = _botDataService.GetGuild(guildId);
-        if (guildData == null) return;
-        if (!guildData.channelNotifications.ContainsKey(route)) return;
-        var channelId_str = guildData.channelNotifications[route];
-        if (string.IsNullOrWhiteSpace(channelId_str)) return;
-        if (!ulong.TryParse(channelId_str, out var channelId)) return;
-        await SendMessageAsync(channelId, message, isTTS, embed, options, allowedMentions, messageReference, components, stickers, embeds, flags, cancellationToken);
-    }
-
-    private async Task SendMessageAsync(ulong channelId, string message, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null, MessageComponent components = null, ISticker[] stickers = null, Embed[] embeds = null, MessageFlags flags = MessageFlags.None, CancellationToken cancellationToken = default)
-    {
-        var channel = _discordSocketClient.GetChannel(channelId);
-        await (channel as IMessageChannel)?.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference, components, stickers, embeds, flags);
     }
 }
 

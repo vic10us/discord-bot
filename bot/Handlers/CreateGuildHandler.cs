@@ -24,6 +24,7 @@ public class CreateGuildHandler : IRequestHandler<CreateGuildCommand, Dtos.Guild
         var x = new Guild
         {
             guildId = $"{request.GuildId}",
+            guildName = $"{request.GuildName}",
             channelNotifications = request.ChannelNotifications,
             staffRoles = request.StaffRoles
         };
