@@ -1,22 +1,29 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace bot.Features.NaturalLanguageProcessing;
 
 public static class StringExtensions
 {
-    public static string[] ExtractSentences(this string input)
+    public static IEnumerable<string> ExtractSentences(this string input)
     {
         string pattern = @"([^!.?]+[.!?])|([^!.?]+)\s*";
 
         MatchCollection matches = Regex.Matches(input, pattern);
-
-        string[] sentences = new string[matches.Count];
-
+        
         for (int i = 0; i < matches.Count; i++)
         {
-            sentences[i] = matches[i].Value.Trim();
+            yield return matches[i].Value.Trim();
         }
-
-        return sentences;
     }
+
+    //public static IEnumerable<string> ParseSentences(this string input)
+    //{
+    //    var sentences = input.ExtractSentences();
+    //    foreach (var sentence in sentences)
+    //    {
+    //        yield return sentence;
+    //    }
+    //}
 }

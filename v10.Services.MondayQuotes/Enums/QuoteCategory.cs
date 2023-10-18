@@ -1,4 +1,4 @@
-﻿namespace bot.Features.MondayQuotes;
+﻿namespace v10.Services.MondayQuotes.Enums;
 
 public enum QuoteCategory
 {

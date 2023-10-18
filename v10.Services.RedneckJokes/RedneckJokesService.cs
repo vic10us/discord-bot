@@ -12,7 +12,7 @@ public class RedneckJokeService : IRedneckJokeService
     {
         var result = new List<string>();
         var assembly = Assembly.GetExecutingAssembly();
-        var resourceName = $"v10.Services.RedneckJokes.redneckjokes.txt";
+        var resourceName = $"{assembly.GetName().Name}.Data.redneckjokes.txt";
         using var stream = assembly.GetManifestResourceStream(resourceName);
         using (var reader = new StreamReader(stream))
         {

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
-using bot.Features.MondayQuotes;
-using bot.Features.Pictures;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
@@ -10,7 +8,6 @@ using Microsoft.Extensions.Options;
 using bot.Features.Games;
 using bot;
 using Microsoft.AspNetCore.Builder;
-using bot.Services;
 using MediatR;
 using FluentValidation;
 using bot.PipelineBehaviors;
@@ -29,7 +26,6 @@ using Discord.Interactions;
 using Discord;
 using Microsoft.FeatureManagement;
 using bot.Features.FeatureManagement;
-using bot.Features.StrangeLaws;
 using LazyProxy.ServiceProvider;
 using bot.Features.NaturalLanguageProcessing;
 using bot.Features.Events;
@@ -41,6 +37,9 @@ using LanguageExt;
 using System.Linq;
 using v10.Services.DadJokes;
 using v10.Services.RedneckJokes;
+using v10.Services.MondayQuotes;
+using v10.Services.StrangeLaws;
+using v10.Services.Images;
 
 Console.OutputEncoding = System.Text.Encoding.Unicode;
 
@@ -151,10 +150,9 @@ services.AddSingleton<CommandService>();
 services.AddSingleton<CommandHandlingService>();
 services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
 services.AddSingleton<PictureService>();
-services.AddSingleton<IDadJokeService, DadJokeService>();
 services.AddSingleton<EightBallService>();
 services.AddTransient<Program>();
-services.AddSingleton<MondayQuotesService>();
+services.AddSingleton<IMondayQuotesService, MondayQuotesService>();
 services.AddSingleton<IRedneckJokeService, RedneckJokeService>();
 services.AddSingleton<IStrangeLawsService, StrangeLawsService>();
 services.AddSingleton<BotDataService>();
@@ -162,6 +160,7 @@ services.AddHttpClient<IDadJokeService>("DadJokeService", (s, c) =>
 {
     c.BaseAddress = new Uri(builder.Configuration["DadJokes:BaseUrl"]);
 });
+services.AddSingleton<IDadJokeService, DadJokeService>();
 services.AddHostedService<LifetimeEventsHostedService>();
 services.AddTransient<ImageApiService>();
 services.Configure<DiscordBotDatabaseSettings>(

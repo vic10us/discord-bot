@@ -1,20 +1,17 @@
 ﻿using Newtonsoft.Json;
 using v10.Services.DadJokes.Models;
-using v10.Services.Jokes;
 
 namespace v10.Services.DadJokes;
 
-public class DadJokeService : IDadJokeService, IJokeServiceImpl<IDadJoke>
+public class DadJokeService : IDadJokeService
 {
     private readonly HttpClient _httpClient;
 
     public DadJokeService(
-        HttpClient client, 
-        IDadJokeServiceConfiguration config
+        IHttpClientFactory clientFactory
         )
     {
-        _httpClient = client;
-        _httpClient.BaseAddress = new Uri(config.BaseUrl);
+        _httpClient = clientFactory.CreateClient("DadJokeService");
     }
 
     public async Task<IDadJoke> GetJokeAsync()

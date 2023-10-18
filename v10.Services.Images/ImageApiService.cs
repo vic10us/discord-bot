@@ -1,16 +1,12 @@
 ﻿using Newtonsoft.Json;
 using QRCoder;
-using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
-using System.IO;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace bot.Services;
+namespace v10.Services.Images;
 
 public class ImageApiService
 {
@@ -52,7 +48,7 @@ public class ImageApiService
 
     public Task<Stream> CreateQRCode()
     {
-        QRCodeGenerator qrGenerator = new QRCodeGenerator();
+        var qrGenerator = new QRCodeGenerator();
         var wifiPayload = new PayloadGenerator.WiFi("MyWiFi-SSID", "MyWiFi-Pass", PayloadGenerator.WiFi.Authentication.WPA);
         var qrCodeData = qrGenerator.CreateQrCode(wifiPayload);
         // QRCodeData qrCodeData = qrGenerator.CreateQrCode("The text which should be encoded.", QRCodeGenerator.ECCLevel.Q);

@@ -1,11 +1,7 @@
-﻿using bot.Features.Pictures;
-using bot.Queries;
-using MediatR;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using MediatR;
+using v10.Services.Images.Queries;
 
-namespace bot.Handlers;
+namespace v10.Services.Images.Handlers;
 
 public class GetPictureFromCategoryQueryHandler : IRequestHandler<GetPictureFromCategoryQuery, (string, Stream)>
 {

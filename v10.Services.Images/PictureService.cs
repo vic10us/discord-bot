@@ -1,11 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
-namespace bot.Features.Pictures;
+namespace v10.Services.Images;
 
 public class PictureService
 {

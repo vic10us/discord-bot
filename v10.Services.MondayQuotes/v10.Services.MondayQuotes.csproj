@@ -5,14 +5,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="redneckjokes.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Data\redneckjokes.txt" />
-  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="MediatR" Version="12.1.1" />
@@ -23,7 +15,19 @@
   </ItemGroup>
   
   <ItemGroup>
+    <None Remove="Funny.txt" />
+    <None Remove="Inspirational.txt" />
+    <None Remove="Popular.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Data\Funny.txt" />
+    <EmbeddedResource Include="Data\Inspirational.txt" />
+    <EmbeddedResource Include="Data\Popular.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Commands\" />
   </ItemGroup>
-  
+
 </Project>
