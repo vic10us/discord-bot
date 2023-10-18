@@ -1,10 +1,8 @@
-﻿using bot.Features.StrangeLaws;
-using bot.Queries;
-using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using MediatR;
+using v10.Services.StrangeLaws;
+using v10.Services.StrangeLaws.Queries;
 
-namespace bot.Handlers;
+namespace v10.Services.StrangeLaws.Handlers;
 
 public class GetStrangeLawResponseHandler : IRequestHandler<GetStrangeLawResponse, string>
 {

@@ -1,5 +1,5 @@
 ﻿using MediatR;
 
-namespace bot.Queries;
+namespace v10.Services.StrangeLaws.Queries;
 
 public class GetStrangeLawResponse : IRequest<string> { }

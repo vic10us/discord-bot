@@ -15,8 +15,11 @@
 		<ProjectReference Include="..\v10.Games.EightBall\v10.Games.EightBall.csproj" />
 		<ProjectReference Include="..\v10.Messaging\v10.Messaging.csproj" />
 		<ProjectReference Include="..\v10.Services.DadJokes\v10.Services.DadJokes.csproj" />
+		<ProjectReference Include="..\v10.Services.Images\v10.Services.Images.csproj" />
 		<ProjectReference Include="..\v10.Services.Jokes\v10.Services.Jokes.csproj" />
+		<ProjectReference Include="..\v10.Services.MondayQuotes\v10.Services.MondayQuotes.csproj" />
 		<ProjectReference Include="..\v10.Services.RedneckJokes\v10.Services.RedneckJokes.csproj" />
+		<ProjectReference Include="..\v10.Services.StrangeLaws\v10.Services.StrangeLaws.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -58,7 +61,6 @@
 		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc9" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9" />
-		<PackageReference Include="QRCoder" Version="1.4.3" />
 		<PackageReference Include="StackExchange.Redis" Version="2.6.122" />
 		<PackageReference Include="Svg" Version="3.4.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
@@ -76,19 +78,11 @@
 
 	<ItemGroup>
 		<None Remove="Features\MemeGenerator\Templates\TwitterMeme.html" />
-		<None Remove="Features\StrangeLaws\data.txt" />
 		<EmbeddedResource Include="Features\MemeGenerator\Templates\TwitterMeme.html" />
-		<None Remove="Features\MondayQuotes\funny.txt" />
-		<EmbeddedResource Include="Features\MondayQuotes\Funny.txt" />
-		<None Remove="Features\MondayQuotes\inspirational.txt" />
-		<EmbeddedResource Include="Features\MondayQuotes\Inspirational.txt" />
-		<None Remove="Features\MondayQuotes\popular.txt" />
-		<EmbeddedResource Include="Features\MondayQuotes\Popular.txt" />
 		<None Remove="Features\Images\Templates\rank.hbs" />
 		<EmbeddedResource Include="Features\Images\Templates\rank.hbs">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</EmbeddedResource>
-		<EmbeddedResource Include="Features\StrangeLaws\data.txt" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -110,7 +104,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Features\Events\Producers\" />
-	  <Folder Include="Features\RedneckJokes\" />
+	  <Folder Include="Services\" />
 	</ItemGroup>
 
 </Project>

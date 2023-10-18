@@ -7,13 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="redneckjokes.txt" />
+    <None Remove="data.txt" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Data\redneckjokes.txt" />
+    <EmbeddedResource Include="Data\data.txt" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="MediatR" Version="12.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
@@ -21,9 +21,9 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <Folder Include="Commands\" />
   </ItemGroup>
-  
+
 </Project>

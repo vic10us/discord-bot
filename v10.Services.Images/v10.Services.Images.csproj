@@ -7,23 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="redneckjokes.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Data\redneckjokes.txt" />
-  </ItemGroup>
-  
-  <ItemGroup>
+    <PackageReference Include="Discord.Net.Interactions" Version="3.12.0" />
     <PackageReference Include="MediatR" Version="12.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.4" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
+    <PackageReference Include="QRCoder" Version="1.4.3" />
+    <PackageReference Include="MimeTypes" Version="2.4.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="System.Drawing.Common" Version="5.0.3" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="Commands\" />
-  </ItemGroup>
-  
+
 </Project>

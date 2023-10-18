@@ -9,6 +9,9 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver.Linq;
 using v10.Services.DadJokes.Queries;
+using v10.Services.MondayQuotes.Queries;
+using v10.Services.RedneckJokes.Queries;
+using v10.Services.StrangeLaws.Queries;
 
 namespace bot.Modules;
 

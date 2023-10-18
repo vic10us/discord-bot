@@ -1,5 +1,5 @@
 ﻿using MediatR;
 
-namespace bot.Queries;
+namespace v10.Services.RedneckJokes.Queries;
 
 public class GetRedneckJokeResponse : IRequest<string> { }

@@ -1,36 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
+﻿using System.Reflection;
+using Microsoft.Extensions.Logging;
 
-namespace bot.Features.StrangeLaws;
+namespace v10.Services.StrangeLaws;
 
 public class StrangeLawsService : IStrangeLawsService
 {
     private readonly string[] _strangeLaws;
     private readonly List<string> _cache = new();
+    private readonly ILogger<StrangeLawsService> _logger;
 
-    public StrangeLawsService()
+    public StrangeLawsService(ILogger<StrangeLawsService> logger)
     {
         _strangeLaws = GetStrangeLaws().Result.ToArray();
+        _logger = logger;
     }
 
     protected async Task<IEnumerable<string>> GetStrangeLaws()
     {
         var result = new List<string>();
         var assembly = Assembly.GetExecutingAssembly();
-        var resourceName = $"bot.Features.StrangeLaws.data.txt";
-        using var stream = assembly.GetManifestResourceStream(resourceName);
-        using (var reader = new StreamReader(stream))
+        var resourceName = $"{assembly.GetName().Name}.Data.data.txt";
+        using var stream = assembly.GetManifestResourceStream(resourceName) ?? throw new Exception($"Resource {resourceName} not found in assembly {assembly.GetName().Name}.");
+        using var reader = new StreamReader(stream);
+        
+        while (!reader.EndOfStream)
         {
-            string lines;
-            while ((lines = await reader.ReadLineAsync()) != null)
-            {
-                if (string.IsNullOrWhiteSpace(lines)) continue;
-                result.Add(lines);
-            }
+            var line = await reader.ReadLineAsync();
+            if (string.IsNullOrWhiteSpace(line)) continue;
+            result.Add(line);
         }
 
         return result;
@@ -40,10 +37,8 @@ public class StrangeLawsService : IStrangeLawsService
     {
         try
         {
-            Console.WriteLine($"Cache contains {_cache.Count}");
+            _logger.LogInformation($"Cache contains {_cache.Count}");
             var quotes = _strangeLaws.Except(_cache).ToList();
-
-            // var quotes = (await GetStrangeLaws()).ToList();
 
             var r = new Random();
 
@@ -59,7 +54,7 @@ public class StrangeLawsService : IStrangeLawsService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _logger.LogError(e, "Error getting strange law");
             throw;
         }
     }

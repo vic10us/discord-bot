@@ -1,16 +1,14 @@
-﻿using bot.Features.MondayQuotes;
-using bot.Queries;
-using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using MediatR;
+using v10.Services.MondayQuotes;
+using v10.Services.MondayQuotes.Queries;
 
 namespace bot.Handlers;
 
 public class GetMondayJokeResponseHandler : IRequestHandler<GetMondayJokeResponse, string>
 {
-    private readonly MondayQuotesService service;
+    private readonly IMondayQuotesService service;
 
-    public GetMondayJokeResponseHandler(MondayQuotesService service)
+    public GetMondayJokeResponseHandler(IMondayQuotesService service)
     {
         this.service = service;
     }

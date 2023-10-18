@@ -2,11 +2,12 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using bot.Queries;
 using Discord;
 using Discord.Interactions;
 using MediatR;
 using Microsoft.OpenApi.Extensions;
+using v10.Services.Images.Enums;
+using v10.Services.Images.Queries;
 
 namespace bot.Modules;
 

@@ -1,10 +1,7 @@
-﻿using bot.Queries;
-using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
-using v10.Services.RedneckJokes;
+﻿using MediatR;
+using v10.Services.RedneckJokes.Queries;
 
-namespace bot.Handlers;
+namespace v10.Services.RedneckJokes.Handlers;
 
 public class GetRedneckJokeResponseHandler : IRequestHandler<GetRedneckJokeResponse, string>
 {

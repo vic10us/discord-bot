@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Discord.Interactions;
 
-namespace bot.Modules;
+namespace v10.Services.Images.Enums;
 
 public enum ImageType
 {

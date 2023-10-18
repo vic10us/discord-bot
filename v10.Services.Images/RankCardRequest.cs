@@ -1,11 +1,10 @@
-﻿namespace bot.Services;
+﻿namespace v10.Services.Images;
 
 public class RankCardRequest
 {
     public int rank;
     public string userDescriminator;
     public string cardTitle;
-
     public string userName { get; set; }
     public string avatarUrl { get; set; }
     public int textXp { get; set; }

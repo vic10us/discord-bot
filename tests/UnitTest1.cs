@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using bot.Features.Games;
-using bot.Features.MondayQuotes;
 using MongoDB.Driver;
+using v10.Services.MondayQuotes;
 using Xunit;
 using Xunit.Abstractions;
 

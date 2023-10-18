@@ -141,7 +141,7 @@ internal class LifetimeEventsHostedService : IHostedService
             return Task.CompletedTask;
 
         var nlpService = _serviceProvider.GetService<INLPService>();
-        var sentencesList = nlpService.GetSentences(arg.Content);
+        var sentencesList = nlpService.GetSentences(arg.Content).ToList();
 
         // a case insensitive regular expression that detects "I'm", "im" or "I am" and extracts the remainder of the sentence.
         var regex = new Regex(@"\b(i'm|im|i am)\s(.*?)(?=[\.,\!?\n]|$)", RegexOptions.IgnoreCase);

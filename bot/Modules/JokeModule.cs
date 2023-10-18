@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
-using bot.Queries;
 using Discord;
 using Discord.Commands;
 using MediatR;
 using v10.Services.DadJokes.Queries;
+using v10.Services.MondayQuotes.Queries;
+using v10.Services.RedneckJokes.Queries;
 
 namespace bot.Modules;
 
