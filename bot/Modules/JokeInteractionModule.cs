@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using bot.Modules.Enums;
-using bot.Queries;
 using Discord;
 using Discord.Interactions;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver.Linq;
+using Newtonsoft.Json.Linq;
+using StackExchange.Redis;
+using v10.Events.Core.Enums;
 using v10.Services.DadJokes.Queries;
 using v10.Services.MondayQuotes.Queries;
 using v10.Services.RedneckJokes.Queries;
@@ -15,13 +17,18 @@ using v10.Services.StrangeLaws.Queries;
 
 namespace bot.Modules;
 
-public class JokeInteractionModule : InteractionModuleBase<SocketInteractionContext>
+public class JokeInteractionModule : CustomInteractionModule<SocketInteractionContext>
 {
     private readonly IMediator _mediator;
-    private readonly ILogger<JokeInteractionModule> _logger;
 
-    public JokeInteractionModule(IMediator mediator, ILogger<JokeInteractionModule> logger)
+    public JokeInteractionModule(
+        IMediator mediator, 
+        ILogger<JokeInteractionModule> logger,
+        IServiceProvider serviceProvider
+        )
     {
+        var server = serviceProvider.GetRequiredService<IServer>();
+        _database = server.Multiplexer.GetDatabase();
         _mediator = mediator;
         _logger = logger;
     }
@@ -37,6 +44,18 @@ public class JokeInteractionModule : InteractionModuleBase<SocketInteractionCont
     [SlashCommand("joke", "Tell a joke")]
     public async Task TellJoke(JokeType jokeType)
     {
+        if (!EnsureSingle()) { return; }
+        try {
+            await TellJokeAsync(jokeType);
+        }
+        finally
+        {
+            ReleaseLock();
+        }
+    }
+
+    private async Task TellJokeAsync(JokeType jokeType)
+    {
         if (jokeType == JokeType.Random) jokeType = GetRandomJokeType();
         var joke = jokeType switch
         {
@@ -47,7 +66,7 @@ public class JokeInteractionModule : InteractionModuleBase<SocketInteractionCont
             _ => (await _mediator.Send(new GetDadJokeResponse())).Joke,
         };
         var builder = new ComponentBuilder()
-            .WithButton($"Another {jokeType} Joke!", $"joke:{jokeType}", ButtonStyle.Success);
+        .WithButton($"Another {jokeType} Joke!", $"joke:{jokeType}", ButtonStyle.Success);
 
         await RespondAsync(joke, components: builder.Build());
     }
@@ -55,8 +74,16 @@ public class JokeInteractionModule : InteractionModuleBase<SocketInteractionCont
     [ComponentInteraction("joke:*")]
     public async Task JokeButtonInteraction(string type)
     {
-        _logger.LogInformation("User pressed the {type} joke button", type);
-        var jokeType = Enum.Parse<JokeType>(type, true);
-        await TellJoke(jokeType);
+        if (!EnsureSingle()) { return; }
+        try
+        {
+            _logger.LogInformation("User pressed the {type} joke button", type);
+            var jokeType = Enum.Parse<JokeType>(type, true);
+            await TellJokeAsync(jokeType);
+        }
+        finally
+        {
+            ReleaseLock();
+        }
     }
 }

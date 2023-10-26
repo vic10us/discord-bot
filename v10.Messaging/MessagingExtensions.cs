@@ -7,7 +7,7 @@ namespace v10.Messaging;
 
 public static class MessagingExtensions
 {
-    public static IServiceCollection AddEventMessaging(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddEventMessaging(this IServiceCollection services, IConfiguration configuration, Func<IEnumerable<Assembly>> configureAssemblies = null)
     {
         services.AddMassTransit(busConfiguration =>
         {
@@ -19,13 +19,15 @@ public static class MessagingExtensions
             //    config.DatabaseConfiguration("");
             //});
 
-            var entryAssembly = new[] { Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() };
+            var entryAssemblies = configureAssemblies != null ? configureAssemblies.Invoke().ToArray() : new[] { Assembly.GetExecutingAssembly() };
+
+            // var entryAssemblies = new[] { Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() };
             // var executingAssembly = Assembly.GetExecutingAssembly();
 
-            busConfiguration.AddConsumers(entryAssembly);
-            busConfiguration.AddSagaStateMachines(entryAssembly);
-            busConfiguration.AddSagas(entryAssembly);
-            busConfiguration.AddActivities(entryAssembly);
+            busConfiguration.AddConsumers(entryAssemblies);
+            busConfiguration.AddSagaStateMachines(entryAssemblies);
+            busConfiguration.AddSagas(entryAssemblies);
+            busConfiguration.AddActivities(entryAssemblies);
 
             var massTransitOptions = new MassTransitOptions();
             configuration.GetSection("MassTransit").Bind(massTransitOptions);
@@ -40,8 +42,6 @@ public static class MessagingExtensions
                 rabbitMqConfiguration.ConfigureEndpoints(context);
             });
         });
-
-        // services.AddHostedService<Worker>();
 
         return services;
     }

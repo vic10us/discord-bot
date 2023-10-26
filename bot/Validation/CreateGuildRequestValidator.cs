@@ -1,5 +1,5 @@
-﻿using bot.Dtos;
-using FluentValidation;
+﻿using FluentValidation;
+using v10.Events.Core.Dtos;
 
 namespace bot.Validation;
 

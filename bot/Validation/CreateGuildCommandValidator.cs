@@ -1,5 +1,5 @@
-﻿using bot.Commands;
-using FluentValidation;
+﻿using FluentValidation;
+using v10.Events.Core.Commands;
 
 namespace bot.Validation;
 

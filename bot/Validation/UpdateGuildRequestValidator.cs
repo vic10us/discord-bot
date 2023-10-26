@@ -1,5 +1,5 @@
-﻿using bot.Dtos;
-using FluentValidation;
+﻿using FluentValidation;
+using v10.Events.Core.Dtos;
 
 namespace bot.Validation;
 
@@ -7,10 +7,11 @@ public class UpdateGuildRequestValidator : AbstractValidator<UpdateGuildRequest>
 {
     public UpdateGuildRequestValidator()
     {
-        Transform(x => x.GuildId, StringToUInt64)
-            .NotNull()
+        RuleFor(x => StringToUInt64(x.GuildId))
             .GreaterThan((ulong)0)
-            .LessThan(ulong.MaxValue);
+            .LessThan(ulong.MaxValue)
+            .OverridePropertyName("GuildId");
+
         RuleFor(x => x.ChannelNotifications)
             .NotNull();
     }

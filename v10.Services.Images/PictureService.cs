@@ -2,7 +2,7 @@
 
 namespace v10.Services.Images;
 
-public class PictureService
+public class PictureService : IPictureService
 {
     private readonly HttpClient _http;
     private readonly IConfiguration _config;

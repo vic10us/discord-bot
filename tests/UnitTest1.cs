@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using bot.Features.Games;
 using MongoDB.Driver;
+using v10.Games.Dice;
 using v10.Services.MondayQuotes;
 using Xunit;
 using Xunit.Abstractions;
@@ -383,7 +383,7 @@ public class UnitTest1
     [MemberData(nameof(RollCountData))]
     public void CanGetNextRoll(int iteration)
     {
-        var dc = new DiceGame();
+        var dc = new DiceGameService();
         var nextRoll = dc.GetNextRoll(6);
         _testOutputHelper.WriteLine($"[{iteration}]Rolled: {nextRoll}");
         Assert.True(nextRoll > 0 && nextRoll <= 6);
@@ -393,8 +393,8 @@ public class UnitTest1
     [MemberData(nameof(RollCountData))]
     public void CanGetNextRolls(int iteration)
     {
-        var dc = new DiceGame();
-        var nextRolls = dc.GetNextRolls();
+        var dc = new DiceGameService();
+        var nextRolls = dc.GetNextRolls().ToList();
         var nextRollsDelim = nextRolls.Select(v => $"{v}").Aggregate((o, n) => $"{o}, {n}");
         _testOutputHelper.WriteLine($"[{iteration}]Rolls: {nextRollsDelim}, Sum: {nextRolls.Sum(v => v)}");
         Assert.True(nextRolls.Count == 2 && nextRolls.All(v => v > 0 && v <= 6) && nextRolls.Sum(v => v) <= 12);
