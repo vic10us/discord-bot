@@ -5,13 +5,13 @@ namespace v10.Services.StrangeLaws;
 
 public class StrangeLawsService : IStrangeLawsService
 {
-    private readonly string[] _strangeLaws;
+    private string[] _strangeLaws;
     private readonly List<string> _cache = new();
     private readonly ILogger<StrangeLawsService> _logger;
 
     public StrangeLawsService(ILogger<StrangeLawsService> logger)
     {
-        _strangeLaws = GetStrangeLaws().Result.ToArray();
+        // _strangeLaws = GetStrangeLaws().Result.ToArray();
         _logger = logger;
     }
 
@@ -33,8 +33,9 @@ public class StrangeLawsService : IStrangeLawsService
         return result;
     }
 
-    public Task<string> Get()
+    public async Task<string> Get()
     {
+        _strangeLaws ??= (await GetStrangeLaws()).ToArray();
         try
         {
             _logger.LogInformation($"Cache contains {_cache.Count}");
@@ -50,7 +51,7 @@ public class StrangeLawsService : IStrangeLawsService
                 _cache.RemoveAt(0);
             }
 
-            return Task.FromResult(resp);
+            return resp;
         }
         catch (Exception e)
         {

@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using v10.Services.StrangeLaws;
 using v10.Services.StrangeLaws.Queries;
 
 namespace v10.Services.StrangeLaws.Handlers;

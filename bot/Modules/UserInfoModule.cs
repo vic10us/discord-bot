@@ -1,14 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Net.Http;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using HandlebarsDotNet;
-using v10.Data.Abstractions.Models;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 using v10.Data.MongoDB;
 using v10.Services.Images;
 
@@ -16,8 +15,22 @@ namespace bot.Modules;
 
 public class UserInfoModule : CustomModule<SocketCommandContext>
 {
-    public ImageApiService ImageService { get; set; }
-    public BotDataService BotDataService { get; set; }
+    public IImageApiService ImageService { get; set; }
+    public IBotDataService BotDataService { get; set; }
+
+    public UserInfoModule(
+        IServiceProvider serviceProvider,
+        IImageApiService imageService,
+        IBotDataService botDataService,
+        ILogger<UserInfoModule> logger
+        )
+    {
+        var server = serviceProvider.GetRequiredService<IServer>();
+        _database = server.Multiplexer.GetDatabase();
+        _logger = logger;
+        ImageService = imageService;
+        BotDataService = botDataService;
+    }
 
     public static class TemplateConstants
     {
@@ -30,86 +43,59 @@ public class UserInfoModule : CustomModule<SocketCommandContext>
     [Alias("r")]
     public async Task GetNewRank(IUser user = null)
     {
-        user ??= Context.User;
-        var guildId = Context.Guild?.Id ?? 0;
-        var userId = user.Id;
-        var userData = BotDataService.GetLevelData(guildId, userId);
-        var data = new RankCardRequest();
-
-        var gaid = (user as SocketGuildUser)?.GuildAvatarId;
-        var url = (string.IsNullOrWhiteSpace(gaid)) ? user.GetAvatarUrl(ImageFormat.Png)
-            : $"https://cdn.discordapp.com/guilds/{guildId}/users/{userId}/avatars/{gaid}.png";
-        var guildUserAvatarUrl = $"https://cdn.discordapp.com/guilds/{guildId}/users/{userId}/avatars/{gaid}.png";
-        var userAvatarUrl = user.GetAvatarUrl(ImageFormat.Png);
-        var guser = user as SocketGuildUser;
-        
-        data.rank = (int)BotDataService.GetUserRank(guildId, userId);
-        data.userName = $"{guser.DisplayName}";
-        data.cardTitle = " ";
-        data.userDescriminator = user.Discriminator;
-        var (textLevel, textXp, xpForNextTextLevel) = BotDataService.ComputeLevelAndXp(userData.level, userData.xp);
-        var (voiceLevel, voiceXp, xpForNextVoiceLevel) = BotDataService.ComputeLevelAndXp(userData.voiceLevel, userData.voiceXp);
-        data.textLevel = (int)textLevel;
-        data.textXp = (int)textXp;
-        data.xpForNextTextLevel = (int)xpForNextTextLevel;
-        data.voiceLevel = (int)voiceLevel;
-        data.voiceXp = (int)voiceXp;
-        data.xpForNextVoiceLevel = (int)xpForNextVoiceLevel;
-        data.avatarUrl = url;
-
-        var imageStream = await ImageService.CreateRankCard(data);
-        await SendImageEmbed(imageStream, $"{user.Username} Rank Card", TemplateConstants.RankImage, Color.Blue);
-    }
-
-    [Command("oldrank")]
-    [Alias("or")]
-    public async Task GetRank(IUser user = null)
-    {
-        user ??= Context.User;
-        var guildId = Context.Guild?.Id ?? 0;
-        var userId = user.Id;
-        var userData = BotDataService.GetLevelData(guildId, userId);
-
-        var source = await GetHandlebarsImageTemplate(TemplateConstants.Rank);
-        var template = Handlebars.Compile(source);
-        var data = new RankData();
-        var gaid = (user as SocketGuildUser)?.GuildAvatarId;
-        var url = (string.IsNullOrWhiteSpace(gaid)) ? user.GetAvatarUrl(ImageFormat.Png)
-            : $"https://cdn.discordapp.com/guilds/{guildId}/users/{userId}/avatars/{gaid}.png";
-        var guildUserAvatarUrl = $"https://cdn.discordapp.com/guilds/{guildId}/users/{userId}/avatars/{gaid}.png";
-        var userAvatarUrl = user.GetAvatarUrl(ImageFormat.Png);
-
+        if (!EnsureSingle()) { return; }
         try
         {
-            var (ct, profileImageData) = await DownloadImage(url);
-            data.avatar.image = $"data:{ct};base64,{Convert.ToBase64String(profileImageData)}";
+            user ??= Context.User;
+            var guildId = Context.Guild?.Id ?? 0;
+            var userId = user.Id;
+            var userData = BotDataService.GetLevelData(guildId, userId);
+            var data = new RankCardRequest();
+
+            var gaid = (user as SocketGuildUser)?.GuildAvatarId;
+            var url = (string.IsNullOrWhiteSpace(gaid)) ? user.GetAvatarUrl(ImageFormat.Png)
+                : $"https://cdn.discordapp.com/guilds/{guildId}/users/{userId}/avatars/{gaid}.png";
+            var guildUserAvatarUrl = $"https://cdn.discordapp.com/guilds/{guildId}/users/{userId}/avatars/{gaid}.png";
+            var userAvatarUrl = user.GetAvatarUrl(ImageFormat.Png);
+            var guser = user as SocketGuildUser;
+
+            data.rank = (int)BotDataService.GetUserRank(guildId, userId);
+            data.userName = $"{guser.DisplayName}";
+            data.cardTitle = " ";
+            data.userDescriminator = user.Discriminator;
+            var (textLevel, textXp, xpForNextTextLevel) = BotDataService.ComputeLevelAndXp(userData.level, userData.xp);
+            var (voiceLevel, voiceXp, xpForNextVoiceLevel) = BotDataService.ComputeLevelAndXp(userData.voiceLevel, userData.voiceXp);
+            data.textLevel = (int)textLevel;
+            data.textXp = (int)textXp;
+            data.xpForNextTextLevel = (int)xpForNextTextLevel;
+            data.voiceLevel = (int)voiceLevel;
+            data.voiceXp = (int)voiceXp;
+            data.xpForNextVoiceLevel = (int)xpForNextVoiceLevel;
+            data.avatarUrl = url;
+
+            var imageStream = await ImageService.CreateRankCard(data);
+            await SendImageEmbed(imageStream, $"{user.Username} Rank Card", TemplateConstants.RankImage, Color.Blue);
         }
-        catch
+        finally
         {
-            data.avatar.image = $"data:image/png;base64,{TemplateConstants.OnePixelImage}";
+            ReleaseLock();
         }
-
-        data.name = user.Username;
-        data.code = user.Discriminator;
-        data.rank = BotDataService.GetUserRank(guildId, userId);
-        (data.level, data.xp.current, data.xp.required) = BotDataService.ComputeLevelAndXp(userData.level, userData.xp);
-        (data.voiceLevel, data.voiceXp.current, data.voiceXp.required) = BotDataService.ComputeLevelAndXp(userData.voiceLevel, userData.voiceXp);
-
-        // data.xp.current = 500;
-        data.statusColor = GetStatusColor(user.Status);
-
-        var svg = template(data);
-
-        var imageStream = await ImageService.ConvertSvgImage(svg);
-        await SendImageEmbed(imageStream, $"{user.Username}#{user.Discriminator} Rank Card", TemplateConstants.RankImage, Color.Blue);
     }
 
     [Command("userinfo")]
     public async Task UserInfoAsync(IUser user = null)
     {
-        user ??= Context.User;
-        var message = $"{user} is {user.Id} [{user.Status}] {user.GetAvatarUrl()}";
-        await ReplyAsync(message);
+        if (!EnsureSingle()) { return; }
+        try
+        {
+            user ??= Context.User;
+            var message = $"{user} is {user.Id} [{user.Status}] {user.GetAvatarUrl()}";
+            await ReplyAsync(message);
+        }
+        finally
+        {
+            ReleaseLock();
+        }
     }
 
     // Ban a user
@@ -121,38 +107,53 @@ public class UserInfoModule : CustomModule<SocketCommandContext>
     [RequireBotPermission(GuildPermission.BanMembers)]
     public async Task BanUserAsync(IGuildUser user, [Remainder] string reason = null)
     {
-        //user.Guild.AddGuildUserAsync()
-        await user.Guild.AddBanAsync(user, reason: reason);
-        await ReplyAsync("ok!");
+        if (!EnsureSingle()) { return; }
+        try
+        {
+            //user.Guild.AddGuildUserAsync()
+            await user.Guild.AddBanAsync(user, reason: reason);
+            await ReplyAsync("ok!");
+        }
+        finally
+        {
+            ReleaseLock();
+        }
     }
 
     [Command("addxp")]
     [RequireUserPermission(GuildPermission.ManageRoles)]
     public Task AddXp(IUser user, ulong amount)
     {
-        var guildId = Context.Guild?.Id ?? 0;
-        var userId = user.Id;
-        _ = BotDataService.AddXp(guildId, userId, amount);
-        return Task.CompletedTask;
+        if (!EnsureSingle()) { return Task.CompletedTask; }
+        try
+        {
+            var guildId = Context.Guild?.Id ?? 0;
+            var userId = user.Id;
+            _ = BotDataService.AddXp(guildId, userId, amount);
+            return Task.CompletedTask;
+        }
+        finally
+        {
+            ReleaseLock();
+        }
     }
 
     [Command("removexp")]
     [RequireUserPermission(GuildPermission.ManageRoles)]
     public Task RemoveXp(IUser user, ulong amount)
     {
-        var guildId = Context.Guild?.Id ?? 0;
-        var userId = user.Id;
-        _ = BotDataService.RemoveXp(guildId, userId, amount);
-        return Task.CompletedTask;
-    }
-
-    private static async Task<string> GetHandlebarsImageTemplate(string name)
-    {
-        var assembly = Assembly.GetEntryAssembly();
-        var resourceStream = assembly?.GetManifestResourceStream($"bot.Features.Images.Templates.{name}");
-        if (resourceStream == null) return "";
-        using var reader = new StreamReader(resourceStream, Encoding.UTF8);
-        return await reader.ReadToEndAsync();
+        if (!EnsureSingle()) { return Task.CompletedTask; }
+        try
+        {
+            var guildId = Context.Guild?.Id ?? 0;
+            var userId = user.Id;
+            _ = BotDataService.RemoveXp(guildId, userId, amount);
+            return Task.CompletedTask;
+        }
+        finally
+        {
+            ReleaseLock();
+        }
     }
 
     private static byte[] CopyToArray(Stream stream)
@@ -183,13 +184,6 @@ public class UserInfoModule : CustomModule<SocketCommandContext>
         //var image = await client.GetStreamAsync(new Uri(url));
         return (ct, CopyToArray(str));
     }
-
-    //private static async Task<byte[]> DownloadImage(string url)
-    //{
-    //    using var client = new HttpClient();
-    //    var image = await client.GetStreamAsync(new Uri(url));
-    //    return CopyToArray(image);
-    //}
 
     private static string GetStatusColor(UserStatus status)
     {

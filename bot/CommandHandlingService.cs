@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using bot.Commands;
 using bot.Features.FeatureManagement;
 using bot.Features.Metrics;
-using bot.Modules.Enums;
 using Discord;
 using Discord.Commands;
 using Discord.Interactions;
@@ -15,7 +13,10 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
+using StackExchange.Redis;
 using v10.Data.MongoDB;
+using v10.Events.Core.Commands;
+using v10.Events.Core.Enums;
 
 namespace bot;
 
@@ -26,15 +27,19 @@ public class CommandHandlingService
     private readonly InteractionService _interactions;
     private readonly IServiceProvider _services;
     private readonly ILogger<CommandHandlingService> _logger;
-    private readonly BotDataService _botDataService;
+    private readonly IBotDataService _botDataService;
     private readonly IMediator _mediator;
+
+    private readonly IDatabase _database;
+    private static readonly string MachineName = $"{Environment.MachineName}{Guid.NewGuid()}";
+    private static readonly RedisValue RedisValue = MachineName;
 
     public CommandHandlingService(IServiceProvider services, ILogger<CommandHandlingService> logger, IMediator mediator)
     {
         _commands = services.GetRequiredService<CommandService>();
         _interactions = services.GetRequiredService<InteractionService>();
         _client = services.GetRequiredService<DiscordSocketClient>();
-        _botDataService = services.GetRequiredService<BotDataService>();
+        _botDataService = services.GetRequiredService<IBotDataService>();
         _services = services;
         _logger = logger;
 
@@ -44,6 +49,9 @@ public class CommandHandlingService
         // if it qualifies as a command.
         _client.MessageReceived += MessageReceivedAsync;
         _mediator = mediator;
+
+        var server = services.GetRequiredService<IServer>();
+        _database = server.Multiplexer.GetDatabase();
     }
 
     protected internal IEnumerable<Type> GetEnabledModules()
@@ -56,13 +64,13 @@ public class CommandHandlingService
         
         return types.Where(t =>
         {
-            var hasFeatureGate = t.GetCustomAttributes(typeof(FeatureModuleGateAttribute), true).FirstOrDefault() as FeatureModuleGateAttribute;
-            if (hasFeatureGate == null) return true;
+            if (t.GetCustomAttributes(typeof(FeatureModuleGateAttribute), true).FirstOrDefault() is not FeatureModuleGateAttribute hasFeatureGate) return true;
             return hasFeatureGate.Features.Any(feature => featureManager.IsEnabledAsync(feature).GetAwaiter().GetResult());
         });
     }
 
-    protected internal async Task AddEnabledModulesAsync() {
+    protected internal async Task AddEnabledModulesAsync() 
+    {
         var enabledModules = GetEnabledModules();
         foreach (var module in enabledModules)
         {
@@ -75,6 +83,7 @@ public class CommandHandlingService
         // Register modules that are public and inherit ModuleBase<T>.
         // await _commands.AddModuleAsync<MusicModule>(_services);
         await AddEnabledModulesAsync();
+
         // await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
         await _interactions.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
 
@@ -107,27 +116,47 @@ public class CommandHandlingService
         }
     }
 
-    private Task ComponentCommandExecuted(ComponentCommandInfo arg1, Discord.IInteractionContext arg2, Discord.Interactions.IResult arg3)
+    private Task ComponentCommandExecuted(ComponentCommandInfo arg1, IInteractionContext arg2, Discord.Interactions.IResult arg3)
     {
         return Task.CompletedTask;
     }
 
-    private Task ContextCommandExecuted(ContextCommandInfo arg1, Discord.IInteractionContext arg2, Discord.Interactions.IResult arg3)
+    private Task ContextCommandExecuted(ContextCommandInfo arg1, IInteractionContext arg2, Discord.Interactions.IResult arg3)
     {
         return Task.CompletedTask;
     }
 
-    private Task SlashCommandExecuted(SlashCommandInfo arg1, Discord.IInteractionContext arg2, Discord.Interactions.IResult arg3)
+    private Task SlashCommandExecuted(SlashCommandInfo arg1, IInteractionContext arg2, Discord.Interactions.IResult arg3)
     {
         return Task.CompletedTask;
     }
 
-    private Task ModalCommandExecuted(ModalCommandInfo arg1, Discord.IInteractionContext arg2, Discord.Interactions.IResult arg3)
+    private Task ModalCommandExecuted(ModalCommandInfo arg1, IInteractionContext arg2, Discord.Interactions.IResult arg3)
     {
         return Task.CompletedTask;
     }
 
     private async Task MessageReceivedAsync(SocketMessage rawMessage)
+    {
+        RedisKey redisKey = $"bot:messages_{rawMessage.Id}";
+        if (!_database.LockTake(redisKey, RedisValue, TimeSpan.FromSeconds(1)))
+        {
+            var machineName = _database.LockQuery(redisKey);
+            _logger.LogWarning("Message {rawMessageId} already being processed by {machineName}", rawMessage.Id, machineName);
+            return;
+        }
+
+        try
+        {
+            await HandleMessageAsync(rawMessage);
+        }
+        finally
+        {
+            _database.LockRelease(redisKey, RedisValue);
+        }
+    }
+
+    private async Task HandleMessageAsync(SocketMessage rawMessage)
     {
         // Ignore system messages, or messages from other bots
         if (rawMessage is not SocketUserMessage { Source: MessageSource.User } message) return;
@@ -185,7 +214,27 @@ public class CommandHandlingService
             });
     }
 
-    private static async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, Discord.Commands.IResult result)
+    private async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, Discord.Commands.IResult result)
+    {
+        RedisKey redisKey = $"bot:commands_{context.Message.Id}";
+        if (!_database.LockTake(redisKey, RedisValue, TimeSpan.FromSeconds(1)))
+        {
+            var machineName = _database.LockQuery(redisKey);
+            _logger.LogWarning("Command {commandName} already being processed by {machineName}", command.Value.Name, machineName);
+            return;
+        }
+
+        try 
+        {
+            await HandleCommandAsync(command, context, result);
+        }
+        finally
+        {
+            _database.LockRelease(redisKey, RedisValue);
+        }
+    }
+
+    private static async Task HandleCommandAsync(Optional<CommandInfo> command, ICommandContext context, Discord.Commands.IResult result)
     {
         // command is unspecified when there was a search failure (command not found); we don't care about these errors
         if (!command.IsSpecified)

@@ -8,7 +8,7 @@ using v10.Data.Abstractions.Models;
 
 namespace v10.Data.MongoDB;
 
-public class BotDataService
+public class BotDataService : IBotDataService
 {
     private readonly IMongoCollection<LevelData> _levelData;
     private readonly IMongoCollection<MessageThrottle> _messageThottles;
@@ -41,7 +41,7 @@ public class BotDataService
         }
     }
 
-    public static (ulong, ulong, ulong) ComputeLevelAndXp(ulong lvl, ulong xp, Action<ulong> cb = null)
+    public (ulong, ulong, ulong) ComputeLevelAndXp(ulong lvl, ulong xp, Action<ulong> cb = null)
     {
         while (xp >= BotLeveling.XpNeededForLevel(lvl))
         {

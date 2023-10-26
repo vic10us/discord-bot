@@ -1,7 +1,10 @@
 ﻿using bot.Features.FeatureManagement;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
+using StackExchange.Redis;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,8 +21,15 @@ public sealed class MusicModule : CustomModule<SocketCommandContext>
     private readonly LavaNode _lavaNode;
     private readonly IFeatureManager _featureManager;
 
-    public MusicModule(IFeatureManager featureManager)
+    public MusicModule(
+        IFeatureManager featureManager,
+        IServiceProvider serviceProvider,
+        ILogger<MusicModule> logger
+        )
     {
+        var server = serviceProvider.GetRequiredService<IServer>();
+        _database = server.Multiplexer.GetDatabase();
+        _logger = logger;
         _featureManager = featureManager;
     }
 
@@ -51,192 +61,256 @@ public sealed class MusicModule : CustomModule<SocketCommandContext>
     [Command("join")]
     public async Task JoinAsync()
     {
-        if (_lavaNode.HasPlayer(Context.Guild))
-        {
-            await ReplyAsync("I'm already connected to a voice channel!");
-            return;
-        }
-
-        var voiceState = Context.User as IVoiceState;
-
-        if (voiceState?.VoiceChannel == null)
-        {
-            await ReplyAsync("You must be connected to a voice channel!");
-            return;
-        }
-
+        if (!EnsureSingle()) { return; }
         try
         {
-            await _lavaNode.JoinAsync(voiceState.VoiceChannel, Context.Channel as ITextChannel);
-            await ReplyAsync($"Joined {voiceState.VoiceChannel.Name}!");
+            if (_lavaNode.HasPlayer(Context.Guild))
+            {
+                await ReplyAsync("I'm already connected to a voice channel!");
+                return;
+            }
+
+            var voiceState = Context.User as IVoiceState;
+
+            if (voiceState?.VoiceChannel == null)
+            {
+                await ReplyAsync("You must be connected to a voice channel!");
+                return;
+            }
+
+            try
+            {
+                await _lavaNode.JoinAsync(voiceState.VoiceChannel, Context.Channel as ITextChannel);
+                await ReplyAsync($"Joined {voiceState.VoiceChannel.Name}!");
+            }
+            catch (Exception exception)
+            {
+                await ReplyAsync(exception.Message);
+            }
         }
-        catch (Exception exception)
+        finally
         {
-            await ReplyAsync(exception.Message);
+            ReleaseLock();
         }
     }
 
     [Command("play")]
     public async Task PlayAsync([Remainder] string searchQuery)
     {
-        if (string.IsNullOrWhiteSpace(searchQuery))
+        if (!EnsureSingle()) { return; }
+        try
         {
-            await ReplyAsync("Please provide search terms.");
-            return;
-        }
-
-        if (!_lavaNode.HasPlayer(Context.Guild))
-        {
-            await ReplyAsync("I'm not connected to a voice channel.");
-            return;
-        }
-
-        var searchResponse = await _lavaNode.SearchAsync(SearchType.YouTube, searchQuery);
-        // var searchResponse = await _lavaNode.SearchAsync(SearchType.Direct, "/media/local/music/Other/Sorted/Tom MacDonald/The Brave (2022)/01 Whiteboyz.mp3");
-        //var searchResponse = await _lavaNode.SearchAsync(SearchType.Direct, searchQuery);
-        // Whiteboyz
-
-        if (searchResponse.Status == SearchStatus.LoadFailed ||
-            searchResponse.Status == SearchStatus.NoMatches)
-        {
-            await ReplyAsync($"I wasn't able to find anything for `{searchQuery}`.");
-            return;
-        }
-
-        var firstTrack = searchResponse.Tracks.First();
-        _lavaNode.TryGetPlayer(Context.Guild, out var player);
-
-        if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
-        {
-            if (!string.IsNullOrWhiteSpace(searchResponse.Playlist.Name))
+            if (string.IsNullOrWhiteSpace(searchQuery))
             {
-                foreach (var t in searchResponse.Tracks)
-                {
-                    player.Vueue.Enqueue(t);
-                }
-
-                await ReplyAsync($"Enqueued {searchResponse.Tracks.Count} tracks.");
+                await ReplyAsync("Please provide search terms.");
                 return;
             }
 
-            player.Vueue.Enqueue(firstTrack);
-            await ReplyAsync($"Enqueued: {firstTrack.Title}");
-            return;
-        }
+            if (!_lavaNode.HasPlayer(Context.Guild))
+            {
+                await ReplyAsync("I'm not connected to a voice channel.");
+                return;
+            }
 
-        if (string.IsNullOrWhiteSpace(searchResponse.Playlist.Name))
-        {
-            await player.PlayAsync(firstTrack);
-            await ReplyAsync($"Now Playing: {firstTrack.Title}");
-            return;
-        }
+            var searchResponse = await _lavaNode.SearchAsync(SearchType.YouTube, searchQuery);
+            // var searchResponse = await _lavaNode.SearchAsync(SearchType.Direct, "/media/local/music/Other/Sorted/Tom MacDonald/The Brave (2022)/01 Whiteboyz.mp3");
+            //var searchResponse = await _lavaNode.SearchAsync(SearchType.Direct, searchQuery);
+            // Whiteboyz
 
-        for (var i = 0; i < searchResponse.Tracks.Count; i++)
-        {
-            if (i == 0)
+            if (searchResponse.Status == SearchStatus.LoadFailed ||
+                searchResponse.Status == SearchStatus.NoMatches)
+            {
+                await ReplyAsync($"I wasn't able to find anything for `{searchQuery}`.");
+                return;
+            }
+
+            var firstTrack = searchResponse.Tracks.First();
+            _lavaNode.TryGetPlayer(Context.Guild, out var player);
+
+            if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
+            {
+                if (!string.IsNullOrWhiteSpace(searchResponse.Playlist.Name))
+                {
+                    foreach (var t in searchResponse.Tracks)
+                    {
+                        player.Vueue.Enqueue(t);
+                    }
+
+                    await ReplyAsync($"Enqueued {searchResponse.Tracks.Count} tracks.");
+                    return;
+                }
+
+                player.Vueue.Enqueue(firstTrack);
+                await ReplyAsync($"Enqueued: {firstTrack.Title}");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(searchResponse.Playlist.Name))
             {
                 await player.PlayAsync(firstTrack);
                 await ReplyAsync($"Now Playing: {firstTrack.Title}");
+                return;
             }
-            else
-            {
-                player.Vueue.Enqueue(searchResponse.Tracks.ElementAt(i));
-            }
-        }
 
-        await ReplyAsync($"Enqueued {searchResponse.Tracks.Count} tracks.");
+            for (var i = 0; i < searchResponse.Tracks.Count; i++)
+            {
+                if (i == 0)
+                {
+                    await player.PlayAsync(firstTrack);
+                    await ReplyAsync($"Now Playing: {firstTrack.Title}");
+                }
+                else
+                {
+                    player.Vueue.Enqueue(searchResponse.Tracks.ElementAt(i));
+                }
+            }
+
+            await ReplyAsync($"Enqueued {searchResponse.Tracks.Count} tracks.");
+        }
+        finally
+        {
+            ReleaseLock();
+        }
     }
 
     [Command("skip")]
     public async Task Skip()
     {
-        var player = await Check();
-        if (player == null) return;
-
-        if (player.Vueue.Count == 0)
+        if (!EnsureSingle()) { return; }
+        try
         {
-            await ReplyAsync("There are no more songs in the queue!");
-            return;
-        }
+            var player = await Check();
+            if (player == null) return;
 
-        await player.SkipAsync();
-        await ReplyAsync($"Now playing {player.Track.Title} from {player.Track.Author} on {player.Track.Source}");
+            if (player.Vueue.Count == 0)
+            {
+                await ReplyAsync("There are no more songs in the queue!");
+                return;
+            }
+
+            await player.SkipAsync();
+            await ReplyAsync($"Now playing {player.Track.Title} from {player.Track.Author} on {player.Track.Source}");
+        }
+        finally
+        {
+            ReleaseLock();
+        }
     }
 
     [Command("pause")]
     public async Task Pause()
     {
-        var player = await Check();
-        if (player == null) return;
-        if (player.PlayerState == PlayerState.Paused)
+        if (!EnsureSingle()) return;
+        try
         {
-            await ReplyAsync("Nothing is playing at the moment");
-            return;
+            var player = await Check();
+            if (player == null) return;
+            if (player.PlayerState == PlayerState.Paused)
+            {
+                await ReplyAsync("Nothing is playing at the moment");
+                return;
+            }
+            await player.PauseAsync();
+            await ReplyAsync($"Paused the music");
         }
-        await player.PauseAsync();
-        await ReplyAsync($"Paused the music");
+        finally
+        {
+            ReleaseLock();
+        }
     }
 
     [Command("resume")]
     public async Task Resume()
     {
-        var player = await Check();
-        if (player == null) return;
-        if (player.PlayerState == PlayerState.Playing)
+        if (!EnsureSingle()) return;
+        try
         {
-            await ReplyAsync("Music is already playing");
-            return;
+            var player = await Check();
+            if (player == null) return;
+            if (player.PlayerState == PlayerState.Playing)
+            {
+                await ReplyAsync("Music is already playing");
+                return;
+            }
+            await player.ResumeAsync();
+            await ReplyAsync($"Resumed playing the music");
         }
-        await player.ResumeAsync();
-        await ReplyAsync($"Resumed playing the music");
+        finally
+        {
+            ReleaseLock();
+        }
     }
 
     [Command("leave")]
     public async Task Leave()
     {
-        var player = await Check();
-        if (player == null) return;
-        var voiceState = Context.User as IVoiceState;
-        await _lavaNode.LeaveAsync(voiceState.VoiceChannel);
-        await ReplyAsync("Left voice channel... sadness");
+        if (!EnsureSingle()) return;
+        try
+        {
+            var player = await Check();
+            if (player == null) return;
+            var voiceState = Context.User as IVoiceState;
+            await _lavaNode.LeaveAsync(voiceState.VoiceChannel);
+            await ReplyAsync("Left voice channel... sadness");
+        }
+        finally
+        {
+            ReleaseLock();
+        }
     }
 
     [Command("stop")]
     public async Task Stop()
     {
-        var player = await Check();
-        if (player == null) return;
-        if (player.PlayerState == PlayerState.Stopped)
+        if (!EnsureSingle()) return;
+        try
         {
-            await ReplyAsync("There is nothing playing");
-            return;
+            var player = await Check();
+            if (player == null) return;
+            if (player.PlayerState == PlayerState.Stopped)
+            {
+                await ReplyAsync("There is nothing playing");
+                return;
+            }
+            await player.StopAsync();
+            await ReplyAsync("Stopped playing music");
         }
-        await player.StopAsync();
-        await ReplyAsync("Stopped playing music");
+        finally
+        {
+            ReleaseLock();
+        }
     }
 
     public async Task<LavaPlayer<LavaTrack>> Check()
     {
-        var voiceState = Context.User as IVoiceState;
-        if (voiceState?.VoiceChannel == null)
+        if (!EnsureSingle()) return null;
+        try
         {
-            await ReplyAsync("You must be connected to a voice channel!");
-            return null;
-        }
+            var voiceState = Context.User as IVoiceState;
+            if (voiceState?.VoiceChannel == null)
+            {
+                await ReplyAsync("You must be connected to a voice channel!");
+                return null;
+            }
 
-        if (!_lavaNode.HasPlayer(Context.Guild))
+            if (!_lavaNode.HasPlayer(Context.Guild))
+            {
+                await ReplyAsync("I'm not connected to a voice channel!");
+                return null;
+            }
+
+            _lavaNode.TryGetPlayer(Context.Guild, out var player);
+            if (voiceState.VoiceChannel != player.VoiceChannel)
+            {
+                await ReplyAsync("You need to be in the same voice channel as me!");
+                return null;
+            }
+
+            return player;
+        }
+        finally
         {
-            await ReplyAsync("I'm not connected to a voice channel!");
-            return null;
+            ReleaseLock();
         }
-
-        _lavaNode.TryGetPlayer(Context.Guild, out var player);
-        if (voiceState.VoiceChannel != player.VoiceChannel)
-        {
-            await ReplyAsync("You need to be in the same voice channel as me!");
-            return null;
-        }
-
-        return player;
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.IO;
-using MediatR;
+﻿using MediatR;
 using v10.Services.Images.Enums;
 
 namespace v10.Services.Images.Queries;

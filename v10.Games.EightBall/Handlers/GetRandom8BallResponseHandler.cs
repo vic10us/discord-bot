@@ -6,9 +6,9 @@ namespace v10.Games.EightBall.Handlers;
 
 public class GetRandom8BallResponseHandler : IRequestHandler<GetRandom8BallResponse, EightBallResponse>
 {
-    private readonly EightBallService _service;
+    private readonly IEightBallService _service;
 
-    public GetRandom8BallResponseHandler(EightBallService service)
+    public GetRandom8BallResponseHandler(IEightBallService service)
     {
         this._service = service;
     }

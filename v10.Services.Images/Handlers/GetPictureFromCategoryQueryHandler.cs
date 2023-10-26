@@ -5,9 +5,9 @@ namespace v10.Services.Images.Handlers;
 
 public class GetPictureFromCategoryQueryHandler : IRequestHandler<GetPictureFromCategoryQuery, (string, Stream)>
 {
-    private readonly PictureService _pictureService;
+    private readonly IPictureService _pictureService;
 
-    public GetPictureFromCategoryQueryHandler(PictureService pictureService)
+    public GetPictureFromCategoryQueryHandler(IPictureService pictureService)
     {
         _pictureService = pictureService;
     }

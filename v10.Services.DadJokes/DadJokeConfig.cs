@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-
-namespace v10.Services.DadJokes;
+﻿namespace v10.Services.DadJokes;
 
 public class DadJokeConfig : IDadJokeServiceConfiguration
 {

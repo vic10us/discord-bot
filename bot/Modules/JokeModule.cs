@@ -1,7 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 using v10.Services.DadJokes.Queries;
 using v10.Services.MondayQuotes.Queries;
 using v10.Services.RedneckJokes.Queries;
@@ -12,8 +16,15 @@ public class JokeModule : CustomModule<SocketCommandContext>
 {
     private readonly IMediator _mediator;
 
-    public JokeModule(IMediator mediator)
+    public JokeModule(
+        IMediator mediator,
+        IServiceProvider serviceProvider,
+        ILogger<JokeModule> logger
+        )
     {
+        var server = serviceProvider.GetRequiredService<IServer>();
+        _database = server.Multiplexer.GetDatabase();
+        _logger = logger;
         _mediator = mediator;
     }
 

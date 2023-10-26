@@ -4,42 +4,34 @@ using Microsoft.Extensions.DependencyInjection;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using bot.Features.Games;
 using bot;
 using Microsoft.AspNetCore.Builder;
 using MediatR;
 using FluentValidation;
-using bot.PipelineBehaviors;
 using bot.Extensions;
 using v10.Data.Abstractions;
-using v10.Data.Abstractions.Interfaces;
-using v10.Data.MongoDB;
 using bot.Features.HealthChecks;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Trace;
-using bot.Features.Metrics;
-using System.Net;
-using Microsoft.Extensions.Logging;
-using OpenTelemetry.Logs;
 using Discord.Interactions;
 using Discord;
 using Microsoft.FeatureManagement;
 using bot.Features.FeatureManagement;
 using LazyProxy.ServiceProvider;
 using bot.Features.NaturalLanguageProcessing;
-using bot.Features.Events;
 using v10.Messaging;
-using v10.Games.EightBall;
 using v10.Bot.Discord;
 using StackExchange.Redis;
-using LanguageExt;
 using System.Linq;
-using v10.Services.DadJokes;
-using v10.Services.RedneckJokes;
-using v10.Services.MondayQuotes;
-using v10.Services.StrangeLaws;
-using v10.Services.Images;
+using v10.Bot.Core;
+using v10.Events.Core;
+using System.Reflection;
+using v10.Services.DadJokes.Extensions;
+using v10.Services.StrangeLaws.Extensions;
+using v10.Services.RedneckJokes.Extensions;
+using v10.Services.MondayQuotes.Extensions;
+using v10.Games.Dice.Extensions;
+using v10.Games.EightBall.Extensions;
+using v10.Services.Images.Extensions;
+using v10.Data.MongoDB.Extensions;
 
 Console.OutputEncoding = System.Text.Encoding.Unicode;
 
@@ -71,70 +63,27 @@ services.AddHttpClient("vic10usApi", c =>
     c.BaseAddress = new Uri(builder.Configuration["vic10usApi:BaseUrl"]);
 });
 
-//services.AddOpenTelemetry();
-
-TelemetryTools.Init();
-var otlpUrl = builder.Configuration["Telemetry:OtlpExporter:Url"];
-var prometheusListenerUrl = builder.Configuration["Telemetry:PrometheusExporter:Url"];
-
-// Configure metrics
-services.AddOpenTelemetryMetrics(telemetryBuilder =>
-{
-    telemetryBuilder.AddConsoleExporter();
-    telemetryBuilder.AddAspNetCoreInstrumentation();
-    telemetryBuilder.AddHttpClientInstrumentation();
-    telemetryBuilder.AddMeter("DiscordBotMetrics");
-    var otlpUrl = builder.Configuration["Telemetry:OtlpExporter:Url"];
-    telemetryBuilder.AddOtlpExporter(options => options.Endpoint = new Uri(otlpUrl));
-    telemetryBuilder.AddPrometheusExporter(config =>
-    {
-        config.StartHttpListener = true;
-        config.HttpListenerPrefixes = new[] { prometheusListenerUrl };
-        TelemetryTools.Init();
-    });
-});
-
-// Configure tracing
-services.AddOpenTelemetryTracing(tracerProviderBuilder =>
-{
-    tracerProviderBuilder.AddHttpClientInstrumentation(options =>
-    {
-        options.Enrich = (activity, eventName, rawObject) =>
-        {
-            if (eventName.Equals("OnStartActivity"))
-                if (rawObject is HttpWebRequest request)
-                    activity.SetTag("requestUri", request.RequestUri);
-        };
-    });
-    tracerProviderBuilder.AddAspNetCoreInstrumentation();
-    tracerProviderBuilder.AddSource("DiscordBotActivitySource");
-    tracerProviderBuilder.AddConsoleExporter();
-    tracerProviderBuilder.AddOtlpExporter(options => options.Endpoint = new Uri(otlpUrl));
-});
-
-// Configure logging
-builder.Logging.AddOpenTelemetry(builder =>
-{
-    builder.IncludeFormattedMessage = true;
-    builder.IncludeScopes = true;
-    builder.ParseStateValues = true;
-    builder.AddOtlpExporter(options => options.Endpoint = new Uri(otlpUrl));
-});
-
 services.AddHostedService<StartupBackgroundService>();
 services.AddSingleton<StartupHealthCheck>();
 
-services.AddEvents(builder.Configuration);
+services.AddEventMessaging(builder.Configuration, () =>
+{
+    var assemblies = new[] {
+                Assembly.GetExecutingAssembly()!,
+                Assembly.GetEntryAssembly()!,
+                typeof(v10.Messaging.Consumers.HelloMessageConsumer).Assembly,
+                typeof(v10.Events.Core.MessageBus.Consumers.UpdateAllServerStatsCommandConsumer).Assembly,
+            };
+    return assemblies;
+});
+
+services.Configure<DiscordWorkerOptions>(builder.Configuration.GetSection("DiscordWorker"));
+services.AddHostedService<DiscordWorker>();
 
 services.AddHealthChecks()
   .AddCheck<ImageApiHealthCheck>("ImageApi")
-  .AddCheck<StartupHealthCheck>(
-        "Startup",
-        tags: new[] { "ready" });
+  .AddCheck<StartupHealthCheck>("Startup", tags: new[] { "ready" });
 
-//services.AddDbContext<BotDbContext>
-//    (x => x.UseSqlite(telemetryBuilder.Configuration.GetConnectionString("BotDb")), ServiceLifetime.Singleton);
-services.AddSingleton<DiceGame>();
 services.AddSingleton(sc =>
 {
     var config = new DiscordSocketConfig()
@@ -149,28 +98,29 @@ services.AddLazySingleton<INLPService, NLPService>();
 services.AddSingleton<CommandService>();
 services.AddSingleton<CommandHandlingService>();
 services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
-services.AddSingleton<PictureService>();
-services.AddSingleton<EightBallService>();
+
+services.AddDiceGame();
+
 services.AddTransient<Program>();
-services.AddSingleton<IMondayQuotesService, MondayQuotesService>();
-services.AddSingleton<IRedneckJokeService, RedneckJokeService>();
-services.AddSingleton<IStrangeLawsService, StrangeLawsService>();
-services.AddSingleton<BotDataService>();
-services.AddHttpClient<IDadJokeService>("DadJokeService", (s, c) =>
-{
-    c.BaseAddress = new Uri(builder.Configuration["DadJokes:BaseUrl"]);
-});
-services.AddSingleton<IDadJokeService, DadJokeService>();
+
+services.AddImagesApi();
+services.AddPictureServices();
+services.Add8BallGame();
+
+services.AddMondayQuotes();
+services.AddRedneckJokes();
+services.AddStrangeLaws();
+services.AddDadJokes();
+
 services.AddHostedService<LifetimeEventsHostedService>();
-services.AddTransient<ImageApiService>();
+
 services.Configure<DiscordBotDatabaseSettings>(
     builder.Configuration.GetSection(nameof(DiscordBotDatabaseSettings)));
 
+services.AddBotDataServices();
+
 services.Configure<MassTransitOptions>(
     builder.Configuration.GetSection("MassTransit"));
-
-services.AddSingleton<IDatabaseSettings>(sp =>
-    sp.GetRequiredService<IOptions<DiscordBotDatabaseSettings>>().Value);
 
 builder.Services.AddSingleton(provider => new RedisConfiguration
 {
@@ -192,9 +142,6 @@ services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "SampleInstance";
 });
 
-//var metrics = AppMetrics.CreateDefaultBuilder()
-//            .Build();
-//services.AddMetrics(metrics);
 services.AddMediatR(cfg =>
 {
     var mediatorAssemblies = v10.Bot.Core.AssemblyScanner.GetTypesImplementingGenericInterfaces(typeof(IRequestHandler<,>), typeof(IRequestHandler<>));
@@ -203,17 +150,13 @@ services.AddMediatR(cfg =>
         cfg.RegisterServicesFromAssemblies(assembly);
     }
 });
+
 services.AddAutoMapper(typeof(Program));
 services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 services.AddValidatorsFromAssembly(typeof(Program).Assembly);
-//services.AddLavaNode(config =>
-//{
-//  telemetryBuilder.Configuration?.Bind($"Victoria", config);
-//});
 
 var app = builder.Build();
 
-// app.UseOpenTelemetryPrometheusScrapingEndpoint();
 app.UseFluentValidationExceptionHandler();
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -221,8 +164,6 @@ app.UseSwaggerUI();
 app.AddApplicationHealthChecks();
 
 app.UseAuthorization();
-//app.UseMetricsRequestTrackingMiddleware();
-//app.UseMetricsAllEndpoints();
 app.MapControllers();
 
 app.Run();

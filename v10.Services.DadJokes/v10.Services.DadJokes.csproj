@@ -15,10 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Extensions\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\v10.Services.Jokes\v10.Services.Jokes.csproj" />
   </ItemGroup>
 

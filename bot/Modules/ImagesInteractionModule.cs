@@ -5,32 +5,33 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Extensions;
+using StackExchange.Redis;
 using v10.Services.Images.Enums;
 using v10.Services.Images.Queries;
 
 namespace bot.Modules;
 
-public class ImagesInteractionModule : InteractionModuleBase<SocketInteractionContext>
+public class ImagesInteractionModule : CustomInteractionModule<SocketInteractionContext>
 {
     private readonly IMediator _mediator;
 
-    private static ImageType GetRandomImageType()
+    public ImagesInteractionModule(
+        IMediator mediator, 
+        ILogger<ImagesInteractionModule> logger,
+        IServiceProvider serviceProvider
+        )
     {
-        var types = Enum.GetValues<ImageType>().Where(t => t != ImageType.Random).ToArray();
-        var random = new Random();
-        var position = random.Next(0, types.Length);
-        return types[position];
-    }
-
-    public ImagesInteractionModule(IMediator mediator)
-    {
+        var server = serviceProvider.GetRequiredService<IServer>();
+        _database = server.Multiplexer.GetDatabase();
         _mediator = mediator;
+        _logger = logger;
     }
 
-    private string GetChoiceDisplayName(Enum enumValue)
+    private static string GetChoiceDisplayName(Enum enumValue)
     {
-        // ChoiceDisplayAttribute
         var attribute = enumValue.GetAttributeOfType<ChoiceDisplayAttribute>();
         return attribute == null ? enumValue.ToString() : attribute.Name;
     }
@@ -38,15 +39,22 @@ public class ImagesInteractionModule : InteractionModuleBase<SocketInteractionCo
     [SlashCommand("image", "Get an image")]
     public async Task GetAnImage(ImageType imageType)
     {
-        var query = new GetPictureFromCategoryQuery(imageType);
-        var (fileName, stream) = await _mediator.Send(query);
-        var ext = Path.GetExtension(fileName);
-        var publicFileName = $"{imageType}.{ext}";
-        var embed = new EmbedBuilder()
-            .WithTitle($"Random {GetChoiceDisplayName(imageType)} Image")
-            .WithImageUrl($"attachment://{publicFileName}")
-            .WithColor(Color.Green)
-            .Build();
-        await RespondWithFileAsync(stream, publicFileName, embed: embed);
+        if (!EnsureSingle()) { return; }
+        try
+        {
+            var query = new GetPictureFromCategoryQuery(imageType);
+            var (fileName, stream) = await _mediator.Send(query);
+            var ext = Path.GetExtension(fileName);
+            var publicFileName = $"{imageType}.{ext}";
+            var embed = new EmbedBuilder()
+                .WithTitle($"Random {GetChoiceDisplayName(imageType)} Image")
+                .WithImageUrl($"attachment://{publicFileName}")
+                .WithColor(Color.Green)
+                .Build();
+            await RespondWithFileAsync(stream, publicFileName, embed: embed);
+        } finally
+        {
+            ReleaseLock();
+        }
     }
 }

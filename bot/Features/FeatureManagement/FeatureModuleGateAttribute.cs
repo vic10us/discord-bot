@@ -41,7 +41,7 @@ public class FeatureModuleGateAttribute : Attribute
     {
         if (features == null || features.Length == 0)
         {
-            throw new ArgumentNullException("features");
+            throw new ArgumentNullException(nameof(features));
         }
 
         Features = features;
@@ -77,7 +77,7 @@ public class FeatureModuleGateAttribute : Attribute
     {
         if (features == null || features.Length == 0)
         {
-            throw new ArgumentNullException("features");
+            throw new ArgumentNullException(nameof(features));
         }
 
         List<string> list = new List<string>();

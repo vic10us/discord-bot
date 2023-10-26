@@ -1,20 +1,29 @@
-﻿using System.Threading.Tasks;
-using bot.Commands;
-using bot.Modules.Enums;
+﻿using System;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
+using v10.Events.Core.Commands;
+using v10.Events.Core.Enums;
 
 namespace bot.Modules;
 
-public class EconomyInteractionModule : InteractionModuleBase<SocketInteractionContext>
+public class EconomyInteractionModule : CustomInteractionModule<SocketInteractionContext>
 {
-    private readonly ILogger _logger;
+    // private readonly ILogger _logger;
     private readonly IMediator _mediator;
 
-    public EconomyInteractionModule(ILogger<EconomyInteractionModule> logger, IMediator mediator)
+    public EconomyInteractionModule(
+        ILogger<EconomyInteractionModule> logger, 
+        IMediator mediator, 
+        IServiceProvider serviceProvider
+        )
     {
+        var server = serviceProvider.GetRequiredService<IServer>();
+        _database = server.Multiplexer.GetDatabase();
         _logger = logger;
         _mediator = mediator;
     }

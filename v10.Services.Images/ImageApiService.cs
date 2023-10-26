@@ -8,7 +8,7 @@ using System.Text;
 
 namespace v10.Services.Images;
 
-public class ImageApiService
+public class ImageApiService : IImageApiService
 {
     private readonly HttpClient _client;
 

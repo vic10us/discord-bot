@@ -17,6 +17,7 @@ public class RedneckJokeService : IRedneckJokeService
         using (var reader = new StreamReader(stream))
         {
             string lines;
+            
             while ((lines = await reader.ReadLineAsync()) != null)
             {
                 if (string.IsNullOrWhiteSpace(lines)) continue;
