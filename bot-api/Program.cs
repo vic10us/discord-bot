@@ -74,6 +74,10 @@ services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "SampleInstance";
 });
 
+services.AddAutoMapper(typeof(Program));
+services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
 services.AddMediatR(cfg =>
 {
     var mediatorAssemblies = v10.Bot.Core.AssemblyScanner.GetTypesImplementingGenericInterfaces(typeof(IRequestHandler<,>), typeof(IRequestHandler<>));
@@ -89,10 +93,6 @@ services.AddMediatR(cfg =>
         }
     }
 });
-
-services.AddAutoMapper(typeof(Program));
-services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 var app = builder.Build();
 

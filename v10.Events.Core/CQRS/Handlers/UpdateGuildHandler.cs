@@ -1,11 +1,12 @@
-﻿using MediatR;
+﻿using LanguageExt.Common;
+using MediatR;
 using v10.Data.Abstractions.Models;
 using v10.Data.MongoDB;
 using v10.Events.Core.Commands;
 
 namespace v10.Events.Core.CQRS.Handlers;
 
-public class UpdateGuildHandler : IRequestHandler<UpdateGuildCommand, ulong>
+public class UpdateGuildHandler : IRequestHandler<UpdateGuildCommand, Result<ulong>>
 {
     private readonly IBotDataService _botDataService;
 
@@ -14,7 +15,7 @@ public class UpdateGuildHandler : IRequestHandler<UpdateGuildCommand, ulong>
         _botDataService = botDataService;
     }
 
-    public Task<ulong> Handle(UpdateGuildCommand request, CancellationToken cancellationToken)
+    public Task<Result<ulong>> Handle(UpdateGuildCommand request, CancellationToken cancellationToken)
     {
         var x = new Guild
         {
@@ -23,8 +24,17 @@ public class UpdateGuildHandler : IRequestHandler<UpdateGuildCommand, ulong>
             channelNotifications = request.ChannelNotifications,
             staffRoles = request.StaffRoles
         };
-        _botDataService.UpdateGuild(StringToUInt64(request.GuildId), x);
-        return Task.FromResult(StringToUInt64(request.GuildId));
+
+        var guildId = StringToUInt64(request.GuildId);
+        try
+        {
+            _botDataService.UpdateGuild(guildId, x);
+            return Task.FromResult(new Result<ulong>(guildId));
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult(new Result<ulong>(ex));
+        }
     }
 
     ulong StringToUInt64(string value)

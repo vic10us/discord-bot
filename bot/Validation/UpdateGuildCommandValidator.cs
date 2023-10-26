@@ -7,10 +7,11 @@ public class UpdateGuildCommandValidator : AbstractValidator<UpdateGuildCommand>
 {
     public UpdateGuildCommandValidator()
     {
-        Transform(x => x.GuildId, StringToUInt64)
-            .NotNull()
+        RuleFor(x => StringToUInt64(x.GuildId))
             .GreaterThan((ulong)0)
-            .LessThan(ulong.MaxValue);
+            .LessThan(ulong.MaxValue)
+            .OverridePropertyName("GuildId");
+
         RuleFor(x => x.ChannelNotifications)
             .NotNull();
     }

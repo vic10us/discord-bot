@@ -32,7 +32,7 @@ public class EconomyInteractionModule : CustomInteractionModule<SocketInteractio
     [RequireUserPermission(GuildPermission.Administrator)]
     public async Task XpCommand(XpOperationType operation, ulong amount, IGuildUser user, XpType xpType = XpType.Text)
     {
-        var levelData = operation switch
+        var commandResult = operation switch
         {
             XpOperationType.Add => await _mediator.Send(new AddUserXpCommand() { 
                 GuildId = Context.Guild.Id,
@@ -56,11 +56,17 @@ public class EconomyInteractionModule : CustomInteractionModule<SocketInteractio
             }),
             _ => null,
         };
-        if (levelData == null) {
+
+        if (commandResult == null) {
             await RespondAsync("Invalid Operation");
             return;
         }
 
-        await RespondAsync($"User XP is now {levelData.totalXp}. Level is {levelData.level}, Voice XP is {levelData.totalVoiceXp}, Voice Level is {levelData.voiceLevel}");
+        var responseMessage = commandResult.Match(
+            data => data == null ? "Invalid Operation" : $"User XP is now {data.totalXp}. Level is {data.level}, Voice XP is {data.totalVoiceXp}, Voice Level is {data.voiceLevel}",
+            error => "An error occured while attempting to adjust XP"
+        );
+
+        await RespondAsync(responseMessage);
     }
 }
