@@ -6,10 +6,11 @@ using v10.Data.Abstractions.Models;
 using v10.Bot.Discord;
 using v10.Events.Core.Commands;
 using v10.Events.Core.Enums;
+using LanguageExt.Common;
 
 namespace v10.Events.Core.CQRS.Handlers;
 
-public class AddUserXpCommandHandler : IRequestHandler<AddUserXpCommand, LevelData>
+public class AddUserXpCommandHandler : IRequestHandler<AddUserXpCommand, Result<LevelData?>>
 {
     private readonly IBotDataService _botDataService;
     private readonly DiscordSocketClient _discordSocketClient;
@@ -28,7 +29,13 @@ public class AddUserXpCommandHandler : IRequestHandler<AddUserXpCommand, LevelDa
         _messageService = messageService;
     }
 
-    public async Task<LevelData> Handle(AddUserXpCommand request, CancellationToken cancellationToken)
+    public async Task<Result<LevelData?>> Handle(AddUserXpCommand request, CancellationToken cancellationToken)
+    {
+        try { return await AddUserXp(request, cancellationToken); }
+        catch (Exception ex) { return new Result<LevelData?>(ex); }
+    }
+
+    private async Task<LevelData?> AddUserXp(AddUserXpCommand request, CancellationToken cancellationToken)
     {
         var user = _discordSocketClient.GetUser(request.UserId);
 

@@ -1,10 +1,11 @@
-﻿using MediatR;
+﻿using LanguageExt.Common;
+using MediatR;
 using v10.Data.Abstractions.Models;
 using v10.Events.Core.Enums;
 
 namespace v10.Events.Core.Commands;
 
-public class RemoveUserXpCommand : IRequest<LevelData>
+public class RemoveUserXpCommand : IRequest<Result<LevelData?>>
 {
     public ulong GuildId { get; set; }
     public ulong UserId { get; set; }

@@ -1,8 +1,9 @@
-﻿using MediatR;
+﻿using LanguageExt.Common;
+using MediatR;
 
 namespace v10.Events.Core.Commands;
 
-public class CreateGuildCommand : IRequest<Dtos.Guild>
+public class CreateGuildCommand : IRequest<Result<Dtos.Guild>>
 {
     public string GuildId { get; set; }
     public string GuildName { get; set; }

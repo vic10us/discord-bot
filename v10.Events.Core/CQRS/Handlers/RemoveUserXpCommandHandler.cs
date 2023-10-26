@@ -6,10 +6,11 @@ using v10.Data.Abstractions.Models;
 using v10.Bot.Discord;
 using v10.Events.Core.Commands;
 using v10.Events.Core.Enums;
+using LanguageExt.Common;
 
 namespace v10.Events.Core.CQRS.Handlers;
 
-public class RemoveUserXpCommandHandler : IRequestHandler<RemoveUserXpCommand, LevelData>
+public class RemoveUserXpCommandHandler : IRequestHandler<RemoveUserXpCommand, Result<LevelData?>>
 {
     private readonly IBotDataService _botDataService;
     private readonly DiscordSocketClient _discordSocketClient;
@@ -28,11 +29,17 @@ public class RemoveUserXpCommandHandler : IRequestHandler<RemoveUserXpCommand, L
         _messageService = messageService;
     }
 
-    public async Task<LevelData> Handle(RemoveUserXpCommand request, CancellationToken cancellationToken)
+    public async Task<Result<LevelData?>> Handle(RemoveUserXpCommand request, CancellationToken cancellationToken)
+    {
+        try { return await RemoveUserXp(request, cancellationToken); }
+        catch (Exception ex) { return new Result<LevelData?>(ex); }
+    }
+
+    private async Task<LevelData?> RemoveUserXp(RemoveUserXpCommand request, CancellationToken cancellationToken)
     {
         var user = _discordSocketClient.GetUser(request.UserId);
 
-        Action<ulong> callback = (newLevel) =>
+        void callback(ulong newLevel)
         {
             _mediator.Send(new UserLevelChangedCommand()
             {
@@ -41,8 +48,8 @@ public class RemoveUserXpCommandHandler : IRequestHandler<RemoveUserXpCommand, L
                 NewLevel = newLevel,
                 Direction = "down",
                 Type = request.Type
-            });
-        };
+            }, cancellationToken);
+        }
 
         var newData = request.Type switch
         {

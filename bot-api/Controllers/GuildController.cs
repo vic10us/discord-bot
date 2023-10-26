@@ -28,7 +28,8 @@ public class GuildsController : ControllerBase
         var query = new GetAllGuildsQuery();
         _logger.LogInformation("Retrieving list of Guilds");
         var result = await _mediator.Send(query);
-        return Ok(result);
+
+        return result.Match<IActionResult>(Ok, error => NotFound());
     }
 
     [HttpGet("{guildId}")]
@@ -37,7 +38,11 @@ public class GuildsController : ControllerBase
         var query = new GetGuildByIdQuery(guildId);
         _logger.LogInformation("Retrieving Guild with guildId: {guildId}", guildId);
         var result = await _mediator.Send(query);
-        return result != null ? Ok(result) : NotFound();
+
+        return result.Match<IActionResult>(
+                    guild => guild != null ? Ok(guild) : NotFound(),
+                    error => NotFound()
+        );
     }
 
     [HttpPost]
@@ -45,7 +50,12 @@ public class GuildsController : ControllerBase
     {
         var command = _mapper.Map<CreateGuildCommand>(request);
         var result = await _mediator.Send(command);
-        return CreatedAtAction("GetGuild", new { guildId = result.GuildId }, result);
+
+        var response = result.Match<IActionResult>(
+            guild => CreatedAtAction("GetGuild", new { guildId = guild.GuildId }, guild),
+            error => BadRequest(error.Message));
+
+        return response;
     }
 
     [HttpPut("{guildId}")]
@@ -55,7 +65,13 @@ public class GuildsController : ControllerBase
         if (guildId != StringToNullableUInt64(command.GuildId)) throw new ArgumentException("Id mismatch", nameof(guildId));
         _logger.LogInformation("Replacing Guild with guildId: {guildId}", guildId);
         var result = await _mediator.Send(command);
-        return AcceptedAtAction("GetGuild", "Guilds", new { guildId = result });
+
+        var response = result.Match<IActionResult>(
+                guild => AcceptedAtAction("GetGuild", "Guilds", new { guildId = guild }),
+                error => NotFound()
+            );
+
+        return response;
     }
 
     static ulong? StringToNullableUInt64(string value)
@@ -66,6 +82,8 @@ public class GuildsController : ControllerBase
     {
         _logger.LogInformation("Deleting Guild with guildId: {guildId}", guildId);
         var result = await _mediator.Send(new DeleteGuildCommand(guildId));
-        return result ? Accepted() : NotFound();
+        return result.Match<IActionResult>(
+                    guild => Accepted(),
+                    error => NotFound());
     }
 }
