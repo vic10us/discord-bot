@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using bot.Features.Caching;
+using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
@@ -10,30 +11,13 @@ namespace bot.Modules;
 
 public abstract class CustomModule<T> : ModuleBase<T> where T : class, ICommandContext
 {
-    internal RedisKey RedisKey => $"_{GetType().Name}_MessageReceived_{Context.Message.Id}";
-    internal RedisValue RedisToken => $"{Environment.MachineName}-{Guid.NewGuid()}";
-
-    internal IDatabase _database;
     internal ILogger _logger;
+    internal ICacheContext _cacheContext;
 
-    protected virtual void ReleaseLock()
+    protected override void BeforeExecute(CommandInfo command)
     {
-        if (_database == null) { return; }
-        _database.LockRelease(RedisKey, RedisToken);
-    }
-
-    protected virtual bool EnsureSingle()
-    {
-        if (_database == null) { return true; }
-        _logger.LogInformation("Acquiring Lock: {RedisKey} {RedisToken}", RedisKey, RedisToken);
-        var lockTaken = _database.LockTake(RedisKey, RedisToken, TimeSpan.FromSeconds(1));
-        if (!lockTaken)
-        {
-            _logger.LogWarning("{Name} Message is already being processed {Content}", GetType().Name, Context.Message.Id);
-            return false;
-        }
-
-        return true;
+        base.BeforeExecute(command);
+        _cacheContext.SetContext(Context);
     }
 
     protected virtual async Task<IUserMessage> ReplyAsyncEx(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null, MessageComponent components = null, ISticker[] stickers = null, Embed[] embeds = null)
@@ -51,4 +35,5 @@ public abstract class CustomModule<T> : ModuleBase<T> where T : class, ICommandC
             .Build();
         await Context.Channel.SendFileAsync(stream: fileStream, filename: filename, embed: embed);
     }
+
 }

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using v10.Data.MongoDB;
 using v10.Events.Core.Commands;
+using v10.Data.Abstractions.Models;
 
 namespace v10.Events.Core.CQRS.Handlers;
 
@@ -47,7 +48,8 @@ public class UpdateGuildStatsCommandHandler : IRequestHandler<UpdateGuildStatsCo
             return;
         }
 
-        var guildData = _botDataService.GetGuild(request.GuildId);
+        var guildDataResult = _botDataService.GetGuild(request.GuildId);
+        var guildData = guildDataResult.Match<Guild>(s => s, f => null);
         if (guildData is null)
         {
             _logger.LogWarning("Attempt to update guild with Id {GuildId} was cancelled. [GUILD_NOT_FOUND]", request.GuildId);

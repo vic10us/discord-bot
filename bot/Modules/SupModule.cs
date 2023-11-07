@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using bot.Features.Caching;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,8 +18,9 @@ public class SupModule : CustomModule<SocketCommandContext>
         )
     {
         var server = serviceProvider.GetRequiredService<IServer>();
-        _database = server.Multiplexer.GetDatabase();
+        var database = server.Multiplexer.GetDatabase();
         _logger = logger;
+        _cacheContext = new CacheContext<SocketCommandContext>(database, logger);
     }
 
     // ~sample square 20 -> 400
@@ -28,16 +30,10 @@ public class SupModule : CustomModule<SocketCommandContext>
         [Summary("The number to square.")]
             int num)
     {
-        if (!EnsureSingle()) { return; }
-        try
-        {
-            // We can also access the channel from the Command Context.
+        await _cacheContext.WithLock(async () =>
+        {            // We can also access the channel from the Command Context.
             await Context.Channel.SendMessageAsync($"{num}^2 = {Math.Pow(num, 2)}");
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     // ~sample userinfo --> foxbot#0282
@@ -53,15 +49,10 @@ public class SupModule : CustomModule<SocketCommandContext>
         [Summary("The (optional) user to get info from")]
             SocketUser user = null)
     {
-        if (!EnsureSingle()) { return; }
-        try
+        await _cacheContext.WithLock(async () =>
         {
             var userInfo = user ?? Context.Client.CurrentUser;
             await ReplyAsync($"{userInfo.Username}#{userInfo.Discriminator}");
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 }

@@ -1,0 +1,47 @@
+﻿@inject IDiscordUserService _discordUserService
+@inject IBotDataService _botDataService
+@page "/dashboard/{ServerId}"
+@using v10.Data.Abstractions.Models
+@using v10.Data.MongoDB
+
+<h1>ServerDashboard: @ServerId</h1>
+@if (_guild != null)
+{
+    <h3>ServerName: @_guild.guildName</h3>
+
+    <div>StaffRoles:</div>
+    <ul>
+        @foreach (var role in _guild.staffRoles)
+        {
+            <li>@role</li>
+        }
+    </ul>
+
+    <div>Notifications:</div>
+    <ul>
+        @foreach (var notification in _guild.channelNotifications)
+        {
+            <li>@notification.Key: @notification.Value</li>
+        }
+    </ul>
+} else
+{
+    <h3>Server not found</h3>
+}
+
+@code {
+    [Parameter]
+    public string ServerId { get; set; }
+
+    private ulong _serverId;
+
+    private Guild? _guild;
+
+    protected override Task OnInitializedAsync()
+    {
+        base.OnInitializedAsync();
+        ulong.TryParse(ServerId, out _serverId);
+        _guild = _botDataService.GetGuild(_serverId, false).Match(g => g, f => null);
+        return Task.CompletedTask;
+    }
+}

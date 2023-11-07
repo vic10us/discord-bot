@@ -1,0 +1,31 @@
+﻿.server-container {
+    margin: 40px auto 0px;
+    width: min(100%, 948px);
+    padding: 0px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+    position: relative;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    width: 100%;
+    margin-top: 57px;
+    margin-bottom: 60px;
+}
+
+@media screen and (max-width: 800px) {
+    .card-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+}

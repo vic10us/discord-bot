@@ -19,7 +19,6 @@ using v10.Bot.Discord;
 using StackExchange.Redis;
 using v10.Events.Core.Enums;
 using v10.Events.Core.Commands;
-using AspNetCoreRateLimit;
 
 namespace bot;
 

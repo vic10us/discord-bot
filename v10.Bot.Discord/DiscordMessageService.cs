@@ -58,12 +58,14 @@ public class DiscordMessageService : IDiscordMessageService
         }
         try
         {
-            var guildData = _botDataService.GetGuild(guildId);
-            if (guildData == null) return;
-            if (!guildData.channelNotifications.TryGetValue(route, out var channelId_str)) return;
-            if (string.IsNullOrWhiteSpace(channelId_str)) return;
-            if (!ulong.TryParse(channelId_str, out var channelId)) return;
-            await SendMessageAsync(channelId, message, isTTS, embed, options, allowedMentions, messageReference, components, stickers, embeds, flags, cancellationToken);
+            var guildDataResult = _botDataService.GetGuild(guildId);
+            guildDataResult.IfSucc(async (guildData) => {
+                if (guildData == null) return;
+                if (!guildData.channelNotifications.TryGetValue(route, out var channelId_str)) return;
+                if (string.IsNullOrWhiteSpace(channelId_str)) return;
+                if (!ulong.TryParse(channelId_str, out var channelId)) return;
+                await SendMessageAsync(channelId, message, isTTS, embed, options, allowedMentions, messageReference, components, stickers, embeds, flags, cancellationToken);
+            });
         }
         finally
         {

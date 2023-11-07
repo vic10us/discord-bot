@@ -8,6 +8,7 @@ using v10.Data.MongoDB;
 using v10.Games.Dice;
 using StackExchange.Redis;
 using Microsoft.Extensions.Logging;
+using bot.Features.Caching;
 
 namespace bot.Modules;
 
@@ -19,15 +20,15 @@ public class GamesModule : CustomModule<SocketCommandContext>
     public GamesModule(IServiceProvider serviceProvider, ILogger<GamesModule> logger)
     {
         var server = serviceProvider.GetRequiredService<IServer>();
-        _database = server.Multiplexer.GetDatabase();
+        var database = server.Multiplexer.GetDatabase();
         _logger = logger;
+        _cacheContext = new CacheContext<SocketCommandContext>(database, logger);
     }
 
     [Command("dicegame")]
     public async Task RollDice(uint betAmount = 0)
     {
-        if (!EnsureSingle()) { return; }
-        try
+        await _cacheContext.WithLock(async () =>
         {
             if (betAmount == 0 || betAmount > 240)
             {
@@ -90,10 +91,6 @@ public class GamesModule : CustomModule<SocketCommandContext>
                 await ReplyAsync($":game_die: **{Context.User.Username}**, you **lost** {betAmount} :coin:");
                 _ = BotDataService.RemoveMoney(guildId, userId, betAmount);
             }
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 }

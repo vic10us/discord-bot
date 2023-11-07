@@ -1,0 +1,37 @@
+﻿@using Discord.Rest
+@inherits LayoutComponentBase
+
+<div id="root">
+
+    <nav class="px-2 navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <NavMenu />
+
+            <AuthorizeView>
+                <Authorized>
+                    <UserProfileMenu />
+                </Authorized>
+                <NotAuthorized>
+                    <div class="nav-item ml-auto">
+                        <NavLink class="nav-link" href="/Account/Login">
+                            <span class="bi bi-person-badge" aria-hidden="true"></span> Login
+                        </NavLink>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </nav>
+
+    @Body
+
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+@code {
+
+}
