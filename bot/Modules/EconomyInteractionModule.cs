@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using bot.Features.Caching;
 using Discord;
+using Discord.Commands;
 using Discord.Interactions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,12 +10,12 @@ using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using v10.Events.Core.Commands;
 using v10.Events.Core.Enums;
+using RequireUserPermissionAttribute = Discord.Interactions.RequireUserPermissionAttribute;
 
 namespace bot.Modules;
 
 public class EconomyInteractionModule : CustomInteractionModule<SocketInteractionContext>
 {
-    // private readonly ILogger _logger;
     private readonly IMediator _mediator;
 
     public EconomyInteractionModule(
@@ -23,50 +25,56 @@ public class EconomyInteractionModule : CustomInteractionModule<SocketInteractio
         )
     {
         var server = serviceProvider.GetRequiredService<IServer>();
-        _database = server.Multiplexer.GetDatabase();
+        var database = server.Multiplexer.GetDatabase();
         _logger = logger;
         _mediator = mediator;
+        _cacheContext = new CacheContext<SocketCommandContext>(database, logger);
     }
 
     [SlashCommand("xp", "Add/Remove/Set Xp for a User")]
     [RequireUserPermission(GuildPermission.Administrator)]
     public async Task XpCommand(XpOperationType operation, ulong amount, IGuildUser user, XpType xpType = XpType.Text)
     {
-        var commandResult = operation switch
+        await _cacheContext.WithLock(async () =>
         {
-            XpOperationType.Add => await _mediator.Send(new AddUserXpCommand() { 
-                GuildId = Context.Guild.Id,
-                UserId = user.Id,
-                Amount = amount,
-                Type = xpType
-            }),
-            XpOperationType.Remove => await _mediator.Send(new RemoveUserXpCommand()
+            var commandResult = operation switch
             {
-                GuildId = Context.Guild.Id,
-                UserId = user.Id,
-                Amount = amount,
-                Type = xpType
-            }),
-            XpOperationType.Set => await _mediator.Send(new SetUserXpCommand()
+                XpOperationType.Add => await _mediator.Send(new AddUserXpCommand()
+                {
+                    GuildId = Context.Guild.Id,
+                    UserId = user.Id,
+                    Amount = amount,
+                    Type = xpType
+                }),
+                XpOperationType.Remove => await _mediator.Send(new RemoveUserXpCommand()
+                {
+                    GuildId = Context.Guild.Id,
+                    UserId = user.Id,
+                    Amount = amount,
+                    Type = xpType
+                }),
+                XpOperationType.Set => await _mediator.Send(new SetUserXpCommand()
+                {
+                    GuildId = Context.Guild.Id,
+                    UserId = user.Id,
+                    Amount = amount,
+                    Type = xpType
+                }),
+                _ => null,
+            };
+
+            if (commandResult == null)
             {
-                GuildId = Context.Guild.Id,
-                UserId = user.Id,
-                Amount = amount,
-                Type = xpType
-            }),
-            _ => null,
-        };
+                await RespondAsync("Invalid Operation");
+                return;
+            }
 
-        if (commandResult == null) {
-            await RespondAsync("Invalid Operation");
-            return;
-        }
+            var responseMessage = commandResult.Match(
+                data => data == null ? "Invalid Operation" : $"User XP is now {data.totalXp}. Level is {data.level}, Voice XP is {data.totalVoiceXp}, Voice Level is {data.voiceLevel}",
+                error => "An error occured while attempting to adjust XP"
+            );
 
-        var responseMessage = commandResult.Match(
-            data => data == null ? "Invalid Operation" : $"User XP is now {data.totalXp}. Level is {data.level}, Voice XP is {data.totalVoiceXp}, Voice Level is {data.voiceLevel}",
-            error => "An error occured while attempting to adjust XP"
-        );
-
-        await RespondAsync(responseMessage);
+            await RespondAsync(responseMessage);
+        });
     }
 }

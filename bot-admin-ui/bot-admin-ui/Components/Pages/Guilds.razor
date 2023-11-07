@@ -1,0 +1,16 @@
+﻿@page "/guilds"
+@using BotAdminUI.Services
+@using Discord.Rest
+@using Newtonsoft.Json
+@attribute [Authorize]
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient _client
+@inject IDiscordUserService _discordUserService
+
+<PageTitle>Guilds</PageTitle>
+
+<DiscordServerList />
+
+@code {
+
+}

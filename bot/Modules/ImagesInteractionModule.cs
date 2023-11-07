@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
+using bot.Features.Caching;
 using Discord;
+using Discord.Commands;
 using Discord.Interactions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,9 +26,10 @@ public class ImagesInteractionModule : CustomInteractionModule<SocketInteraction
         )
     {
         var server = serviceProvider.GetRequiredService<IServer>();
-        _database = server.Multiplexer.GetDatabase();
+        var database = server.Multiplexer.GetDatabase();
         _mediator = mediator;
         _logger = logger;
+        _cacheContext = new CacheContext<SocketCommandContext>(database, logger);
     }
 
     private static string GetChoiceDisplayName(Enum enumValue)
@@ -39,8 +41,7 @@ public class ImagesInteractionModule : CustomInteractionModule<SocketInteraction
     [SlashCommand("image", "Get an image")]
     public async Task GetAnImage(ImageType imageType)
     {
-        if (!EnsureSingle()) { return; }
-        try
+        await _cacheContext.WithLock(async () =>
         {
             var query = new GetPictureFromCategoryQuery(imageType);
             var (fileName, stream) = await _mediator.Send(query);
@@ -52,9 +53,6 @@ public class ImagesInteractionModule : CustomInteractionModule<SocketInteraction
                 .WithColor(Color.Green)
                 .Build();
             await RespondWithFileAsync(stream, publicFileName, embed: embed);
-        } finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 }

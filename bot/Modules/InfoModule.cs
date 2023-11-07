@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using bot.Features.Caching;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -18,22 +19,18 @@ public class InfoModule : CustomModule<SocketCommandContext>
         )
     {
         var server = serviceProvider.GetRequiredService<IServer>();
-        _database = server.Multiplexer.GetDatabase();
+        var database = server.Multiplexer.GetDatabase();
         _logger = logger;
+        _cacheContext = new CacheContext<SocketCommandContext>(database, logger);
     }
 
     [Command("ping")]
     [Alias("pong", "hello")]
     public async Task PingAsync()
     {
-        if (!EnsureSingle()) { return; }
-        try
+        await _cacheContext.WithLock(async () =>
         {
             await ReplyAsync("pong!");
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 }

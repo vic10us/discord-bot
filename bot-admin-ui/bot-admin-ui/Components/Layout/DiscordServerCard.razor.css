@@ -1,0 +1,81 @@
+﻿.profile-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
+    flex-shrink: 0;
+}
+
+.server-card {
+    width: 100%;
+    --guild-icon-url: url('about:blank');
+}
+
+.card-image {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    background: rgb(31, 33, 41);
+    height: 152px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.card-image_background {
+    position: absolute;
+    inset: 0px;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    transform: scale(1.4);
+    filter: blur(10px);
+    opacity: 0.3;
+    background: var(--guild-icon-url) center center / cover no-repeat;
+}
+
+.card-image_logo {
+    position: relative;
+    z-index: 2;
+    border: 2px solid rgb(242, 244, 251);
+    filter: drop-shadow(rgba(0, 0, 0, 0.16) 0px 32px 72px);
+}
+
+.card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 16px;
+}
+
+.card-actions h3 {
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 24px;
+    color: rgb(242, 244, 251);
+    margin: 0px 0px 3px;
+    padding: 0px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.card-actions_text {
+    margin-right: 12px;
+}
+
+.card-action_button {
+    padding-top: .75rem !important;
+    padding-bottom: .75rem !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+}
+
+.card-action_button span {
+    text-wrap: nowrap;
+    white-space: nowrap;
+}

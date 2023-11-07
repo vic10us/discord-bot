@@ -1,0 +1,42 @@
+﻿@using Newtonsoft.Json
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div class="dropdown ml-auto">
+    <a class="nav-link" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <div class="dropdown-toggle profile">
+            <img src="@avatarUrl" alt="Profile Image" class="rounded-circle" width="30" height="30">
+            <div class="d-none d-sm-inline d-md-inline" data-user-name="@userName">@givenName</div>
+        </div>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="#">Account Settings</a></li>
+        <li><a class="dropdown-item" href="#">Manage Servers</a></li>
+        <li><div class="dropdown-divider"></div></li>
+        <li>
+            <NavLink class="dropdown-item" href="/auth/logout">
+                Logout
+            </NavLink>
+        </li>
+    </ul>
+</div>
+
+@code {
+    private bool isLoggedIn = false;
+    private string? avatarUrl = null;
+    private string? userName = null;
+    private string? givenName = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider
+           .GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            userName = user.Identity.Name;
+            Console.WriteLine(JsonConvert.SerializeObject(user.Claims.Select(c => $"{c.Type}: {c.Value}"), Formatting.Indented));
+            givenName = user.Claims.FirstOrDefault(c => c.Type.Equals(ClaimTypes.GivenName))?.Value ?? "";
+            avatarUrl = user.Claims.FirstOrDefault(c => c.Type.Equals("urn:discord:avatar_url"))?.Value ?? "";
+        }
+    }
+}

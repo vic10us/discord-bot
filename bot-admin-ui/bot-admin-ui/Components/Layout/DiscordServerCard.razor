@@ -1,0 +1,99 @@
+﻿@rendermode InteractiveServer
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<div class="server-card" style="--guild-icon-url: url('@ImageUrl');">
+    <div class="card-image">
+        <div class="card-image_background"></div>
+        <img class="card-image_logo profile-image"
+             src="@ImageUrl"
+             alt="@Name" />
+    </div>
+    <div class="card-actions">
+        <div class="card-actions_text">
+            <h3 class="card-actions_text_title">@Name</h3>
+            <div class="card-actions_text_subtitle">@Role</div>
+        </div>
+        <a class="btn @buttonClass card-action_button" role="button" @onclick="OpenInstall">
+            <span>@actionText</span>
+        </a>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string ImageUrl { get; set; }
+
+    [Parameter]
+    public string Name { get; set; }
+
+    [Parameter]
+    public string Role { get; set; }
+
+    [Parameter]
+    public string ServerId { get; set; }
+
+    [Parameter]
+    public bool IsInstalled { get; set; } = false;
+
+    [Parameter]
+    public bool CanManage { get; set; } = false;
+
+    private async Task OpenInstall()
+    {
+        if (IsInstalled && CanManage)
+        {
+            Console.WriteLine("Opening Manage Link");
+            Navigation.NavigateTo(actionLink);
+        }
+        else if (!IsInstalled && CanManage)
+        {
+            Console.WriteLine("Opening Install Link");
+            // var template = "https://discord.com/oauth2/authorize?scope=bot+applications.commands&response_type=code&redirect_uri=https%3A%2F%2Fmee6.xyz%2Fguild-oauth&permissions=364870364383&client_id=159985415099514880&guild_id=1104129117735112786";
+            var url = $"https://discord.com/api/oauth2/authorize?client_id=1118286947027275818&permissions=8&scope=bot%20applications.commands&guild_id={ServerId}";
+            await JS.InvokeVoidAsync("installBot", new object[2] { url, $"install-{ServerId}" });
+        }
+        else
+            Console.WriteLine("Doing nothing");
+    }
+
+    private string actionLink { 
+        get {
+            if (IsInstalled && CanManage)
+                return $"/dashboard/{ServerId}";
+            else if (!IsInstalled && CanManage)
+                return $"/install/{ServerId}";
+            else
+                return $"#";
+        }
+    }
+
+    private string actionText
+    {
+        get
+        {
+            if (IsInstalled && CanManage)
+                return "Manage";
+            else if (!IsInstalled && CanManage)
+                return "Install";
+            else
+                return "--";
+        }
+    }
+    private string buttonClass
+    {
+        get
+        {
+            if (IsInstalled && CanManage)
+                return "btn-primary";
+            else if (!IsInstalled && CanManage)
+                return "btn-secondary";
+            else
+                return "btn-secondary disabled";
+        }
+    }
+
+    // private string abuttonClass => IsOwner ? "btn-primary" : "btn-secondary";
+
+    private bool IsOwner => Role == "Owner";
+}

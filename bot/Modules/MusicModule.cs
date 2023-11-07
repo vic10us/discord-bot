@@ -1,4 +1,5 @@
-﻿using bot.Features.FeatureManagement;
+﻿using bot.Features.Caching;
+using bot.Features.FeatureManagement;
 using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,9 +29,10 @@ public sealed class MusicModule : CustomModule<SocketCommandContext>
         )
     {
         var server = serviceProvider.GetRequiredService<IServer>();
-        _database = server.Multiplexer.GetDatabase();
+        var database = server.Multiplexer.GetDatabase();
         _logger = logger;
         _featureManager = featureManager;
+        _cacheContext = new CacheContext<SocketCommandContext>(database, logger);
     }
 
     //public MusicModule(LavaNode lavaNode)
@@ -61,8 +63,7 @@ public sealed class MusicModule : CustomModule<SocketCommandContext>
     [Command("join")]
     public async Task JoinAsync()
     {
-        if (!EnsureSingle()) { return; }
-        try
+        await _cacheContext.WithLock(async () =>
         {
             if (_lavaNode.HasPlayer(Context.Guild))
             {
@@ -87,18 +88,13 @@ public sealed class MusicModule : CustomModule<SocketCommandContext>
             {
                 await ReplyAsync(exception.Message);
             }
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     [Command("play")]
     public async Task PlayAsync([Remainder] string searchQuery)
     {
-        if (!EnsureSingle()) { return; }
-        try
+        await _cacheContext.WithLock(async () =>
         {
             if (string.IsNullOrWhiteSpace(searchQuery))
             {
@@ -166,18 +162,13 @@ public sealed class MusicModule : CustomModule<SocketCommandContext>
             }
 
             await ReplyAsync($"Enqueued {searchResponse.Tracks.Count} tracks.");
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     [Command("skip")]
     public async Task Skip()
     {
-        if (!EnsureSingle()) { return; }
-        try
+        await _cacheContext.WithLock(async () =>
         {
             var player = await Check();
             if (player == null) return;
@@ -190,18 +181,13 @@ public sealed class MusicModule : CustomModule<SocketCommandContext>
 
             await player.SkipAsync();
             await ReplyAsync($"Now playing {player.Track.Title} from {player.Track.Author} on {player.Track.Source}");
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     [Command("pause")]
     public async Task Pause()
     {
-        if (!EnsureSingle()) return;
-        try
+        await _cacheContext.WithLock(async () =>
         {
             var player = await Check();
             if (player == null) return;
@@ -212,18 +198,13 @@ public sealed class MusicModule : CustomModule<SocketCommandContext>
             }
             await player.PauseAsync();
             await ReplyAsync($"Paused the music");
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     [Command("resume")]
     public async Task Resume()
     {
-        if (!EnsureSingle()) return;
-        try
+        await _cacheContext.WithLock(async () =>
         {
             var player = await Check();
             if (player == null) return;
@@ -234,36 +215,26 @@ public sealed class MusicModule : CustomModule<SocketCommandContext>
             }
             await player.ResumeAsync();
             await ReplyAsync($"Resumed playing the music");
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     [Command("leave")]
     public async Task Leave()
     {
-        if (!EnsureSingle()) return;
-        try
+        await _cacheContext.WithLock(async () =>
         {
             var player = await Check();
             if (player == null) return;
             var voiceState = Context.User as IVoiceState;
             await _lavaNode.LeaveAsync(voiceState.VoiceChannel);
             await ReplyAsync("Left voice channel... sadness");
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     [Command("stop")]
     public async Task Stop()
     {
-        if (!EnsureSingle()) return;
-        try
+        await _cacheContext.WithLock(async () =>
         {
             var player = await Check();
             if (player == null) return;
@@ -274,17 +245,12 @@ public sealed class MusicModule : CustomModule<SocketCommandContext>
             }
             await player.StopAsync();
             await ReplyAsync("Stopped playing music");
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     public async Task<LavaPlayer<LavaTrack>> Check()
     {
-        if (!EnsureSingle()) return null;
-        try
+        var x = await _cacheContext.WithLock(async () =>
         {
             var voiceState = Context.User as IVoiceState;
             if (voiceState?.VoiceChannel == null)
@@ -307,10 +273,7 @@ public sealed class MusicModule : CustomModule<SocketCommandContext>
             }
 
             return player;
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
+        return x.Match(succ => succ, f => null);
     }
 }

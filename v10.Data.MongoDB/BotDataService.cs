@@ -277,7 +277,23 @@ public class BotDataService : IBotDataService
         UpdateUserLevelData(userData);
     }
 
-    public Guild GetGuild(ulong guildId, bool canCreate = true)
+    public Result<Guild> CreateGuild(Guild guild)
+    {
+        try
+        {
+            var existingGuild = _guilds.Find(ld => ld.guildId.Equals(guild.guildId)).FirstOrDefault();
+            if (existingGuild != null) return existingGuild;
+            _guilds.InsertOne(guild);
+            return guild;
+        } catch (Exception ex)
+        {
+            return new Result<Guild>(ex);
+        }
+    }
+
+    public Result<Guild> GetGuild(ulong guildId) => GetGuild(guildId, true);
+
+    public Result<Guild> GetGuild(ulong guildId, bool canCreate)
     {
         var guildData = _guilds.Find(ld => ld.guildId.Equals(guildId.ToString())).FirstOrDefault();
         if (guildData != null) return guildData;
@@ -289,15 +305,16 @@ public class BotDataService : IBotDataService
             channelNotifications = new Dictionary<string, string>(),
             staffRoles = Array.Empty<string>(),
         };
-        _guilds.InsertOne(guildData);
-        return guildData;
+        return CreateGuild(guildData);
     }
 
     public void UpdateGuild(ulong guildId, Guild data)
     {
         var guild = GetGuild(guildId);
-        var guildUpdate = new Guild(guild.Id, data);
-        UpdateGuild(guildUpdate);
+        guild.IfSucc(g => {
+            var guildUpdate = new Guild(g.Id, data);
+            UpdateGuild(guildUpdate);
+        });
     }
 
     public void UpdateGuild(Guild guildData)
@@ -334,9 +351,12 @@ public class BotDataService : IBotDataService
     public Task<bool> UpdateGuildName(ulong guildId, string guildName, CancellationToken cancellationToken)
     {
         var guildData = GetGuild(guildId);
-        guildData.guildName = guildName;
-        UpdateGuild(guildData);
-        return Task.FromResult(true);
+        guildData.IfSucc(gd => {
+            gd.guildName = guildName;
+            UpdateGuild(gd);
+        });
+        
+        return Task.FromResult(guildData.IsSuccess);
     }
 
     /*

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using bot.Features.Caching;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -26,10 +27,11 @@ public class UserInfoModule : CustomModule<SocketCommandContext>
         )
     {
         var server = serviceProvider.GetRequiredService<IServer>();
-        _database = server.Multiplexer.GetDatabase();
+        var database = server.Multiplexer.GetDatabase();
         _logger = logger;
         ImageService = imageService;
         BotDataService = botDataService;
+        _cacheContext = new CacheContext<SocketCommandContext>(database, logger);
     }
 
     public static class TemplateConstants
@@ -43,9 +45,7 @@ public class UserInfoModule : CustomModule<SocketCommandContext>
     [Alias("r")]
     public async Task GetNewRank(IUser user = null)
     {
-        if (!EnsureSingle()) { return; }
-        try
-        {
+        await _cacheContext.WithLock(async () => {
             user ??= Context.User;
             var guildId = Context.Guild?.Id ?? 0;
             var userId = user.Id;
@@ -75,27 +75,17 @@ public class UserInfoModule : CustomModule<SocketCommandContext>
 
             var imageStream = await ImageService.CreateRankCard(data);
             await SendImageEmbed(imageStream, $"{user.Username} Rank Card", TemplateConstants.RankImage, Color.Blue);
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     [Command("userinfo")]
     public async Task UserInfoAsync(IUser user = null)
     {
-        if (!EnsureSingle()) { return; }
-        try
-        {
+        await _cacheContext.WithLock(async () => {
             user ??= Context.User;
             var message = $"{user} is {user.Id} [{user.Status}] {user.GetAvatarUrl()}";
             await ReplyAsync(message);
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     // Ban a user
@@ -107,53 +97,37 @@ public class UserInfoModule : CustomModule<SocketCommandContext>
     [RequireBotPermission(GuildPermission.BanMembers)]
     public async Task BanUserAsync(IGuildUser user, [Remainder] string reason = null)
     {
-        if (!EnsureSingle()) { return; }
-        try
-        {
+        await _cacheContext.WithLock(async () => {
             //user.Guild.AddGuildUserAsync()
             await user.Guild.AddBanAsync(user, reason: reason);
             await ReplyAsync("ok!");
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     [Command("addxp")]
     [RequireUserPermission(GuildPermission.ManageRoles)]
-    public Task AddXp(IUser user, ulong amount)
+    public async Task AddXp(IUser user, ulong amount)
     {
-        if (!EnsureSingle()) { return Task.CompletedTask; }
-        try
+        await _cacheContext.WithLock(() =>
         {
             var guildId = Context.Guild?.Id ?? 0;
             var userId = user.Id;
             _ = BotDataService.AddXp(guildId, userId, amount);
             return Task.CompletedTask;
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     [Command("removexp")]
     [RequireUserPermission(GuildPermission.ManageRoles)]
-    public Task RemoveXp(IUser user, ulong amount)
+    public async Task RemoveXp(IUser user, ulong amount)
     {
-        if (!EnsureSingle()) { return Task.CompletedTask; }
-        try
+        await _cacheContext.WithLock(() =>
         {
             var guildId = Context.Guild?.Id ?? 0;
             var userId = user.Id;
             _ = BotDataService.RemoveXp(guildId, userId, amount);
             return Task.CompletedTask;
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     private static byte[] CopyToArray(Stream stream)

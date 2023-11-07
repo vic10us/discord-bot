@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using v10.Data.MongoDB;
 using Discord.WebSocket;
 using Discord;
 using v10.Bot.Discord;

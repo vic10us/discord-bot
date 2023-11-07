@@ -1,0 +1,17 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <DiscordServerList />
+    </Authorized>
+    <NotAuthorized>
+        <h1>Hello, world!</h1>
+
+        Welcome to your new app. This is a template for a Blazor WebAssembly application.
+        <NavLink class="nav-link" href="/Account/Login">
+            <span class="bi bi-person-badge" aria-hidden="true"></span> Login
+        </NavLink>
+    </NotAuthorized>
+</AuthorizeView>

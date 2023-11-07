@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using bot.Features.Caching;
 using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,70 +28,52 @@ public class JokeGroupModule : CustomModule<SocketCommandContext>
         )
     {
         var server = serviceProvider.GetRequiredService<IServer>();
-        _database = server.Multiplexer.GetDatabase();
+        var database = server.Multiplexer.GetDatabase();
         _logger = logger;
         _dadJokeService = dadJokeService;
         _mondayQuotesService = mondayQuotesService;
         _redneckJokeService = redneckJokeService;
+        _cacheContext = new CacheContext<SocketCommandContext>(database, logger);
     }
 
     [Command("dad")]
     [Alias("dj")]
     public async Task DadJoke()
     {
-        if (!EnsureSingle()) { return; }
-        try
+        await _cacheContext.WithLock(async () =>
         {
             var joke = await _dadJokeService.GetJokeAsync();
             await ReplyAsync(joke.Joke, messageReference: new MessageReference(Context.Message.Id));
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     [Command("monday")]
     public async Task MondayQuote()
     {
-        if (!EnsureSingle()) { return; }
-        try
+        await _cacheContext.WithLock(async () =>
         {
             var joke = await _mondayQuotesService.GetQuote();
             await ReplyAsync(joke, messageReference: new MessageReference(Context.Message.Id));
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     [Command("redneck")]
     [Alias("rn")]
     public async Task RedneckJoke()
     {
-        if (!EnsureSingle()) { return; }
-        try
+        await _cacheContext.WithLock(async () =>
         {
             var joke = await _redneckJokeService.GetQuote();
             await ReplyAsync(joke, messageReference: new MessageReference(Context.Message.Id));
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
     [Command]
     public async Task Help()
     {
-        if (!EnsureSingle()) { return; }
-        try 
+        await _cacheContext.WithLock(async () =>
         {
             await ReplyAsync("use !joke [dad, redneck, monday]", messageReference: new MessageReference(Context.Message.Id));
-        }
-        finally { 
-            ReleaseLock(); 
-        }
+        });
     }
 }

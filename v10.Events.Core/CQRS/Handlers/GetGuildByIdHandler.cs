@@ -41,7 +41,8 @@ public class GetGuildByIdHandler : IRequestHandler<GetGuildByIdQuery, Result<Dto
             }
         }
 
-        guild = _botDataService.GetGuild(request.GuildId, canCreate: false);
+        var guildResult = _botDataService.GetGuild(request.GuildId, canCreate: false);
+        guild = guildResult.Match<Guild>(s => s, f => null);
         _cache.SetString(
             request.GuildId.ToString(),
             JsonConvert.SerializeObject(guild),

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Amazon.Runtime.Internal.Util;
+using bot.Features.Caching;
+using Discord.Commands;
 using Discord.Interactions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,32 +22,29 @@ public class InfoInteractionModule : CustomInteractionModule<SocketInteractionCo
         )
     {
         var server = serviceProvider.GetRequiredService<IServer>();
-        _database = server.Multiplexer.GetDatabase();
+        var database = server.Multiplexer.GetDatabase();
         _mediator = mediator;
         _logger = logger;
+        _cacheContext = new CacheContext<SocketCommandContext>(database, logger);
     }
 
     [SlashCommand("ping", "Receive a ping message")]
     public async Task HandlePingCommand()
     {
-        if (!EnsureSingle()) { return; }
-        await RespondAsync("PONG!");
-        ReleaseLock();
+        await _cacheContext.WithLock(async () =>
+        {
+            await RespondAsync("PONG!");
+        });
     }
 
     [SlashCommand("8ball", "Ask the magic 8 ball your question and see your future")]
     public async Task Handle8Ball(string question)
     {
-        if (!EnsureSingle()) { return; }
-        try
+        await _cacheContext.WithLock(async () =>
         {
             var x = await _mediator.Send(new GetRandom8BallResponse());
             await RespondAsync($"{question}: {x.Text}");
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 
 }

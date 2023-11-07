@@ -12,7 +12,9 @@ public interface IBotDataService
     Task<Guild> CreateGuildAsync(Guild guild);
     Task<bool> DeleteGuildAsync(ulong guildId);
     Task DeleteMessageThrottle(ulong guildId, ulong userId, string key, CancellationToken cancellationToken = default);
-    Guild GetGuild(ulong guildId, bool canCreate = true);
+    Result<Guild> GetGuild(ulong guildId);
+    Result<Guild> GetGuild(ulong guildId, bool canCreate);
+    Result<Guild> CreateGuild(Guild guild);
     Task<IEnumerable<Guild>> GetGuildsAsync();
     LevelData GetLevelData(ulong guildId, ulong userId);
     Task<MessageThrottle> GetMessageThrottle(ulong guildId, ulong userId, string key, bool canCreate = false, CancellationToken cancellationToken = default);

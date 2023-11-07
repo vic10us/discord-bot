@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using bot.Features.Caching;
 using Discord;
+using Discord.Commands;
 using Discord.Interactions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver.Linq;
-using Newtonsoft.Json.Linq;
 using StackExchange.Redis;
 using v10.Events.Core.Enums;
 using v10.Services.DadJokes.Queries;
@@ -28,9 +29,10 @@ public class JokeInteractionModule : CustomInteractionModule<SocketInteractionCo
         )
     {
         var server = serviceProvider.GetRequiredService<IServer>();
-        _database = server.Multiplexer.GetDatabase();
+        var database = server.Multiplexer.GetDatabase();
         _mediator = mediator;
         _logger = logger;
+        _cacheContext = new CacheContext<SocketCommandContext>(database, logger);
     }
 
     private static JokeType GetRandomJokeType()
@@ -44,14 +46,10 @@ public class JokeInteractionModule : CustomInteractionModule<SocketInteractionCo
     [SlashCommand("joke", "Tell a joke")]
     public async Task TellJoke(JokeType jokeType)
     {
-        if (!EnsureSingle()) { return; }
-        try {
-            await TellJokeAsync(jokeType);
-        }
-        finally
+        await _cacheContext.WithLock(async () =>
         {
-            ReleaseLock();
-        }
+            await TellJokeAsync(jokeType);
+        });
     }
 
     private async Task TellJokeAsync(JokeType jokeType)
@@ -74,16 +72,11 @@ public class JokeInteractionModule : CustomInteractionModule<SocketInteractionCo
     [ComponentInteraction("joke:*")]
     public async Task JokeButtonInteraction(string type)
     {
-        if (!EnsureSingle()) { return; }
-        try
+        await _cacheContext.WithLock(async () =>
         {
             _logger.LogInformation("User pressed the {type} joke button", type);
             var jokeType = Enum.Parse<JokeType>(type, true);
             await TellJokeAsync(jokeType);
-        }
-        finally
-        {
-            ReleaseLock();
-        }
+        });
     }
 }

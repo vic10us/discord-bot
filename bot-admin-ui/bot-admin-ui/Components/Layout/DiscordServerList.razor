@@ -1,0 +1,70 @@
+﻿@using Discord.Rest
+@inject IDiscordUserService _discordUserService
+@attribute [StreamRendering(true)]
+
+<div class="server-container">
+@if (_guilds != null && _guilds.Any())
+{
+    <h1 class="font-bold text-white">Select a server</h1>
+    <div class="card-grid">
+    @foreach (var guild in _guilds)
+    {
+        <DiscordServerCard 
+            CanManage="@guild.CanManage" 
+            IsInstalled="@guild.IsInstalled" 
+            ImageUrl="@guild.IconUrl" 
+            Name="@guild.Name" 
+            Role="@guild.Role" 
+            ServerId="@guild.Id" />
+    }
+    </div>
+}
+else
+{
+    <h1 class="font-bold text-white">Select a server</h1>
+    <div class="card-grid">
+        <DiscordServerPlaceholderCard />
+        <DiscordServerPlaceholderCard />
+        <DiscordServerPlaceholderCard />
+    </div>
+}
+</div>
+
+@code {
+    private IEnumerable<Guild> _guilds = Array.Empty<Guild>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userGuilds = await _discordUserService.GetGuildsAsync();
+        var botInstalledGuilds = await _discordUserService.GetInstalledGuilds();
+        if (userGuilds == null) return;
+
+        _guilds = userGuilds.Select(g => 
+            new Guild(g, botInstalledGuilds.FirstOrDefault(bg => bg.Id.Equals(g.Id))))
+            .OrderByDescending(g => g.CanManage)
+            .ThenByDescending(g => g.IsInstalled)
+            .ThenBy(g => g.Name);
+    }
+
+    public class Guild
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string IconUrl { get; set; }
+        public bool IsInstalled { get; set; } = false;
+        public string Role { get; set; } = "User";
+        public bool CanManage { get; set; } = false;
+        public bool ShowInstall => !IsInstalled && CanManage;
+        public bool ShowManage => IsInstalled && CanManage;
+
+        public Guild(RestUserGuild discordGuild, RestUserGuild? botGuild)
+        {
+            Id = discordGuild.Id.ToString();
+            Name = discordGuild.Name;
+            IconUrl = discordGuild.IconUrl;
+            IsInstalled = botGuild != null;
+            CanManage = discordGuild.Permissions.Administrator;
+            Role = CanManage ? "Owner" : "User";
+        }
+    }
+}
