@@ -28,11 +28,11 @@ public static class HealthCheckHelpers
         {
             Predicate = predicate,
             ResultStatusCodes =
-      {
-        [HealthStatus.Healthy] = StatusCodes.Status200OK,
-        [HealthStatus.Degraded] = StatusCodes.Status200OK,
-        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
-      },
+              {
+                [HealthStatus.Healthy] = StatusCodes.Status200OK,
+                [HealthStatus.Degraded] = StatusCodes.Status200OK,
+                [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+              },
             ResponseWriter = WriteResponse
         };
     }

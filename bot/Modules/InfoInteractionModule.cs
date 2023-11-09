@@ -25,7 +25,7 @@ public class InfoInteractionModule : CustomInteractionModule<SocketInteractionCo
         var database = server.Multiplexer.GetDatabase();
         _mediator = mediator;
         _logger = logger;
-        _cacheContext = new CacheContext<SocketCommandContext>(database, logger);
+        _cacheContext = new CacheContext<SocketInteractionContext>(database, logger);
     }
 
     [SlashCommand("ping", "Receive a ping message")]
@@ -43,7 +43,7 @@ public class InfoInteractionModule : CustomInteractionModule<SocketInteractionCo
         await _cacheContext.WithLock(async () =>
         {
             var x = await _mediator.Send(new GetRandom8BallResponse());
-            await RespondAsync($"{question}: {x.Text}");
+            await RespondAsync($"{question}: {x.Text}", ephemeral: true);
         });
     }
 
