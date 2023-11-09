@@ -93,7 +93,10 @@ jobs:
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
         run: |
-          cosign sign --yes "${TAGS}@${DIGEST}"
+          IFS=$'\n' read -d '' -r -a tags <<< "${TAGS}"
+          for tag in "${tags[@]}"; do
+            cosign sign --yes "${tag}@${DIGEST}"
+          done
         env:
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
           TAGS: ${{ steps.docker_meta.outputs.tags }}
