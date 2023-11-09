@@ -12,11 +12,11 @@ namespace tests;
 
 public class UnitTest1
 {
-    private readonly ITestOutputHelper _testOutputHelper;
+    private readonly ITestOutputHelper _output;
 
     public UnitTest1(ITestOutputHelper testOutputHelper)
     {
-        _testOutputHelper = testOutputHelper;
+        _output = testOutputHelper;
     }
 
     [Fact]
@@ -24,6 +24,7 @@ public class UnitTest1
     {
         var qs = new MondayQuotesService();
         var quote = await qs.GetQuote();
+        _output.WriteLine(quote);
         Assert.NotEmpty(quote);
     }
 
@@ -56,7 +57,7 @@ public class UnitTest1
     //  var dbList = dbClient.ListDatabases().ToList();
     //  foreach (var db in dbList)
     //  {
-    //    _testOutputHelper.WriteLine(db.ToString());
+    //    _output.WriteLine(db.ToString());
     //  }
     //}
 
@@ -106,12 +107,12 @@ public class UnitTest1
         ulong totalLevelXp = TotalXpForLevel(13);
         ulong totalXp = totalLevelXp + xp;
         ulong lvlForTotalXp = LevelForTotalXp(totalXp);
-        _testOutputHelper.WriteLine($"Lvl: {lvl}, xp: {xp}, TotalLevelXp: {totalLevelXp}, TotalXp: {totalXp}, lvlForTotalXp: {lvlForTotalXp}");
+        _output.WriteLine($"Lvl: {lvl}, xp: {xp}, TotalLevelXp: {totalLevelXp}, TotalXp: {totalXp}, lvlForTotalXp: {lvlForTotalXp}");
         totalXp -= 500;
         lvl = LevelForTotalXp(totalXp);
         totalLevelXp = TotalXpForLevel(lvl);
         xp = totalXp - totalLevelXp;
-        _testOutputHelper.WriteLine($"Lvl: {lvl}, xp: {xp}, TotalLevelXp: {totalLevelXp}, TotalXp: {totalXp}");
+        _output.WriteLine($"Lvl: {lvl}, xp: {xp}, TotalLevelXp: {totalLevelXp}, TotalXp: {totalXp}");
     }
 
     [Theory]
@@ -220,7 +221,7 @@ public class UnitTest1
     {
         var x = LevelForTotalXp(totalXp);
         Assert.Equal(expectedLevel, x);
-        _testOutputHelper.WriteLine($"{totalXp}xp = Level {x}");
+        _output.WriteLine($"{totalXp}xp = Level {x}");
     }
 
     [Theory]
@@ -347,14 +348,14 @@ public class UnitTest1
         var (l, x, _) = (0, 256, 0);
         var (lvl, xp, next) = ComputeLevelAndXp(l, x, (xxx) =>
         {
-            _testOutputHelper.WriteLine(xxx);
+            _output.WriteLine(xxx);
         });
         var totalXp = xp;
         for (var i = 0; i < lvl; i++)
         {
             totalXp += (int)(5 * Math.Pow(i, 2) + 50 * i + 100);
         }
-        _testOutputHelper.WriteLine($"Level: {lvl} Curr: {xp} Next: {next} Total: {totalXp}");
+        _output.WriteLine($"Level: {lvl} Curr: {xp} Next: {next} Total: {totalXp}");
     }
 
     [Fact]
@@ -364,7 +365,7 @@ public class UnitTest1
         var xp = 10110;
         while (xp > 5 * Math.Pow(lvl, 2) + 50 * lvl + 100)
         {
-            _testOutputHelper.WriteLine($"New Level: {lvl + 1} -{(5 * Math.Pow(lvl, 2) + 50 * lvl + 100)} xp ({xp - (5 * Math.Pow(lvl, 2) + 50 * lvl + 100)})");
+            _output.WriteLine($"New Level: {lvl + 1} -{(5 * Math.Pow(lvl, 2) + 50 * lvl + 100)} xp ({xp - (5 * Math.Pow(lvl, 2) + 50 * lvl + 100)})");
             xp -= (int)(5 * Math.Pow(lvl, 2) + 50 * lvl + 100);
             lvl++;
         }
@@ -374,7 +375,7 @@ public class UnitTest1
             totalXp += (int)(5 * Math.Pow(l, 2) + 50 * l + 100);
         }
         var next = 5 * Math.Pow(lvl, 2) + 50 * lvl + 100;
-        _testOutputHelper.WriteLine($"Level: {lvl} Curr: {xp} Next: {next} Total: {totalXp}");
+        _output.WriteLine($"Level: {lvl} Curr: {xp} Next: {next} Total: {totalXp}");
     }
 
     public static IEnumerable<object[]> RollCountData => Enumerable.Range(0, 1000).Select(x => new object[] { (object)x }).ToArray();
@@ -385,7 +386,7 @@ public class UnitTest1
     {
         var dc = new DiceGameService();
         var nextRoll = dc.GetNextRoll(6);
-        _testOutputHelper.WriteLine($"[{iteration}]Rolled: {nextRoll}");
+        _output.WriteLine($"[{iteration}]Rolled: {nextRoll}");
         Assert.True(nextRoll > 0 && nextRoll <= 6);
     }
 
@@ -396,7 +397,7 @@ public class UnitTest1
         var dc = new DiceGameService();
         var nextRolls = dc.GetNextRolls().ToList();
         var nextRollsDelim = nextRolls.Select(v => $"{v}").Aggregate((o, n) => $"{o}, {n}");
-        _testOutputHelper.WriteLine($"[{iteration}]Rolls: {nextRollsDelim}, Sum: {nextRolls.Sum(v => v)}");
+        _output.WriteLine($"[{iteration}]Rolls: {nextRollsDelim}, Sum: {nextRolls.Sum(v => v)}");
         Assert.True(nextRolls.Count == 2 && nextRolls.All(v => v > 0 && v <= 6) && nextRolls.Sum(v => v) <= 12);
     }
 }
