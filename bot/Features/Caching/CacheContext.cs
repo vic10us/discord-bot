@@ -106,6 +106,38 @@ public class CacheContext<T> : ICacheContext where T : class
         }
     }
 
+    // Wrap WithLock in a Result so we can return errors
+    async Task<Result<bool>> WithLockResult(Func<Task> action)
+    {
+        if (_database == null) { await action(); return true; }
+        var lockTaken = false;
+        try
+        {
+            _logger.LogInformation("Acquiring Lock: {RedisKey} {RedisToken}", RedisKey, RedisToken);
+            lockTaken = await _database.LockTakeAsync(RedisKey, RedisToken, TimeSpan.FromSeconds(1));
+            if (!lockTaken)
+            {
+                _logger.LogWarning("{ClassName} Message is already being processed {ContextId}", typeof(T).Name, ContextId);
+                return new Result<bool>(new DuplicateMessageException($"{typeof(T).Name} Message is already being processed {ContextId}"));
+            }
+
+            await action();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error running {ClassName}", typeof(T).Name);
+            return new Result<bool>(ex);
+        }
+        finally
+        {
+            if (lockTaken)
+            {
+                _database.LockRelease(RedisKey, RedisToken);
+            }
+        }
+    }
+
     /// <summary>
     /// Run an action with a lock on the message to ensure that only one instance of the command is running at a time.
     /// </summary>

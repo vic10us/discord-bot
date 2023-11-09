@@ -45,37 +45,49 @@ public class UserInfoModule : CustomModule<SocketCommandContext>
     [Alias("r")]
     public async Task GetNewRank(IUser user = null)
     {
-        await _cacheContext.WithLock(async () => {
-            user ??= Context.User;
-            var guildId = Context.Guild?.Id ?? 0;
-            var userId = user.Id;
-            var userData = BotDataService.GetLevelData(guildId, userId);
-            var data = new RankCardRequest();
-
-            var gaid = (user as SocketGuildUser)?.GuildAvatarId;
-            var url = (string.IsNullOrWhiteSpace(gaid)) ? user.GetAvatarUrl(ImageFormat.Png)
-                : $"https://cdn.discordapp.com/guilds/{guildId}/users/{userId}/avatars/{gaid}.png";
-            var guildUserAvatarUrl = $"https://cdn.discordapp.com/guilds/{guildId}/users/{userId}/avatars/{gaid}.png";
-            var userAvatarUrl = user.GetAvatarUrl(ImageFormat.Png);
-            var guser = user as SocketGuildUser;
-
-            data.rank = (int)BotDataService.GetUserRank(guildId, userId);
-            data.userName = $"{guser.DisplayName}";
-            data.cardTitle = " ";
-            data.userDescriminator = user.Discriminator;
-            var (textLevel, textXp, xpForNextTextLevel) = BotDataService.ComputeLevelAndXp(userData.level, userData.xp);
-            var (voiceLevel, voiceXp, xpForNextVoiceLevel) = BotDataService.ComputeLevelAndXp(userData.voiceLevel, userData.voiceXp);
-            data.textLevel = (int)textLevel;
-            data.textXp = (int)textXp;
-            data.xpForNextTextLevel = (int)xpForNextTextLevel;
-            data.voiceLevel = (int)voiceLevel;
-            data.voiceXp = (int)voiceXp;
-            data.xpForNextVoiceLevel = (int)xpForNextVoiceLevel;
-            data.avatarUrl = url;
-
-            var imageStream = await ImageService.CreateRankCard(data);
-            await SendImageEmbed(imageStream, $"{user.Username} Rank Card", TemplateConstants.RankImage, Color.Blue);
+        user ??= Context.User;
+        var imageStreamResult = await _cacheContext.WithLock<Stream>(async () => {
+            var imageStream = await GetImageStream(user);
+            return imageStream;
         });
+        imageStreamResult.IfSucc(async imageStream => {
+            await SendImageEmbed(imageStream, $"{(user as SocketGuildUser).DisplayName} Rank Card", TemplateConstants.RankImage, Color.Blue);
+        });
+        imageStreamResult.IfFail(async error => { 
+            await ReplyAsync(error.Message);
+        });
+    }
+
+    private async Task<Stream> GetImageStream(IUser user)
+    {
+        var guildId = Context.Guild?.Id ?? 0;
+        var userId = user.Id;
+        var userData = BotDataService.GetLevelData(guildId, userId);
+        var data = new RankCardRequest();
+
+        var gaid = (user as SocketGuildUser)?.GuildAvatarId;
+        var url = (string.IsNullOrWhiteSpace(gaid)) ? user.GetAvatarUrl(ImageFormat.Png)
+            : $"https://cdn.discordapp.com/guilds/{guildId}/users/{userId}/avatars/{gaid}.png";
+        var guildUserAvatarUrl = $"https://cdn.discordapp.com/guilds/{guildId}/users/{userId}/avatars/{gaid}.png";
+        var userAvatarUrl = user.GetAvatarUrl(ImageFormat.Png);
+        var guser = user as SocketGuildUser;
+
+        data.rank = (int)BotDataService.GetUserRank(guildId, userId);
+        data.userName = $"{guser.DisplayName}";
+        data.cardTitle = " ";
+        data.userDescriminator = user.Discriminator;
+        var (textLevel, textXp, xpForNextTextLevel) = BotDataService.ComputeLevelAndXp(userData.level, userData.xp);
+        var (voiceLevel, voiceXp, xpForNextVoiceLevel) = BotDataService.ComputeLevelAndXp(userData.voiceLevel, userData.voiceXp);
+        data.textLevel = (int)textLevel;
+        data.textXp = (int)textXp;
+        data.xpForNextTextLevel = (int)xpForNextTextLevel;
+        data.voiceLevel = (int)voiceLevel;
+        data.voiceXp = (int)voiceXp;
+        data.xpForNextVoiceLevel = (int)xpForNextVoiceLevel;
+        data.avatarUrl = url;
+
+        var imageStream = await ImageService.CreateRankCard(data);
+        return imageStream;
     }
 
     [Command("userinfo")]

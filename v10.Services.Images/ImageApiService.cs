@@ -39,6 +39,8 @@ public class ImageApiService : IImageApiService
     {
         var json = JsonConvert.SerializeObject(rankCardRequest);
         using var message = await _client.PostAsync("images/rankCard", new StringContent(json, Encoding.UTF8, "application/json"));
+        //check that the response was successful
+        message.EnsureSuccessStatusCode();
         var stream = await message.Content.ReadAsStreamAsync();
         var resultStream = new MemoryStream();
         await stream.CopyToAsync(resultStream);

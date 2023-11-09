@@ -32,7 +32,7 @@ public class JokeInteractionModule : CustomInteractionModule<SocketInteractionCo
         var database = server.Multiplexer.GetDatabase();
         _mediator = mediator;
         _logger = logger;
-        _cacheContext = new CacheContext<SocketCommandContext>(database, logger);
+        _cacheContext = new CacheContext<SocketInteractionContext>(database, logger);
     }
 
     private static JokeType GetRandomJokeType()
@@ -54,6 +54,7 @@ public class JokeInteractionModule : CustomInteractionModule<SocketInteractionCo
 
     private async Task TellJokeAsync(JokeType jokeType)
     {
+        await DeferAsync();
         if (jokeType == JokeType.Random) jokeType = GetRandomJokeType();
         var joke = jokeType switch
         {
@@ -65,8 +66,7 @@ public class JokeInteractionModule : CustomInteractionModule<SocketInteractionCo
         };
         var builder = new ComponentBuilder()
         .WithButton($"Another {jokeType} Joke!", $"joke:{jokeType}", ButtonStyle.Success);
-
-        await RespondAsync(joke, components: builder.Build());
+        await FollowupAsync(joke, components: builder.Build());
     }
 
     [ComponentInteraction("joke:*")]

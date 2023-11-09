@@ -28,14 +28,15 @@ public class EconomyInteractionModule : CustomInteractionModule<SocketInteractio
         var database = server.Multiplexer.GetDatabase();
         _logger = logger;
         _mediator = mediator;
-        _cacheContext = new CacheContext<SocketCommandContext>(database, logger);
+        _cacheContext = new CacheContext<SocketInteractionContext>(database, logger);
     }
 
     [SlashCommand("xp", "Add/Remove/Set Xp for a User")]
     [RequireUserPermission(GuildPermission.Administrator)]
     public async Task XpCommand(XpOperationType operation, ulong amount, IGuildUser user, XpType xpType = XpType.Text)
     {
-        await _cacheContext.WithLock(async () =>
+        await DeferAsync(ephemeral: true);
+        var response = await _cacheContext.WithLock<string>(async () =>
         {
             var commandResult = operation switch
             {
@@ -65,8 +66,7 @@ public class EconomyInteractionModule : CustomInteractionModule<SocketInteractio
 
             if (commandResult == null)
             {
-                await RespondAsync("Invalid Operation");
-                return;
+                throw new Exception("An error occured. [Invalid Operation]");
             }
 
             var responseMessage = commandResult.Match(
@@ -74,7 +74,9 @@ public class EconomyInteractionModule : CustomInteractionModule<SocketInteractio
                 error => "An error occured while attempting to adjust XP"
             );
 
-            await RespondAsync(responseMessage);
+            return responseMessage;
         });
+        response.IfSucc(async (message) => await FollowupAsync(message));
+        response.IfFail(async (error) => await FollowupAsync(error.Message));
     }
 }

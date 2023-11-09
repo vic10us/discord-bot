@@ -29,7 +29,7 @@ public class ImagesInteractionModule : CustomInteractionModule<SocketInteraction
         var database = server.Multiplexer.GetDatabase();
         _mediator = mediator;
         _logger = logger;
-        _cacheContext = new CacheContext<SocketCommandContext>(database, logger);
+        _cacheContext = new CacheContext<SocketInteractionContext>(database, logger);
     }
 
     private static string GetChoiceDisplayName(Enum enumValue)
@@ -41,6 +41,7 @@ public class ImagesInteractionModule : CustomInteractionModule<SocketInteraction
     [SlashCommand("image", "Get an image")]
     public async Task GetAnImage(ImageType imageType)
     {
+        await DeferAsync();
         await _cacheContext.WithLock(async () =>
         {
             var query = new GetPictureFromCategoryQuery(imageType);
@@ -52,7 +53,7 @@ public class ImagesInteractionModule : CustomInteractionModule<SocketInteraction
                 .WithImageUrl($"attachment://{publicFileName}")
                 .WithColor(Color.Green)
                 .Build();
-            await RespondWithFileAsync(stream, publicFileName, embed: embed);
+            await FollowupWithFileAsync(stream, publicFileName, embed: embed);
         });
     }
 }
