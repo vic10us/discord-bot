@@ -8,7 +8,7 @@ public class MondayQuotesService : IMondayQuotesService
     protected static async Task<IEnumerable<string>> GetQuotes(QuoteCategory category = QuoteCategory.Funny)
     {
         var assembly = Assembly.GetExecutingAssembly();
-        var resourceName = $"{assembly.GetName().Name}.Data.MondayQuotes.{category}.txt";
+        var resourceName = $"{assembly.GetName().Name}.Data.{category}.txt";
         using var stream = assembly.GetManifestResourceStream(resourceName) ?? throw new Exception($"Resource {resourceName} not found in assembly {assembly.GetName().Name}.");
         using var reader = new StreamReader(stream);
 
