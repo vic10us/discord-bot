@@ -45,13 +45,13 @@ public class UserInfoInteractionModule : CustomInteractionModule<SocketInteracti
             return imageStream;
         });
         imageStreamResult.IfSucc(async imageStream => {
-            await ModifyOriginalResponseAsync((mp) => {
-                imageStream.Seek(0, SeekOrigin.Begin);
-                var embed = new EmbedBuilder()
+            var embed = new EmbedBuilder()
                     .WithTitle($"{user.DisplayName} Rank Card")
                     .WithImageUrl($"attachment://{TemplateConstants.RankImage}")
                     .WithColor(Color.Blue)
                     .Build();
+            imageStream.Seek(0, SeekOrigin.Begin);
+            await ModifyOriginalResponseAsync((mp) => {
                 mp.Embeds = new[] { embed };
                 mp.Attachments = new[] { new FileAttachment(imageStream, TemplateConstants.RankImage) };
             });
@@ -68,30 +68,31 @@ public class UserInfoInteractionModule : CustomInteractionModule<SocketInteracti
         var guildId = Context.Guild?.Id ?? 0;
         var userId = user.Id;
         var userData = BotDataService.GetLevelData(guildId, userId);
-        var data = new RankCardRequest();
-
-        var gaid = (user as SocketGuildUser)?.GuildAvatarId;
-        var url = (string.IsNullOrWhiteSpace(gaid)) ? user.GetAvatarUrl(ImageFormat.Png)
-            : $"https://cdn.discordapp.com/guilds/{guildId}/users/{userId}/avatars/{gaid}.png";
-        var guildUserAvatarUrl = $"https://cdn.discordapp.com/guilds/{guildId}/users/{userId}/avatars/{gaid}.png";
-        var userAvatarUrl = user.GetAvatarUrl(ImageFormat.Png);
+        
         var guser = user as SocketGuildUser;
+        var gaid = guser.GuildAvatarId;
+        var url = (string.IsNullOrWhiteSpace(gaid)) ? 
+              guser.GetAvatarUrl(ImageFormat.Png)
+            : $"https://cdn.discordapp.com/guilds/{guildId}/users/{userId}/avatars/{gaid}.png";
 
-        data.rank = (int)BotDataService.GetUserRank(guildId, userId);
-        data.userName = $"{guser.DisplayName}";
-        data.cardTitle = " ";
-        data.userDescriminator = user.Discriminator;
         var (textLevel, textXp, xpForNextTextLevel) = BotDataService.ComputeLevelAndXp(userData.level, userData.xp);
         var (voiceLevel, voiceXp, xpForNextVoiceLevel) = BotDataService.ComputeLevelAndXp(userData.voiceLevel, userData.voiceXp);
-        data.textLevel = (int)textLevel;
-        data.textXp = (int)textXp;
-        data.xpForNextTextLevel = (int)xpForNextTextLevel;
-        data.voiceLevel = (int)voiceLevel;
-        data.voiceXp = (int)voiceXp;
-        data.xpForNextVoiceLevel = (int)xpForNextVoiceLevel;
-        data.avatarUrl = url;
 
-        var imageStream = await ImageService.CreateRankCard(data);
-        return imageStream;
+        var data = new RankCardRequest
+        {
+            rank = (int)BotDataService.GetUserRank(guildId, userId),
+            userName = $"{guser.DisplayName}",
+            cardTitle = " ",
+            userDescriminator = guser.Discriminator,
+            textLevel = (int)textLevel,
+            textXp = (int)textXp,
+            xpForNextTextLevel = (int)xpForNextTextLevel,
+            voiceLevel = (int)voiceLevel,
+            voiceXp = (int)voiceXp,
+            xpForNextVoiceLevel = (int)xpForNextVoiceLevel,
+            avatarUrl = url
+        };
+
+        return await ImageService.CreateRankCard(data);
     }
 }
