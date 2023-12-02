@@ -64,10 +64,10 @@ public class AuthController : ControllerBase
     [Authorize(AuthenticationSchemes = "Discord")]
     public object GetToken()
     {
-        var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-        string key = _config["Jwt:EncryptionKey"];
-        string issuer = _config["Jwt:Issuer"];
-        string audience = _config["Jwt:Audience"];
+        var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+        string key = _config["Jwt:EncryptionKey"]!;
+        string issuer = _config["Jwt:Issuer"]!;
+        string audience = _config["Jwt:Audience"]!;
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

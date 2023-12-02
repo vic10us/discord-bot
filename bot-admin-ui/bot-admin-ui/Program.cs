@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using BotAdminUI;
+using BotAdminUI.Client.Pages;
 using BotAdminUI.Components;
 using BotAdminUI.Services;
 using Discord;
@@ -54,7 +55,7 @@ services.AddKeyedSingleton<DiscordRestClient>("BotClient", (s, k) =>
 
 services.AddKeyedScoped<DiscordRestClient>("UserClient", (s, k) => {
     var httpContext = s.GetRequiredService<IHttpContextAccessor>();
-    var accessToken = httpContext.HttpContext.GetTokenAsync("Discord", "access_token").GetAwaiter().GetResult();
+    var accessToken = httpContext.HttpContext!.GetTokenAsync("Discord", "access_token").GetAwaiter().GetResult();
 
     var client = new DiscordRestClient(new DiscordRestConfig
     {
@@ -85,12 +86,12 @@ services.AddAuthentication(options =>
     options.LogoutPath = "/logout";
 })
 .AddOAuth("Discord", options => {
-    options.ClientId = builder.Configuration["DiscordAuth:ClientId"];
-    options.ClientSecret = builder.Configuration["DiscordAuth:ClientSecret"];
+    options.ClientId = builder.Configuration["DiscordAuth:ClientId"]!;
+    options.ClientSecret = builder.Configuration["DiscordAuth:ClientSecret"]!;
 
-    options.AuthorizationEndpoint = builder.Configuration["Discord:AuthorizationEndpoint"];
-    options.TokenEndpoint = builder.Configuration["Discord:TokenEndpoint"];
-    options.UserInformationEndpoint = builder.Configuration["Discord:UserInformationEndpoint"];
+    options.AuthorizationEndpoint = builder.Configuration["Discord:AuthorizationEndpoint"]!;
+    options.TokenEndpoint = builder.Configuration["Discord:TokenEndpoint"]!;
+    options.UserInformationEndpoint = builder.Configuration["Discord:UserInformationEndpoint"]!;
 
     options.Scope.Add("identify");
     options.Scope.Add("guilds");
@@ -128,8 +129,8 @@ services.AddAuthentication(options =>
             //DiscordRestClient client = new DiscordRestClient();
             //await client.LoginAsync(Discord.TokenType.Bearer, context.AccessToken);
             //var restUser = await client.GetCurrentUserAsync();
-            var userId = doc["id"]?.GetValue<string?>();
-            var avatarId = doc["avatar"]?.GetValue<string?>();
+            var userId = doc["id"]?.GetValue<string?>() ?? string.Empty;
+            var avatarId = doc["avatar"]?.GetValue<string?>() ?? string.Empty;
             
             var userAvatarUrl = DiscordUserService.GetUserAvatarUrl(userId, avatarId);  //restUser.GetAvatarUrl();
 
@@ -163,7 +164,7 @@ app.UseSwaggerUI();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseWebAssemblyDebugging();
+    // app.UseWebAssemblyDebugging();
 }
 else
 {

@@ -69,7 +69,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Snowflakes", "v10.Snowf
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7C600C19-F954-4093-8DA8-2AC3D2B65BD5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "v10.Snowflakes.Tests", "Tests\v10.Snowflakes.Tests\v10.Snowflakes.Tests.csproj", "{E27B6B27-06C0-4FAB-9D73-1D400CE87C33}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Snowflakes.Tests", "Tests\v10.Snowflakes.Tests\v10.Snowflakes.Tests.csproj", "{E27B6B27-06C0-4FAB-9D73-1D400CE87C33}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "v10.Bot.Tests", "Tests\v10.Bot.Tests\v10.Bot.Tests.csproj", "{1A327024-37DD-49C3-A6C1-101AFB7A09E2}"
 EndProject

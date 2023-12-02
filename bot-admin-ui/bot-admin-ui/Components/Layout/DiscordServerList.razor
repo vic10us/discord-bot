@@ -1,5 +1,6 @@
 ﻿@using Discord.Rest
 @inject IDiscordUserService _discordUserService
+@inject ILogger<DiscordServerList> _logger
 @attribute [StreamRendering(true)]
 
 <div class="server-container">
@@ -32,9 +33,24 @@ else
 
 @code {
     private IEnumerable<Guild> _guilds = Array.Empty<Guild>();
+    private int called;
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) _logger.LogInformation("On First Render");
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
 
     protected override async Task OnInitializedAsync()
     {
+        called++;
+        if (_guilds.Any()) return;
+        _logger.LogInformation("Called OnInitializedAsync {called}", called);
         var userGuilds = await _discordUserService.GetGuildsAsync();
         var botInstalledGuilds = await _discordUserService.GetInstalledGuilds();
         if (userGuilds == null) return;
@@ -44,6 +60,8 @@ else
             .OrderByDescending(g => g.CanManage)
             .ThenByDescending(g => g.IsInstalled)
             .ThenBy(g => g.Name);
+
+        await base.OnInitializedAsync();
     }
 
     public class Guild
