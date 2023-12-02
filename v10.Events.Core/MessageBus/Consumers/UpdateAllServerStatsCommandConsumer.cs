@@ -29,8 +29,11 @@ public class UpdateAllServerStatsCommandConsumer : IConsumer<UpdateAllServerStat
     {
         var guilds = _discordSocketClient.Guilds;
         var configuredGuilds = await _botDataService.GetGuildsAsync();
-        var guildIds = guilds.Select(g => g.Id).ToList();
-        guildIds.AddRange(configuredGuilds.Select(g => ulong.Parse(g.guildId)));
+        var guildIds = guilds.Where(g => 
+                configuredGuilds.Any(cg => 
+                    cg.guildId.Equals(g.Id.ToString())
+                )
+            ).Select(g => g.Id).ToList();
         guildIds = guildIds.Distinct().ToList();
         foreach (var guild in guildIds)
         {
