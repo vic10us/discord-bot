@@ -1,9 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>BotAdminUI</RootNamespace>
     <UserSecretsId>bbbfe350-96f5-4a1d-8338-d66fe457341f</UserSecretsId>
   </PropertyGroup>

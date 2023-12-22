@@ -27,12 +27,14 @@ COPY ["v10.Services.Images/v10.Services.Images.csproj", "v10.Services.Images/"]
 COPY ["v10.Services.MondayQuotes/v10.Services.MondayQuotes.csproj", "v10.Services.MondayQuotes/"]
 COPY ["v10.Services.RedneckJokes/v10.Services.RedneckJokes.csproj", "v10.Services.RedneckJokes/"]
 COPY ["v10.Services.StrangeLaws/v10.Services.StrangeLaws.csproj", "v10.Services.StrangeLaws/"]
+COPY ["Directory.Build.props", "./"]
 RUN dotnet restore "bot/bot.csproj"
 COPY . .
-WORKDIR "/src/bot"
-RUN dotnet build "bot.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src"
+RUN dotnet build "bot/bot.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
+WORKDIR "/src/bot"
 RUN dotnet publish "bot.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
